@@ -78,9 +78,7 @@
                 aria-labelledby="navbarDropdownUser"
               >
                 <li>
-                  <a class="dropdown-item" href="{% url 'password_change' %}"
-                    >Cambiar Contraseña</a
-                  >
+                  <a class="dropdown-item" href="{% url 'password_change' %}">Cambiar Contraseña</a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
@@ -136,5 +134,28 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"
     ></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+
+        togglePasswordButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Encuentra el campo de contraseña asociado a este botón.
+                // Asumimos que el input está justo antes del botón o dentro de un contenedor común.
+                // Esta es una forma simple, podría necesitar ajuste según tu HTML exacto.
+                const passwordInputId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(passwordInputId);
+
+                if (passwordInput) {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    // Cambia el texto/icono del botón (simple)
+                    this.textContent = type === 'password' ? '👁️ Ver' : '🙈 Ocultar';
+                }
+            });
+        });
+    });
+    </script>
   </body>
 </html>
