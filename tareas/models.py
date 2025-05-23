@@ -36,3 +36,41 @@ class Tarea(models.Model):
     # Podríamos añadir una meta-clase para ordenar las tareas por defecto, por ejemplo, por fecha_asignada
     class Meta:
         ordering = ['usuario', 'fecha_asignada', 'titulo'] # Añadimos usuario al ordenamiento.
+        
+
+class Proyecto(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE) # Un proyecto pertenece a un usuario
+    nombre = models.CharField(max_length=255, verbose_name="Nombre del Proyecto")
+    descripcion = models.TextField(null=True, blank=True, verbose_name="Descripción del Proyecto")
+
+    # Para "tiempo estimado: 1 semana", un CharField es flexible.
+    # Si quisieras cálculos más precisos, podrías usar DurationField o campos numéricos.
+    # Por ahora, lo mantenemos simple como texto.
+    tiempo_estimado_general = models.CharField(max_length=100, null=True, blank=True, verbose_name="Tiempo Estimado General", help_text="Ej: 1 semana, 2 meses, corto plazo")
+
+    fecha_inicio = models.DateField(null=True, blank=True, verbose_name="Fecha de Inicio")
+    fecha_fin_estimada = models.DateField(null=True, blank=True, verbose_name="Fecha de Finalización Estimada")
+
+    # Podríamos añadir un estado, ej: 'planificado', 'en curso', 'completado', 'en espera'
+    ESTADO_CHOICES = [
+        ('planificado', 'Planificado'),
+        ('en_curso', 'En Curso'),
+        ('completado', 'Completado'),
+        ('en_espera', 'En Espera'),
+        ('cancelado', 'Cancelado'),
+    ]
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='planificado',
+        verbose_name="Estado del Proyecto"
+    )
+    fecha_creacion_proyecto = models.DateTimeField(auto_now_add=True) # Fecha de creación del registro del proyecto
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        ordering = ['usuario', 'fecha_fin_estimada', 'nombre']
+        verbose_name = "Proyecto" # Nombre singular para el admin
+        verbose_name_plural = "Proyectos" # Nombre plural para el admin
