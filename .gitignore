@@ -1,0 +1,87 @@
+# Entornos Virtuales
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# Bases de datos locales
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de compilación
+*.so
+*.o
+
+# Archivos de configuración local (si usas python-dotenv o similar)
+.env
+.env.*
+!.env.example  # A menudo se incluye un archivo de ejemplo
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de IDE y editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+nbproject/
+*.swp
+*~
+*.bak
+*.tmp
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Cobertura de pruebas
+.coverage
+.coverage.*
+htmlcov/
+coverage_html_report/
+
+# Archivos generados por Django
+media/ # Si no quieres subir los archivos subidos por los usuarios en desarrollo
+staticfiles/ # Directorio donde collectstatic agrupa los archivos estáticos para producción
+# Comenta 'staticfiles/' si quieres trackear los estáticos de apps de terceros después de collectstatic en algún caso específico.
+# Es mejor que el servidor de producción sirva los estáticos.
+
+# Archivos de paquetes de Python
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints
+
+# Build artifacts
+dist/
+build/
+*.tar.gz
+*.zip
+
+# Archivos específicos de Heroku (si lo usaras en el futuro)
+.heroku/
+Procfile.windows
+
+# Archivos de Windows específicos
+node_modules/ # Si usas npm/node para frontend
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

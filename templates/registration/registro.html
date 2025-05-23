@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Registrarse - Agenda Personal{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title mb-0 text-center">Crear una Cuenta Nueva</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {# UserCreationForm es un formulario de Django, podemos renderizarlo como los otros #}
+                    {# Iteramos para un mejor control con Bootstrap, similar a nuestro formulario_tarea.html #}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            <input type="{{ field.field.widget.input_type }}"
+                                   name="{{ field.name }}"
+                                   id="{{ field.id_for_label }}"
+                                   class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                   {% if field.field.required %}required{% endif %}>
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    {# O de forma más simple, pero menos estilizada para Bootstrap: #}
+                    {# {{ form.as_p }} #}
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Registrarse</button>
+                    </div>
+                </form>
+                <hr>
+                <div class="text-center">
+                    <p>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

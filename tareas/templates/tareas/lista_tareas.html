@@ -1,0 +1,56 @@
+{% extends "base.html" %} {# Le decimos a Django que esta plantilla hereda de 'base.html' #}
+
+{% block title %}Lista de Mis Tareas - Mi Agenda{% endblock title %} {# Sobrescribimos el bloque title #}
+
+{% block content %} {# Aquí empieza el contenido específico de esta página #}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Lista de Mis Tareas</h1>
+    <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary">➕ Añadir Nueva Tarea</a>
+</div>
+
+{% if lista_de_tareas_template %}
+    <div class="list-group">
+        {% for tarea_individual in lista_de_tareas_template %}
+            <div class="list-group-item list-group-item-action flex-column align-items-start {% if tarea_individual.completada %}list-group-item-success{% else %}list-group-item-light{% endif %} mb-2 shadow-sm rounded">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ tarea_individual.titulo }}</h5>
+                    <small class="text-muted">
+                        {% if tarea_individual.fecha_asignada %}
+                            {{ tarea_individual.fecha_asignada|date:"D, d M Y" }}
+                        {% else %}
+                            Sin fecha asignada
+                        {% endif %}
+                    </small>
+                </div>
+
+                {% if tarea_individual.descripcion %}
+                    <p class="mb-1">{{ tarea_individual.descripcion }}</p>
+                {% endif %}
+
+                <small class="text-muted">
+                    Creada: {{ tarea_individual.fecha_creacion|date:"d/m/Y H:i" }}
+                    {% if tarea_individual.tiempo_estimado %}
+                        | Tiempo Estimado: {{ tarea_individual.tiempo_estimado }}
+                    {% endif %}
+                </small>
+                <div class="mt-2">
+                    <strong>Estado:</strong>
+                    {% if tarea_individual.completada %}
+                        <span class="badge bg-success">Completada ✔</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Pendiente ⏳</span>
+                    {% endif %}
+                </div>
+                <div class="mt-3 task-actions"> {# Aplicamos la clase definida en base.html o podemos añadir más aquí #}
+                    <a href="{% url 'editar_tarea_url' tarea_individual.id %}" class="btn btn-sm btn-outline-warning">✏️ Editar</a>
+                    <a href="{% url 'eliminar_tarea_url' tarea_individual.id %}" class="btn btn-sm btn-outline-danger">🗑️ Eliminar</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info" role="alert">
+        ¡No tienes tareas pendientes! <a href="{% url 'crear_tarea_url' %}" class="alert-link">Añade una ahora</a>.
+    </div>
+{% endif %}
+{% endblock content %} {# Aquí termina el bloque de contenido específico #}
