@@ -18,4 +18,7 @@ urlpatterns = [
     path('registro/', VistaRegistro.as_view(), name='registro_url'),
     
     path('proyectos/', views.lista_proyectos, name='lista_de_proyectos_url'),
+    
+    # NUEVA URL para crear proyectos
+    path('proyectos/nuevo/', views.crear_proyecto, name='crear_proyecto_url'),
 ]

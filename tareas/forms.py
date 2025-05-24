@@ -1,5 +1,5 @@
 from django import forms # Importamos el módulo de formularios de Django
-from .models import Tarea # Importamos nuestro modelo Tarea
+from .models import Tarea, Proyecto # Importamos nuestro modelo Tarea y Proyecto
 from django.contrib.auth.forms import UserCreationForm # Importamos el UserCreationForm base
 from django.contrib.auth.models import User # Importamos el modelo User
 
@@ -25,9 +25,11 @@ class TareaForm(forms.ModelForm):
         # o podríamos intentar personalizarlo si el que viene por defecto no es muy usable.
         # Para 'descripcion', podemos usar un Textarea.
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Añade una descripción detallada...'}),
-            'fecha_asignada': forms.DateInput(attrs={'type': 'date'}),
-            'tiempo_estimado': forms.TextInput(attrs={'placeholder': 'Ej: 1h30m o 0:45:00'}), # Un simple TextInput, DurationField puede ser complejo para input directo
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}), # Añadido
+            'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Añade una descripción detallada...', 'class': 'form-control'}), # Añadido class
+            'fecha_asignada': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), # Añadido class
+            'tiempo_estimado': forms.TextInput(attrs={'placeholder': 'Ej: 1h30m o 0:45:00', 'class': 'form-control'}), # Añadido class
+            'completada': forms.CheckboxInput(attrs={'class': 'form-check-input'}), # Para checkboxes
         }
 
         # 'labels' nos permite personalizar las etiquetas que se muestran junto a cada campo.
@@ -71,3 +73,30 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save() # Guarda el usuario en la base de datos
         return user
+    
+    
+    
+class ProyectoForm(forms.ModelForm):
+    class Meta:
+        model = Proyecto
+        # Excluimos 'usuario' porque se asignará automáticamente en la vista.
+        # Excluimos 'fecha_creacion_proyecto' porque es auto_now_add.
+        fields = ['nombre', 'descripcion', 'tiempo_estimado_general', 'fecha_inicio', 'fecha_fin_estimada', 'estado']
+
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}), # Añadido
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}), # Añadido class
+            'tiempo_estimado_general': forms.TextInput(attrs={'class': 'form-control'}), # Añadido
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), # Añadido class
+            'fecha_fin_estimada': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), # Añadido class
+            'estado': forms.Select(attrs={'class': 'form-select'}), # Para <select>, Bootstrap usa form-select
+        }
+
+        labels = {
+            'nombre': 'Nombre del Proyecto',
+            'descripcion': 'Descripción Detallada del Proyecto',
+            'tiempo_estimado_general': 'Tiempo Estimado General',
+            'fecha_inicio': 'Fecha de Inicio del Proyecto',
+            'fecha_fin_estimada': 'Fecha Estimada de Finalización',
+            'estado': 'Estado Actual del Proyecto',
+        }

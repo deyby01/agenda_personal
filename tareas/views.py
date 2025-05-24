@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy # Para redirigir después de un registro exitoso
 from django.views import generic # Para vistas basadas en clases genéricas
 from .models import Tarea, Proyecto
-from .forms import TareaForm, CustomUserCreationForm # Importamos nuestro formulario de tareas
+from .forms import TareaForm, CustomUserCreationForm, ProyectoForm # Importamos nuestro formulario de tareas
 
 # Definimos una función llamada 'lista_tareas' que toma un objeto 'request' como argumento.
 # El objeto 'request' contiene información sobre la solicitud web actual (quién la hizo, qué datos envió, etc.).
@@ -61,10 +61,11 @@ def crear_tarea(request):
     # Pasamos el formulario (ya sea vacío o con errores si no fue válido) a la plantilla.
     contexto = {
         'formulario': form,
-        'accion': 'Crear'
+        'accion': 'Crear',
+        'tipo_objeto': 'Tarea' # Para usar en la plantilla del formulario
     }
     # Renderizamos la plantilla 'tareas/crear_tarea.html' con el contexto.
-    return render(request, 'tareas/formulario_tarea.html', contexto)
+    return render(request, 'tareas/formulario_generico.html', contexto)
 
 
 @login_required  # Aseguramos que solo los usuarios autenticados puedan acceder a esta vista.
@@ -89,11 +90,12 @@ def editar_tarea(request, tarea_id): # 'tarea_id' vendrá de la URL
     contexto = {
         'formulario': form,
         'accion': 'Editar', # Variable para el título/botón
-        'tarea': tarea_obj # Opcional: pasar el objeto tarea por si lo necesitas en la plantilla
+        'tarea': tarea_obj, # Opcional: pasar el objeto tarea por si lo necesitas en la plantilla
+        'tipo_objeto': 'Tarea'
     }
     # Reutilizaremos la plantilla del formulario, o crearemos una nueva si es necesario.
     # Por ahora, asumamos que vamos a generalizar la plantilla 'crear_tarea.html'.
-    return render(request, 'tareas/formulario_tarea.html', contexto)
+    return render(request, 'tareas/formulario_generico.html', contexto)
 
 
 @login_required
@@ -138,3 +140,25 @@ def lista_proyectos(request):
         'lista_de_proyectos_template': proyectos
     }
     return render(request, 'tareas/lista_proyectos.html', contexto) # Usaremos una nueva plantilla
+
+
+@login_required
+def crear_proyecto(request):
+    if request.method == 'POST':
+        form = ProyectoForm(request.POST)
+        if form.is_valid():
+            proyecto = form.save(commit=False) # No guardar en BD todavía
+            proyecto.usuario = request.user    # Asignar el usuario actual
+            proyecto.save()                    # Ahora guardar en BD
+            return redirect('lista_de_proyectos_url') # Redirigir a la lista de proyectos
+    else:
+        form = ProyectoForm()
+
+    contexto = {
+        'formulario': form,
+        'tipo_objeto': 'Proyecto', # Para usar en la plantilla del formulario
+        'accion': 'Crear'
+    }
+    # Podríamos crear una plantilla específica 'formulario_proyecto.html' o generalizar más.
+    # Por ahora, vamos a crear una copia de formulario_tarea.html y la llamaremos formulario_generico.html
+    return render(request, 'tareas/formulario_generico.html', contexto)

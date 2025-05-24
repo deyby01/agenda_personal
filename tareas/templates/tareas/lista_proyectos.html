@@ -5,9 +5,8 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Mis Proyectos</h1>
-    {# Enlace para crear un nuevo proyecto (lo haremos funcionar más tarde) #}
-    <a href="#" class="btn btn-primary">➕ Añadir Nuevo Proyecto</a>
-    {# O si ya tienes la URL planeada: <a href="{% url 'crear_proyecto_url' %}" class="btn btn-primary">➕ Añadir Nuevo Proyecto</a> #}
+    {# En lista_proyectos.html #}
+    <a href="{% url 'crear_proyecto_url' %}" class="btn btn-primary">➕ Añadir Nuevo Proyecto</a>
 </div>
 
 {% if lista_de_proyectos_template %}
@@ -49,8 +48,7 @@
     </div>
 {% else %}
     <div class="alert alert-info mt-4" role="alert">
-        No tienes proyectos registrados. <a href="#" class="alert-link">¡Añade tu primer proyecto!</a>
-        {# O <a href="{% url 'crear_proyecto_url' %}" class="alert-link">¡Añade tu primer proyecto!</a> #}
+        No tienes proyectos registrados. <a href="{% url 'crear_proyecto_url' %}" class="alert-link">¡Añade tu primer proyecto!</a>
     </div>
 {% endif %}
 {% endblock content %}
