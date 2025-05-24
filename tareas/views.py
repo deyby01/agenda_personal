@@ -8,6 +8,7 @@ import datetime
 from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q # Para consultas OR complejas
+from django.contrib import messages # ¡Importamos el framework de mensajes!
 
 # Definimos una función llamada 'lista_tareas' que toma un objeto 'request' como argumento.
 # El objeto 'request' contiene información sobre la solicitud web actual (quién la hizo, qué datos envió, etc.).
@@ -63,6 +64,7 @@ def crear_tarea(request):
             tarea = form.save(commit=False) # No guardamos en BD todavía
             tarea.usuario = request.user    # Asignamos el usuario
             tarea.save()                    # Ahora sí guardamos
+            messages.success(request, f'¡Tarea "{tarea.titulo}" creada exitosamente!') # Mensaje de éxito
 
             # Después de guardar, redirigimos al usuario a la página de la lista de tareas.
             # 'lista_de_tareas_url' es el nombre que le dimos a la URL de la lista de tareas en urls.py.
@@ -97,6 +99,7 @@ def editar_tarea(request, tarea_id): # 'tarea_id' vendrá de la URL
         form = TareaForm(request.POST, instance=tarea_obj)
         if form.is_valid():
             form.save() # Guarda los cambios en la tarea existente
+            messages.success(request, f'¡Tarea "{tarea_obj.titulo}" actualizada exitosamente!') # Mensaje de éxito
             return redirect('lista_de_tareas_url')
     else:
         # Si es una solicitud GET, creamos una instancia del formulario
@@ -123,6 +126,7 @@ def eliminar_tarea(request, tarea_id): # 'tarea_id' vendrá de la URL
     # Si la solicitud es POST, significa que el usuario ha confirmado la eliminación.
     if request.method == 'POST':
         tarea_obj.delete() # Eliminamos el objeto Tarea de la base de datos.
+        messages.success(request, f'¡Tarea "{tarea_obj.titulo}" eliminada exitosamente!') # Mensaje de éxito
         return redirect('lista_de_tareas_url') # Redirigimos a la lista de tareas.
 
     # Si la solicitud no es POST (es GET), mostramos la página de confirmación.
@@ -167,7 +171,8 @@ def crear_proyecto(request):
         if form.is_valid():
             proyecto = form.save(commit=False) # No guardar en BD todavía
             proyecto.usuario = request.user    # Asignar el usuario actual
-            proyecto.save()                    # Ahora guardar en BD
+            proyecto.save()                     # Ahora guardar en BD
+            messages.success(request, f'¡Proyecto "{proyecto.nombre}" creado exitosamente!') # Mensaje de éxito
             return redirect('lista_de_proyectos_url') # Redirigir a la lista de proyectos
     else:
         form = ProyectoForm()
@@ -194,6 +199,7 @@ def editar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
         form = ProyectoForm(request.POST, instance=proyecto_obj)
         if form.is_valid():
             form.save() # Guarda los cambios en el proyecto existente
+            messages.success(request, f"¡Proyecto '{proyecto_obj.nombre}' actualizado exitosamente!")
             return redirect('lista_de_proyectos_url') # Redirige a la lista de proyectos
     else:
         # Si es una solicitud GET, creamos una instancia del formulario
@@ -216,7 +222,9 @@ def eliminar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
     proyecto_obj = get_object_or_404(Proyecto, id=proyecto_id, usuario=request.user)
 
     if request.method == 'POST':
+        nombre_eliminado = proyecto_obj.nombre # Guardamos el nombre del proyecto para el mensaje
         proyecto_obj.delete() # Eliminamos el objeto Proyecto de la base de datos.
+        messages.success(request, f"¡Proyecto '{nombre_eliminado}' eliminado exitosamente!")
         return redirect('lista_de_proyectos_url') # Redirigimos a la lista de proyectos.
 
     # Si la solicitud no es POST (es GET), mostramos la página de confirmación.
@@ -317,6 +325,8 @@ def cambiar_estado_tarea(request, tarea_id):
         # Simplemente invertimos el estado.
         tarea.completada = not tarea.completada
         tarea.save()
+        estado_str = "completada" if tarea.completada else "marcada como pendiente"
+        messages.success(request, f'¡Tarea "{tarea.titulo}" {estado_str} exitosamente!') # Mensaje de éxito
 
     # Redirigir de vuelta a la vista semanal.
     # Necesitamos saber a qué semana volver. Podríamos pasar la fecha de inicio de semana
