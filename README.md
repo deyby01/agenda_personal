@@ -1,2 +1,2 @@
 # agenda_personal
-Mini proyecto desarrollado con Djando, Html y Css
+Mini proyecto desarrollado con Djando, Html, Boostrap y Css
