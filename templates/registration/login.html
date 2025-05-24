@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 
 {% block title %}Iniciar Sesión - Agenda Personal{% endblock title %}
 
@@ -27,20 +28,9 @@
 
                 <form method="post" action="{% url 'login' %}">
                     {% csrf_token %}
+                    {{ form|crispy }} 
 
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
-                        <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
-                        <div class="input-group"> {# Usamos input-group de Bootstrap para agrupar input y botón #}
-                            <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" class="form-control" required>
-                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="{{ form.password.id_for_label }}">👁️ Ver</button>
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
+                    <div class="d-grid mt-3">
                         <button type="submit" class="btn btn-success">Iniciar Sesión</button>
                     </div>
                     <input type="hidden" name="next" value="{{ next }}">

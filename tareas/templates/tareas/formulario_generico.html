@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %} {# ¡CARGAMOS LOS TAGS DE CRISPY FORMS! #}
 
 {% block title %}{{ accion }} {{ tipo_objeto|default:"Elemento" }} - Agenda Personal{% endblock title %}
 
@@ -12,37 +13,8 @@
             <div class="card-body">
                 <form method="POST">
                     {% csrf_token %}
-                    {% for field in formulario %}
-                        <div class="mb-3">
-                            {{ field.label_tag }}
-
-                            {% if field.name == 'old_password' or field.name == 'new_password1' or field.name == 'new_password2' or field.name == 'password' %}
-                                <div class="input-group">
-                                    <input type="{{ field.field.widget.input_type }}"
-                                           name="{{ field.name }}"
-                                           id="{{ field.id_for_label }}"
-                                           class="form-control {% if field.errors %}is-invalid{% endif %}"
-                                           {% if field.field.required %}required{% endif %}>
-                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="{{ field.id_for_label }}">👁️ Ver</button>
-                                </div>
-                            {% else %}
-                                {# Para campos que NO son de contraseña, simplemente renderizamos el campo. #}
-                                {# Django usará el widget que definiste en tu forms.py. #}
-                                {# Si has añadido 'class': 'form-control' o 'form-select' #}
-                                {# a los widgets en forms.py, esto se verá bien. #}
-                                {{ field }}
-                            {% endif %}
-
-                            {% if field.help_text %}
-                                <small class="form-text text-muted">{{ field.help_text|safe }}</small>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ error }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
+                    {# REEMPLAZAMOS EL BUCLE MANUAL CON LA ETIQUETA CRISPY #}
+                    {{ formulario|crispy }}
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                          {# El enlace de cancelar debería ser dinámico o quitarse si es muy complejo ahora #}
