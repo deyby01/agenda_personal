@@ -27,4 +27,12 @@ urlpatterns = [
     
     # NUEVA URL para eliminar proyectos
     path('proyectos/eliminar/<int:proyecto_id>/', views.eliminar_proyecto, name='eliminar_proyecto_url'),
+    
+    # URLs para la Vista Semanal
+    # Para la semana actual (sin parámetros de fecha en la URL)
+    path('mi-semana/', views.mi_semana_view, name='mi_semana_actual_url'),
+    # Para una semana específica basada en una fecha (año, mes, día)
+    path('mi-semana/<int:anio>/<int:mes>/<int:dia>/', views.mi_semana_view, name='mi_semana_especifica_url'),
+    
+    path('tarea/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado_tarea_url'),
 ]

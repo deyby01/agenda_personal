@@ -100,3 +100,9 @@ class ProyectoForm(forms.ModelForm):
             'fecha_fin_estimada': 'Fecha Estimada de Finalización',
             'estado': 'Estado Actual del Proyecto',
         }
+        
+
+class TareaEstadoForm(forms.ModelForm):
+    class Meta:
+        model = Tarea
+        fields = ['completada'] # Solo nos interesa este campo

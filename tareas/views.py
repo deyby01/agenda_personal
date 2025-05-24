@@ -4,6 +4,9 @@ from django.urls import reverse_lazy # Para redirigir después de un registro ex
 from django.views import generic # Para vistas basadas en clases genéricas
 from .models import Tarea, Proyecto
 from .forms import TareaForm, CustomUserCreationForm, ProyectoForm # Importamos nuestro formulario de tareas
+import datetime
+from django.utils import timezone
+from django.urls import reverse
 
 # Definimos una función llamada 'lista_tareas' que toma un objeto 'request' como argumento.
 # El objeto 'request' contiene información sobre la solicitud web actual (quién la hizo, qué datos envió, etc.).
@@ -210,3 +213,92 @@ def eliminar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
     }
     # Reutilizaremos la plantilla de confirmación de eliminación
     return render(request, 'tareas/confirmar_eliminacion_generica.html', contexto)
+
+
+@login_required
+def mi_semana_view(request, anio=None, mes=None, dia=None):
+    # Determinar la fecha base para la semana
+    if anio and mes and dia:
+        try:
+            fecha_base = datetime.date(int(anio), int(mes), int(dia))
+        except ValueError:
+            # Si la fecha no es válida, redirigir a la semana actual
+            return redirect(reverse('mi_semana_actual_url')) # Necesitaremos esta URL
+    else:
+        fecha_base = timezone.localdate()
+
+    # Calcular el inicio de la semana (lunes) y el fin de la semana (domingo)
+    # weekday() devuelve 0 para lunes y 6 para domingo
+    inicio_semana = fecha_base - datetime.timedelta(days=fecha_base.weekday())
+    fin_semana = inicio_semana + datetime.timedelta(days=6)
+
+    # Fechas para los botones de navegación
+    semana_anterior_fecha = inicio_semana - datetime.timedelta(days=7)
+    semana_siguiente_fecha = inicio_semana + datetime.timedelta(days=7)
+
+    # Determinar si es la semana actual
+    hoy = timezone.localdate()
+    es_semana_actual = (inicio_semana <= hoy <= fin_semana)
+
+    # Preparar datos para la plantilla
+    dias_con_tareas = []
+    for i in range(7):
+        fecha_dia_actual = inicio_semana + datetime.timedelta(days=i)
+        tareas_del_dia = Tarea.objects.filter(
+            usuario=request.user,
+            fecha_asignada=fecha_dia_actual
+        ).order_by('completada', 'titulo') # Ordenar por completada y luego título
+
+        # Para el enlace "+Añadir Tarea"
+        url_crear_tarea_dia = f"{reverse('crear_tarea_url')}?fecha_asignada={fecha_dia_actual.strftime('%Y-%m-%d')}"
+
+        dias_con_tareas.append({
+            'fecha': fecha_dia_actual,
+            'tareas': tareas_del_dia,
+            'es_hoy': fecha_dia_actual == hoy,
+            'url_crear_tarea_dia': url_crear_tarea_dia
+        })
+
+    # Formatear rango de fechas para el título
+    # Si el inicio y fin de semana están en el mismo mes
+    if inicio_semana.month == fin_semana.month:
+        rango_fechas_str = f"{inicio_semana.strftime('%d')} - {fin_semana.strftime('%d %b %Y')}"
+    else: # Si abarcan meses diferentes
+        rango_fechas_str = f"{inicio_semana.strftime('%d %b')} - {fin_semana.strftime('%d %b %Y')}"
+
+
+    contexto = {
+        'dias_con_tareas': dias_con_tareas,
+        'rango_fechas_str': rango_fechas_str,
+        'es_semana_actual': es_semana_actual,
+        'semana_anterior_url': reverse('mi_semana_especifica_url', args=[semana_anterior_fecha.year, semana_anterior_fecha.month, semana_anterior_fecha.day]) if not es_semana_actual else None,
+        'semana_siguiente_url': reverse('mi_semana_especifica_url', args=[semana_siguiente_fecha.year, semana_siguiente_fecha.month, semana_siguiente_fecha.day]),
+        # Necesitaremos estas URLs: 'mi_semana_actual_url' y 'mi_semana_especifica_url'
+    }
+    return render(request, 'tareas/mi_semana.html', contexto) # Nueva plantilla
+
+
+
+@login_required
+def cambiar_estado_tarea(request, tarea_id):
+    tarea = get_object_or_404(Tarea, id=tarea_id, usuario=request.user)
+    if request.method == 'POST':
+        # No necesitamos un formulario completo aquí si solo cambiamos un booleano.
+        # Simplemente invertimos el estado.
+        tarea.completada = not tarea.completada
+        tarea.save()
+
+    # Redirigir de vuelta a la vista semanal.
+    # Necesitamos saber a qué semana volver. Podríamos pasar la fecha de inicio de semana
+    # como un parámetro en la URL de 'cambiar_estado_tarea' o en los datos POST.
+    # Por simplicidad ahora, redirigimos a la semana actual.
+    # Una mejor solución sería redirigir a la semana que se estaba viendo.
+
+    # Para redirigir a la semana que se estaba viendo, necesitamos esa fecha.
+    # Si la pasamos como parámetro GET en la URL de la acción del formulario:
+    redirect_url_param = request.GET.get('next_week_view')
+    if redirect_url_param:
+        return redirect(redirect_url_param)
+
+    # Fallback a la semana actual si no se especifica 'next_week_view'
+    return redirect(reverse('mi_semana_actual_url'))

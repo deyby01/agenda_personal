@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mi Semana ({{ rango_fechas_str }}){% endblock title %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center my-4 position-relative">
+    {# Botón Semana Anterior (condicional) #}
+    {% if semana_anterior_url %}
+        <a href="{{ semana_anterior_url }}" class="btn btn-outline-secondary position-absolute start-0" style="top: 50%; transform: translateY(-50%);">&laquo; Sem Anterior</a>
+    {% else %}
+        {# Espacio reservado para mantener el título centrado si el botón no está #}
+        <span class="btn btn-outline-secondary invisible position-absolute start-0" style="top: 50%; transform: translateY(-50%);">&laquo; Sem Anterior</span>
+    {% endif %}
+
+    <div class="text-center">
+        <h1 class="mb-0">Mi Semana</h1>
+        <h4 class="text-muted fw-normal">{{ rango_fechas_str }} {% if es_semana_actual %}(Semana Actual){% endif %}</h4>
+    </div>
+
+    {# Botón Semana Siguiente #}
+    <a href="{{ semana_siguiente_url }}" class="btn btn-outline-secondary position-absolute end-0" style="top: 50%; transform: translateY(-50%);">Sem Siguiente &raquo;</a>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-7 g-3">
+    {# Para 7 columnas en pantallas XL, 4 en LG, 3 en MD, 2 en SM, 1 por defecto #}
+    {% for dia_info in dias_con_tareas %}
+        <div class="col">
+            <div class="card h-100 {% if dia_info.es_hoy %}border-primary border-2 shadow{% else %}shadow-sm{% endif %}">
+                <div class="card-header {% if dia_info.es_hoy %}bg-primary text-white{% else %}bg-light{% endif %}">
+                    <h5 class="mb-0 small text-center">
+                        {{ dia_info.fecha|date:"l" }}<br>
+                        <span class="fs-5 fw-bold">{{ dia_info.fecha|date:"j" }}</span><br>
+                        <span class="small">{{ dia_info.fecha|date:"M" }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-2" style="min-height: 150px;"> {# Altura mínima para consistencia #}
+                    {% if dia_info.tareas %}
+                        <ul class="list-unstyled mb-0">
+                            {% for tarea in dia_info.tareas %}
+                            <li class="mb-2 p-1 rounded {% if tarea.completada %}bg-light text-muted text-decoration-line-through{% else %}bg-white{% endif %} border-start border-4 {% if tarea.completada %}border-success{% else %}border-warning{% endif %}">
+                                {# Checkbox irá aquí más adelante #}
+                                <div class="d-flex align-items-start">
+                                    <div class="me-2 pt-1">
+                                        {# --- INICIO FORMULARIO CHECKBOX --- #}
+                                        <form action="{% url 'cambiar_estado_tarea_url' tarea.id %}?next_week_view={{ request.path }}" method="POST" style="display: inline;">
+                                            {% csrf_token %}
+                                            {# Usaremos un input checkbox que al cambiar (onchange) envíe el formulario #}
+                                            <input type="checkbox"
+                                                class="form-check-input"
+                                                name="completada" {# El nombre no es estrictamente necesario para esta lógica simple #}
+                                                id="tarea_{{ tarea.id }}_check"
+                                                {% if tarea.completada %}checked{% endif %}
+                                                onchange="this.form.submit()"> {# Envía el formulario cuando el estado cambia #}
+                                        </form>
+                                        {# --- FIN FORMULARIO CHECKBOX --- #}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <span class="fw-bold small d-block">{{ tarea.titulo }}</span>
+                                        {% if tarea.tiempo_estimado %}
+                                            <small class="text-muted d-block">({{ tarea.tiempo_estimado }})</small>
+                                        {% endif %}
+                                        <div class="mt-1 action-buttons-semana">
+                                            <a href="{% url 'editar_tarea_url' tarea.id %}" class="btn btn-xs btn-outline-secondary py-0 px-1 me-1"><small>✏️</small></a>
+                                            <a href="{% url 'eliminar_tarea_url' tarea.id %}" class="btn btn-xs btn-outline-danger py-0 px-1"><small>🗑️</small></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-center text-muted small mt-3"><em>Sin tareas.</em></p>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center p-1">
+                    <a href="{{ dia_info.url_crear_tarea_dia }}" class="btn btn-sm btn-outline-success w-100 py-1"><small>+ Añadir</small></a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    .action-buttons-semana a small { font-size: 0.7rem; } /* Para que los botones E y X sean más pequeños */
+</style>
+{% endblock content %}
