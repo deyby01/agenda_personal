@@ -36,6 +36,19 @@ def lista_tareas(request):
 
 @login_required  # Aseguramos que solo los usuarios autenticados puedan acceder a esta vista.
 def crear_tarea(request):
+    # --- INICIO DE LA MODIFICACIÓN ---
+    initial_data = {} # Un diccionario para los datos iniciales del formulario
+    fecha_asignada_param = request.GET.get('fecha_asignada') # Intenta obtener el parámetro de la URL
+
+    if fecha_asignada_param:
+        try:
+            # Intenta convertir el string de fecha a un objeto date
+            initial_data['fecha_asignada'] = datetime.datetime.strptime(fecha_asignada_param, '%Y-%m-%d').date()
+        except ValueError:
+            # Si el formato de fecha es incorrecto, simplemente ignora el parámetro
+            pass
+    # --- FIN DE LA MODIFICACIÓN ---
+    
     # Verificamos si el método de la solicitud es POST.
     # Esto sucede cuando el usuario envía (submits) el formulario.
     if request.method == 'POST':
@@ -59,7 +72,7 @@ def crear_tarea(request):
         # Si el método no es POST (es decir, es GET, lo que significa que el usuario
         # acaba de navegar a la URL para crear una tarea),
         # creamos una instancia vacía del formulario.
-        form = TareaForm()
+        form = TareaForm(initial=initial_data) # ESTA LÍNEA ES CRUCIAL
 
     # Preparamos el contexto para la plantilla.
     # Pasamos el formulario (ya sea vacío o con errores si no fue válido) a la plantilla.

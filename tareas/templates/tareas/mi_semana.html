@@ -76,7 +76,7 @@
                     {% endif %}
                 </div>
                 <div class="card-footer text-center p-1">
-                    <a href="{{ dia_info.url_crear_tarea_dia }}" class="btn btn-sm btn-outline-success w-100 py-1"><small>+ Añadir</small></a>
+                    <a href="{% url 'crear_tarea_url' %}?fecha_asignada={{ dia_info.fecha|date:'Y-m-d' }}" class="btn btn-sm btn-outline-success w-100 py-1"><small>+ Añadir</small></a>
                 </div>
             </div>
         </div>
