@@ -110,9 +110,10 @@ def eliminar_tarea(request, tarea_id): # 'tarea_id' vendrá de la URL
 
     # Si la solicitud no es POST (es GET), mostramos la página de confirmación.
     contexto = {
-        'tarea': tarea_obj
+        'tarea': tarea_obj,
+        'url_lista_retorno': 'lista_de_tareas_url', # Para el botón "Cancelar"
     }
-    return render(request, 'tareas/confirmar_eliminacion_tarea.html', contexto)
+    return render(request, 'tareas/confirmar_eliminacion_generica.html', contexto)
 
 
 
@@ -162,3 +163,50 @@ def crear_proyecto(request):
     # Podríamos crear una plantilla específica 'formulario_proyecto.html' o generalizar más.
     # Por ahora, vamos a crear una copia de formulario_tarea.html y la llamaremos formulario_generico.html
     return render(request, 'tareas/formulario_generico.html', contexto)
+
+
+@login_required
+def editar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
+    # Obtenemos la instancia del Proyecto que queremos editar.
+    # Solo el usuario propietario puede editarlo.
+    proyecto_obj = get_object_or_404(Proyecto, id=proyecto_id, usuario=request.user)
+
+    if request.method == 'POST':
+        # Creamos una instancia del formulario con los datos de la solicitud (request.POST)
+        # y la instancia del proyecto existente (instance=proyecto_obj).
+        form = ProyectoForm(request.POST, instance=proyecto_obj)
+        if form.is_valid():
+            form.save() # Guarda los cambios en el proyecto existente
+            return redirect('lista_de_proyectos_url') # Redirige a la lista de proyectos
+    else:
+        # Si es una solicitud GET, creamos una instancia del formulario
+        # poblada con los datos del proyecto existente (instance=proyecto_obj).
+        form = ProyectoForm(instance=proyecto_obj)
+
+    contexto = {
+        'formulario': form,
+        'accion': 'Editar',
+        'tipo_objeto': 'Proyecto',
+        'objeto': proyecto_obj # Pasamos el objeto por si queremos mostrar su nombre u otra info en la plantilla
+    }
+    return render(request, 'tareas/formulario_generico.html', contexto)
+
+
+@login_required
+def eliminar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
+    # Obtenemos la instancia del Proyecto que queremos eliminar.
+    # Solo el usuario propietario puede eliminarlo.
+    proyecto_obj = get_object_or_404(Proyecto, id=proyecto_id, usuario=request.user)
+
+    if request.method == 'POST':
+        proyecto_obj.delete() # Eliminamos el objeto Proyecto de la base de datos.
+        return redirect('lista_de_proyectos_url') # Redirigimos a la lista de proyectos.
+
+    # Si la solicitud no es POST (es GET), mostramos la página de confirmación.
+    contexto = {
+        'objeto': proyecto_obj, # Usaremos 'objeto' para que la plantilla sea más genérica
+        'tipo_objeto': 'Proyecto',
+        'url_lista_retorno': 'lista_de_proyectos_url' # Para el botón "Cancelar"
+    }
+    # Reutilizaremos la plantilla de confirmación de eliminación
+    return render(request, 'tareas/confirmar_eliminacion_generica.html', contexto)

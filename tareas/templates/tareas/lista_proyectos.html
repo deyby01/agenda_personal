@@ -38,9 +38,8 @@
                     </ul>
                 </div>
                 <div class="card-footer bg-light text-end">
-                    {# Enlaces para editar y eliminar (los haremos funcionar más tarde) #}
-                    <a href="#" class="btn btn-sm btn-outline-warning task-actions">✏️ Editar</a>
-                    <a href="#" class="btn btn-sm btn-outline-danger task-actions">🗑️ Eliminar</a>
+                    <a href="{% url 'editar_proyecto_url' proyecto_individual.id %}" class="btn btn-sm btn-outline-warning task-actions">✏️ Editar</a>
+                    <a href="{% url 'eliminar_proyecto_url' proyecto_individual.id %}" class="btn btn-sm btn-outline-danger task-actions">🗑️ Eliminar</a>
                 </div>
             </div>
         </div>

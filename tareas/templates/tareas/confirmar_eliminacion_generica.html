@@ -1,23 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Confirmar Eliminación - Mi Agenda{% endblock title %}
+{% block title %}Confirmar Eliminación de {{ tipo_objeto }} - Mi Agenda{% endblock title %}
 
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center mt-5">
     <div class="col-md-6">
         <div class="card text-center shadow-sm">
             <div class="card-header bg-danger text-white">
                 <h2 class="card-title mb-0">Confirmar Eliminación</h2>
             </div>
             <div class="card-body">
-                <p class="card-text fs-5">¿Estás seguro de que quieres eliminar la tarea <br>"<strong>{{ tarea.titulo }}</strong>"?</p>
+                {# Usamos 'objeto.titulo' o 'objeto.nombre' dependiendo del tipo_objeto #}
+                {# O podemos simplemente mostrar el objeto, que usará su método __str__ #}
+                <p class="card-text fs-5 mt-3">¿Estás seguro de que quieres eliminar {{ tipo_objeto.lower }}:<br>"<strong>{{ objeto }}</strong>"?</p>
                 <p class="text-muted"><small>Esta acción no se puede deshacer.</small></p>
 
-                <form method="POST" class="mt-4">
+                <form method="POST" class="mt-4"> {# La action irá a la URL actual por defecto #}
                     {% csrf_token %}
                     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
                         <button type="submit" class="btn btn-danger px-4 me-sm-2">Sí, Eliminar</button>
-                        <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                        <a href="{% url url_lista_retorno %}" class="btn btn-outline-secondary px-4">Cancelar</a>
                     </div>
                 </form>
             </div>
