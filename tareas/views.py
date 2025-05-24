@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm # ¡Importamos el formulario de creación de usuarios!
 from django.urls import reverse_lazy # Para redirigir después de un registro exitoso
 from django.views import generic # Para vistas basadas en clases genéricas
-from .models import Tarea   
+from .models import Tarea, Proyecto
 from .forms import TareaForm, CustomUserCreationForm # Importamos nuestro formulario de tareas
 
 # Definimos una función llamada 'lista_tareas' que toma un objeto 'request' como argumento.
@@ -127,3 +126,15 @@ class VistaRegistro(generic.CreateView):
 
     # Especificamos la plantilla HTML que se usará para mostrar el formulario de registro.
     template_name = 'registration/registro.html' # La crearemos a continuación
+    
+    
+@login_required # Protegemos la lista de proyectos
+def lista_proyectos(request):
+    # Filtramos los proyectos para mostrar solo los del usuario actual
+    # Ordenamos por fecha_fin_estimada y luego por nombre
+    proyectos = Proyecto.objects.filter(usuario=request.user).order_by('fecha_fin_estimada', 'nombre')
+
+    contexto = {
+        'lista_de_proyectos_template': proyectos
+    }
+    return render(request, 'tareas/lista_proyectos.html', contexto) # Usaremos una nueva plantilla

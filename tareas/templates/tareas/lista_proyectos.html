@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Proyectos - Mi Agenda{% endblock title %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Mis Proyectos</h1>
+    {# Enlace para crear un nuevo proyecto (lo haremos funcionar más tarde) #}
+    <a href="#" class="btn btn-primary">➕ Añadir Nuevo Proyecto</a>
+    {# O si ya tienes la URL planeada: <a href="{% url 'crear_proyecto_url' %}" class="btn btn-primary">➕ Añadir Nuevo Proyecto</a> #}
+</div>
+
+{% if lista_de_proyectos_template %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for proyecto_individual in lista_de_proyectos_template %}
+        <div class="col">
+            <div class="card h-100 shadow-sm {% if proyecto_individual.estado == 'completado' %}border-success{% elif proyecto_individual.estado == 'cancelado' %}border-danger{% else %}border-primary{% endif %}">
+                <div class="card-header {% if proyecto_individual.estado == 'completado' %}bg-success text-white{% elif proyecto_individual.estado == 'cancelado' %}bg-danger text-white{% else %}bg-primary text-white{% endif %}">
+                    <h5 class="card-title mb-0">{{ proyecto_individual.nombre }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if proyecto_individual.descripcion %}
+                        <p class="card-text">{{ proyecto_individual.descripcion|truncatewords:30 }}</p>
+                    {% else %}
+                        <p class="card-text text-muted"><em>Sin descripción.</em></p>
+                    {% endif %}
+
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li><strong>Estado:</strong> <span class="badge bg-secondary">{{ proyecto_individual.get_estado_display }}</span></li>
+                        {% if proyecto_individual.tiempo_estimado_general %}
+                            <li><strong>Tiempo Estimado:</strong> {{ proyecto_individual.tiempo_estimado_general }}</li>
+                        {% endif %}
+                        {% if proyecto_individual.fecha_inicio %}
+                            <li><strong>Inicio:</strong> {{ proyecto_individual.fecha_inicio|date:"d/m/Y" }}</li>
+                        {% endif %}
+                        {% if proyecto_individual.fecha_fin_estimada %}
+                            <li><strong>Fin Estimado:</strong> {{ proyecto_individual.fecha_fin_estimada|date:"d/m/Y" }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-light text-end">
+                    {# Enlaces para editar y eliminar (los haremos funcionar más tarde) #}
+                    <a href="#" class="btn btn-sm btn-outline-warning task-actions">✏️ Editar</a>
+                    <a href="#" class="btn btn-sm btn-outline-danger task-actions">🗑️ Eliminar</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info mt-4" role="alert">
+        No tienes proyectos registrados. <a href="#" class="alert-link">¡Añade tu primer proyecto!</a>
+        {# O <a href="{% url 'crear_proyecto_url' %}" class="alert-link">¡Añade tu primer proyecto!</a> #}
+    </div>
+{% endif %}
+{% endblock content %}

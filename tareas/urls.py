@@ -16,4 +16,6 @@ urlpatterns = [
     path('eliminar/<int:tarea_id>/', views.eliminar_tarea, name='eliminar_tarea_url'),
     # La ruta será '/agenda/registro/' si el prefijo en el urls.py principal es 'agenda/'
     path('registro/', VistaRegistro.as_view(), name='registro_url'),
+    
+    path('proyectos/', views.lista_proyectos, name='lista_de_proyectos_url'),
 ]

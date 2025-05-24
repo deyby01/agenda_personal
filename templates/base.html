@@ -48,6 +48,9 @@
                 >Tareas</a
               >
             </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.resolver_match.url_name == 'lista_de_proyectos_url' %}active{% endif %}" href="{% url 'lista_de_proyectos_url' %}">Proyectos</a>
+            </li>
             {% if user.is_authenticated %} {# Solo mostrar si el usuario está
             logueado #}
             <li class="nav-item">
