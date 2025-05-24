@@ -80,6 +80,65 @@
         </div>
     {% endfor %}
 </div>
+{% if tareas_sin_fecha %} {# Este bloque ya existía en la versión anterior que te pasé, lo mantengo #}
+<div class="mt-5">
+    <h2>Tareas Pendientes Sin Fecha Asignada</h2>
+    <div class="list-group">
+        {% for tarea in tareas_sin_fecha %}
+        <a href="{% url 'editar_tarea_url' tarea.id %}" class="list-group-item list-group-item-action">
+            {{ tarea.titulo }}
+            {% if tarea.tiempo_estimado %}
+                <small class="text-muted">({{ tarea.tiempo_estimado }})</small>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# --- NUEVA SECCIÓN PARA PROYECTOS ACTIVOS --- #}
+{% if proyectos_activos %}
+<div class="mt-5 pt-3 border-top">
+    <h2 class="mb-3">Proyectos Activos Esta Semana</h2>
+    <div class="list-group">
+        {% for proyecto in proyectos_activos %}
+        <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm rounded">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ proyecto.nombre }}</h5>
+                <small class="text-muted">
+                    {% if proyecto.fecha_fin_estimada %}
+                        Fin est: {{ proyecto.fecha_fin_estimada|date:"d M Y" }}
+                    {% else %}
+                        Sin fecha fin
+                    {% endif %}
+                </small>
+            </div>
+            {% if proyecto.descripcion %}
+                <p class="mb-1 small text-muted">{{ proyecto.descripcion|truncatewords:25 }}</p>
+            {% endif %}
+            <div class="mt-1">
+                <span class="badge 
+                    {% if proyecto.estado == 'completado' %}bg-success
+                    {% elif proyecto.estado == 'en_curso' %}bg-primary
+                    {% elif proyecto.estado == 'planificado' %}bg-info text-dark
+                    {% elif proyecto.estado == 'en_espera' %}bg-secondary
+                    {% elif proyecto.estado == 'cancelado' %}bg-danger
+                    {% else %}bg-light text-dark{% endif %}">
+                    {{ proyecto.get_estado_display }}
+                </span>
+                {% if proyecto.tiempo_estimado_general %}
+                    <small class="ms-2 text-muted">Est: {{ proyecto.tiempo_estimado_general }}</small>
+                {% endif %}
+            </div>
+            <div class="mt-2 text-end">
+                <a href="{% url 'editar_proyecto_url' proyecto.id %}" class="btn btn-sm btn-outline-secondary py-0 px-2">Editar Proyecto</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{# --- FIN DE LA NUEVA SECCIÓN --- #}
 
 <style>
     .action-buttons-semana a small { font-size: 0.7rem; } /* Para que los botones E y X sean más pequeños */

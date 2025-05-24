@@ -7,6 +7,7 @@ from .forms import TareaForm, CustomUserCreationForm, ProyectoForm # Importamos 
 import datetime
 from django.utils import timezone
 from django.urls import reverse
+from django.db.models import Q # Para consultas OR complejas
 
 # Definimos una función llamada 'lista_tareas' que toma un objeto 'request' como argumento.
 # El objeto 'request' contiene información sobre la solicitud web actual (quién la hizo, qué datos envió, etc.).
@@ -266,6 +267,22 @@ def mi_semana_view(request, anio=None, mes=None, dia=None):
     else: # Si abarcan meses diferentes
         rango_fechas_str = f"{inicio_semana.strftime('%d %b')} - {fin_semana.strftime('%d %b %Y')}"
 
+    # --- NUEVA LÓGICA PARA PROYECTOS ACTIVOS EN LA SEMANA ---
+    proyectos_activos = Proyecto.objects.filter(
+        Q(usuario=request.user),
+        # Proyectos que comienzan antes o durante esta semana Y terminan durante o después de esta semana.
+        # O proyectos sin fecha de inicio pero que terminan durante o después de esta semana.
+        # O proyectos sin fecha de fin pero que comienzan antes o durante esta semana.
+        # O proyectos sin fechas de inicio ni fin (se muestran siempre si no están completados/cancelados)
+        (
+            Q(fecha_inicio__lte=fin_semana, fecha_fin_estimada__gte=inicio_semana) | # Caso principal: se solapa
+            Q(fecha_inicio__lte=fin_semana, fecha_fin_estimada__isnull=True) |       # Inicia en/antes, sin fecha fin
+            Q(fecha_inicio__isnull=True, fecha_fin_estimada__gte=inicio_semana) |    # Sin fecha inicio, termina en/después
+            Q(fecha_inicio__isnull=True, fecha_fin_estimada__isnull=True)            # Sin fechas (mostrar siempre activos)
+        ),
+        ~Q(estado__in=['completado', 'cancelado']) # Excluir completados o cancelados
+    ).distinct().order_by('fecha_fin_estimada', 'nombre')
+    # El .distinct() es importante si un proyecto pudiera coincidir con múltiples condiciones Q y duplicarse.
 
     contexto = {
         'dias_con_tareas': dias_con_tareas,
@@ -273,9 +290,9 @@ def mi_semana_view(request, anio=None, mes=None, dia=None):
         'es_semana_actual': es_semana_actual,
         'semana_anterior_url': reverse('mi_semana_especifica_url', args=[semana_anterior_fecha.year, semana_anterior_fecha.month, semana_anterior_fecha.day]) if not es_semana_actual else None,
         'semana_siguiente_url': reverse('mi_semana_especifica_url', args=[semana_siguiente_fecha.year, semana_siguiente_fecha.month, semana_siguiente_fecha.day]),
-        # Necesitaremos estas URLs: 'mi_semana_actual_url' y 'mi_semana_especifica_url'
+        'proyectos_activos': proyectos_activos, # <--- NUEVO DATO PARA LA PLANTILLA
     }
-    return render(request, 'tareas/mi_semana.html', contexto) # Nueva plantilla
+    return render(request, 'tareas/mi_semana.html', contexto) 
 
 
 
