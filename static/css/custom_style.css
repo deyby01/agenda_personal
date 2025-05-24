@@ -1,0 +1,10 @@
+body {
+    padding-top: 56px; /* Ajuste para la barra de navegación fija */
+}
+.task-actions a {
+    margin-left: 5px;
+} /* Pequeño ajuste para los botones de acción de tareas */
+    /* Estilo adicional para los botones de acción en la vista semanal si es necesario */
+.action-buttons-semana a small { 
+    font-size: 0.7rem; 
+}
