@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle: {{ proyecto.nombre }} - Mi Agenda{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header 
+            {% if proyecto.estado == 'completado' %}bg-success-subtle
+            {% elif proyecto.estado == 'en_curso' %}bg-primary-subtle
+            {% elif proyecto.estado == 'planificado' %}bg-info-subtle
+            {% elif proyecto.estado == 'en_espera' %}bg-secondary-subtle
+            {% elif proyecto.estado == 'cancelado' %}bg-danger-subtle
+            {% else %}bg-light{% endif %}">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">{{ proyecto.nombre }}</h2>
+                <span class="badge 
+                    {% if proyecto.estado == 'completado' %}bg-success
+                    {% elif proyecto.estado == 'en_curso' %}bg-primary
+                    {% elif proyecto.estado == 'planificado' %}bg-info text-dark
+                    {% elif proyecto.estado == 'en_espera' %}bg-secondary
+                    {% elif proyecto.estado == 'cancelado' %}bg-danger
+                    {% else %}bg-light text-dark{% endif %} fs-6">
+                    {{ proyecto.get_estado_display }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if proyecto.descripcion %}
+                <h5 class="card-subtitle mb-2 text-muted">Descripción:</h5>
+                <p class="card-text" style="white-space: pre-wrap;">{{ proyecto.descripcion }}</p>
+            {% else %}
+                <p class="card-text text-muted"><em>Sin descripción detallada.</em></p>
+            {% endif %}
+
+            <hr>
+            <h5 class="card-subtitle my-3 text-muted">Planificación:</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Creado en Sistema:</strong> {{ proyecto.fecha_creacion_proyecto|date:"d M Y, H:i" }}</p>
+                    {% if proyecto.fecha_inicio %}
+                        <p><strong>Fecha de Inicio:</strong> {{ proyecto.fecha_inicio|date:"l, d M Y" }}</p>
+                    {% else %}
+                        <p><strong>Fecha de Inicio:</strong> <em class="text-muted">No especificada</em></p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    {% if proyecto.fecha_fin_estimada %}
+                        <p><strong>Fecha Fin Estimada:</strong> {{ proyecto.fecha_fin_estimada|date:"l, d M Y" }}</p>
+                    {% else %}
+                        <p><strong>Fecha Fin Estimada:</strong> <em class="text-muted">No especificada</em></p>
+                    {% endif %}
+                    {% if proyecto.tiempo_estimado_general %}
+                        <p><strong>Tiempo Estimado General:</strong> {{ proyecto.tiempo_estimado_general }}</p>
+                    {% else %}
+                        <p><strong>Tiempo Estimado General:</strong> <em class="text-muted">No especificado</em></p>
+                    {% endif %}
+                </div>
+            </div>
+            {# Aquí podríamos listar tareas asociadas si las tuviéramos #}
+            {# {% if tareas_del_proyecto %}
+                <hr>
+                <h5 class="card-subtitle my-3 text-muted">Tareas Asociadas:</h5>
+                <ul>
+                    {% for tarea in tareas_del_proyecto %}
+                        <li><a href="{% url 'detalle_tarea_url' tarea.id %}">{{ tarea.titulo }}</a> - {% if tarea.completada %}Completada{% else %}Pendiente{% endif %}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %} #}
+        </div>
+        <div class="card-footer bg-light text-end">
+            <a href="{% url 'lista_de_proyectos_url' %}" class="btn btn-outline-secondary me-2">Volver a Proyectos</a>
+            <a href="{% url 'editar_proyecto_url' proyecto.id %}" class="btn btn-warning me-2">✏️ Editar Proyecto</a>
+            <a href="{% url 'eliminar_proyecto_url' proyecto.id %}" class="btn btn-danger">🗑️ Eliminar Proyecto</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

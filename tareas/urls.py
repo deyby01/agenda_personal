@@ -11,6 +11,8 @@ urlpatterns = [
     # lo cual es útil para referenciarla desde otras partes de Django (como plantillas).
     path('', views.lista_tareas, name='lista_de_tareas_url'),
     path('nueva/', views.crear_tarea, name='crear_tarea_url'),
+    # NUEVA URL para el detalle de una tarea
+    path('tarea/<int:tarea_id>/', views.detalle_tarea, name='detalle_tarea_url'),
     # Ej: /agenda/editar/1/ llamará a views.editar_tarea(request, tarea_id=1)
     path('editar/<int:tarea_id>/', views.editar_tarea, name='editar_tarea_url'),
     path('eliminar/<int:tarea_id>/', views.eliminar_tarea, name='eliminar_tarea_url'),
@@ -18,6 +20,8 @@ urlpatterns = [
     path('registro/', VistaRegistro.as_view(), name='registro_url'),
     
     path('proyectos/', views.lista_proyectos, name='lista_de_proyectos_url'),
+    # NUEVA URL para el detalle de un proyecto
+    path('proyectos/<int:proyecto_id>/', views.detalle_proyecto, name='detalle_proyecto_url'),
     
     # NUEVA URL para crear proyectos
     path('proyectos/nuevo/', views.crear_proyecto, name='crear_proyecto_url'),

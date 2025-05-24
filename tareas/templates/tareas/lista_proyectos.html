@@ -15,7 +15,11 @@
         <div class="col">
             <div class="card h-100 shadow-sm {% if proyecto_individual.estado == 'completado' %}border-success{% elif proyecto_individual.estado == 'cancelado' %}border-danger{% else %}border-primary{% endif %}">
                 <div class="card-header {% if proyecto_individual.estado == 'completado' %}bg-success text-white{% elif proyecto_individual.estado == 'cancelado' %}bg-danger text-white{% else %}bg-primary text-white{% endif %}">
-                    <h5 class="card-title mb-0">{{ proyecto_individual.nombre }}</h5>
+                    <h5 class="card-title mb-0">
+                        <a href="{% url 'detalle_proyecto_url' proyecto_individual.id %}" class="text-white text-decoration-none">
+                            {{ proyecto_individual.nombre }}
+                        </a>
+                    </h5>
                 </div>
                 <div class="card-body">
                     {% if proyecto_individual.descripcion %}

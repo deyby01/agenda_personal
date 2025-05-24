@@ -13,7 +13,11 @@
         {% for tarea_individual in lista_de_tareas_template %}
             <div class="list-group-item list-group-item-action flex-column align-items-start {% if tarea_individual.completada %}list-group-item-success{% else %}list-group-item-light{% endif %} mb-2 shadow-sm rounded">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ tarea_individual.titulo }}</h5>
+                    <h5 class="mb-1">
+                        <a href="{% url 'detalle_tarea_url' tarea_individual.id %}" class="text-decoration-none">
+                            {{ tarea_individual.titulo }}
+                        </a>
+                    </h5>
                     <small class="text-muted">
                         {% if tarea_individual.fecha_asignada %}
                             {{ tarea_individual.fecha_asignada|date:"D, d M Y" }}

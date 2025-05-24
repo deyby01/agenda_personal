@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle: {{ tarea.titulo }} - Mi Agenda{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header {% if tarea.completada %}bg-success-subtle{% else %}bg-warning-subtle{% endif %}">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="card-title mb-0">{{ tarea.titulo }}</h2>
+                <span class="badge {% if tarea.completada %}bg-success{% else %}bg-warning text-dark{% endif %} fs-6">
+                    {% if tarea.completada %}Completada ✔{% else %}Pendiente ⏳{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if tarea.descripcion %}
+                <h5 class="card-subtitle mb-2 text-muted">Descripción:</h5>
+                <p class="card-text" style="white-space: pre-wrap;">{{ tarea.descripcion }}</p>
+            {% else %}
+                <p class="card-text text-muted"><em>Sin descripción.</em></p>
+            {% endif %}
+
+            <hr>
+            <h5 class="card-subtitle my-3 text-muted">Detalles:</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Creada:</strong> {{ tarea.fecha_creacion|date:"d M Y, H:i" }}</p>
+                    {% if tarea.fecha_asignada %}
+                        <p><strong>Fecha Asignada:</strong> {{ tarea.fecha_asignada|date:"l, d M Y" }}</p>
+                    {% else %}
+                        <p><strong>Fecha Asignada:</strong> <em class="text-muted">No especificada</em></p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    {% if tarea.tiempo_estimado %}
+                        <p><strong>Tiempo Estimado:</strong> {{ tarea.tiempo_estimado }}</p>
+                    {% else %}
+                        <p><strong>Tiempo Estimado:</strong> <em class="text-muted">No especificado</em></p>
+                    {% endif %}
+                    <p><strong>Propietario:</strong> {{ tarea.usuario.username }}</p> {# O tarea.usuario.get_full_name si tienes first_name y last_name #}
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light text-end">
+            <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-secondary me-2">Volver a la Lista</a>
+            <a href="{% url 'editar_tarea_url' tarea.id %}" class="btn btn-warning me-2">✏️ Editar Tarea</a>
+            <a href="{% url 'eliminar_tarea_url' tarea.id %}" class="btn btn-danger">🗑️ Eliminar Tarea</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

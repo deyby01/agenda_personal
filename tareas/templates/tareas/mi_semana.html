@@ -56,7 +56,9 @@
                                         {# --- FIN FORMULARIO CHECKBOX --- #}
                                     </div>
                                     <div class="flex-grow-1">
-                                        <span class="fw-bold small d-block">{{ tarea.titulo }}</span>
+                                        <a href="{% url 'detalle_tarea_url' tarea.id %}" class="fw-bold small d-block text-decoration-none text-dark">
+                                            {{ tarea.titulo }}
+                                        </a>
                                         {% if tarea.tiempo_estimado %}
                                             <small class="text-muted d-block">({{ tarea.tiempo_estimado }})</small>
                                         {% endif %}
@@ -104,7 +106,11 @@
         {% for proyecto in proyectos_activos %}
         <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm rounded">
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">{{ proyecto.nombre }}</h5>
+                <h5 class="mb-1">
+                    <a href="{% url 'detalle_proyecto_url' proyecto.id %}" class="text-decoration-none text-dark">
+                        {{ proyecto.nombre }}
+                    </a>
+                </h5>
                 <small class="text-muted">
                     {% if proyecto.fecha_fin_estimada %}
                         Fin est: {{ proyecto.fecha_fin_estimada|date:"d M Y" }}
