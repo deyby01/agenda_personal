@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 LOGIN_URL = 'login'  # El nombre de la URL de inicio de sesión (Django usa 'login' por defecto con django.contrib.auth.urls)
-LOGIN_REDIRECT_URL = 'lista_de_tareas_url' # A dónde ir después de un inicio de sesión exitoso
+LOGIN_REDIRECT_URL = 'mi_semana_actual_url' # A dónde ir después de un inicio de sesión exitoso
 LOGOUT_REDIRECT_URL = 'login' # A dónde ir después de cerrar sesión (podría ser 'logged_out' o la página principal)
 
 

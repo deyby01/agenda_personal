@@ -9,7 +9,10 @@ urlpatterns = [
     # se llamará a la función 'lista_tareas' que está en views.py.
     # El argumento 'name="lista_tareas"' le da un nombre a esta URL,
     # lo cual es útil para referenciarla desde otras partes de Django (como plantillas).
-    path('', views.lista_tareas, name='lista_de_tareas_url'),
+    
+    # Para la semana actual (sin parámetros de fecha en la URL)
+    path('', views.mi_semana_view, name='mi_semana_actual_url'),
+    path('lista-tareas/', views.lista_tareas, name='lista_de_tareas_url'),
     path('nueva/', views.crear_tarea, name='crear_tarea_url'),
     # NUEVA URL para el detalle de una tarea
     path('tarea/<int:tarea_id>/', views.detalle_tarea, name='detalle_tarea_url'),
@@ -33,8 +36,7 @@ urlpatterns = [
     path('proyectos/eliminar/<int:proyecto_id>/', views.eliminar_proyecto, name='eliminar_proyecto_url'),
     
     # URLs para la Vista Semanal
-    # Para la semana actual (sin parámetros de fecha en la URL)
-    path('mi-semana/', views.mi_semana_view, name='mi_semana_actual_url'),
+    
     # Para una semana específica basada en una fecha (año, mes, día)
     path('mi-semana/<int:anio>/<int:mes>/<int:dia>/', views.mi_semana_view, name='mi_semana_especifica_url'),
     

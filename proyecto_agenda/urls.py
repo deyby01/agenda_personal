@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,4 +33,5 @@ urlpatterns = [
     # accounts/reset/<uidb64>/<token>/
     # accounts/reset/done/
     path('accounts/', include('django.contrib.auth.urls')),
+    path('', RedirectView.as_view(pattern_name='mi_semana_actual_url', permanent=False)), # Redirige la raíz del sitio
 ]

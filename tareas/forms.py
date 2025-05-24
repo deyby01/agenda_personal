@@ -2,6 +2,8 @@ from django import forms # Importamos el módulo de formularios de Django
 from .models import Tarea, Proyecto # Importamos nuestro modelo Tarea y Proyecto
 from django.contrib.auth.forms import UserCreationForm # Importamos el UserCreationForm base
 from django.contrib.auth.models import User # Importamos el modelo User
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Field, HTML, Row, Column, Div
 
 # Creamos una clase TareaForm que hereda de forms.ModelForm
 # ModelForm es una clase especial que crea un formulario a partir de un modelo de Django.
@@ -62,6 +64,44 @@ class CustomUserCreationForm(UserCreationForm):
         # Incluimos los campos originales de UserCreationForm (username, password1, password2)
         # y añadimos los nuestros. El orden aquí definirá el orden en el formulario.
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email') # Si añadiste last_name, ponlo aquí también
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        # No necesitamos un botón de submit aquí si ya lo tenemos en la plantilla HTML
+        # self.helper.add_input(Submit('submit', 'Registrarse', css_class='btn-primary'))
+        
+        # Definimos el layout del formulario
+        self.helper.layout = Layout(
+            # UserCreationForm tiene 'username', luego muestro 'first_name', 'last_name' y 'email'
+            ## y luego 'password1', 'password2' (que se llaman new_password1 y new_password2 internamente)
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            # Para los campos de contraseña, usaremos un Div para envolver el input-group
+            # Accedemos a los campos de contraseña que UserCreationForm define: new_password1 y new_password2
+            Div(
+                Field('new_password1', wrapper_class='mb-0'), # mb-0 para el Field para que el input-group maneje el margen
+                HTML("""
+                    <button class="btn btn-outline-secondary toggle-password" type="button" 
+                            data-target="{{ form.new_password1.id_for_label }}">👁️ Ver</button>
+                """),
+                css_class='input-group mb-3' # mb-3 para el input-group
+            ),
+            Div(
+                Field('new_password2', wrapper_class='mb-0'),
+                HTML("""
+                    <button class="btn btn-outline-secondary toggle-password" type="button" 
+                            data-target="{{ form.new_password2.id_for_label }}">👁️ Ver</button>
+                """),
+                css_class='input-group mb-3'
+            ),
+            # Si tuvieras otros campos, los añadirías aquí
+        )
+        # Si no quieres que Crispy renderice el <form> y {% csrf_token %} (porque ya lo tienes en la plantilla)
+        # self.helper.form_tag = False # Descomenta si es necesario
 
     def save(self, commit=True):
         # Sobrescribimos el método save para guardar también los campos adicionales.

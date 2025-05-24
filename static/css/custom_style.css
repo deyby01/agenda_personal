@@ -1,5 +1,6 @@
 body {
     padding-top: 56px; /* Ajuste para la barra de navegación fija */
+    background-color: #a3e4d7;
 }
 .task-actions a {
     margin-left: 5px;
