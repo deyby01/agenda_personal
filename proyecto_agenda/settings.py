@@ -12,21 +12,42 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Cargar variables de entorno desde .env (si existe)
+load_dotenv(os.path.join(BASE_DIR, '.env')) # Añadir esta línea
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f77m&9nt0-0-f_-&m(!qf#q4ho++u9$chb^nm6gjco(1c6b_js'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
+
+# Si DEBUG es False, debes llenar ALLOWED_HOSTS.
+# Podríamos hacer esto condicional o leerlo desde una variable de entorno.
+# Ejemplo de cómo podría ser:
+if not DEBUG:
+    # En producción, leer ALLOWED_HOSTS de una variable de entorno
+    # que podría ser una lista separada por comas.
+    allowed_hosts_env = os.environ.get('ALLOWED_HOSTS')
+    if allowed_hosts_env:
+        ALLOWED_HOSTS = allowed_hosts_env.split(',')
+    else:
+        # Si no se define la variable de entorno, es un error de configuración en producción
+        # Aquí podrías lanzar un error o dejarlo vacío y que Django falle (lo cual es seguro).
+        # Por ahora, lo dejamos así; PythonAnywhere nos ayudará a configurarlo.
+        ALLOWED_HOSTS = [] # Django se quejará si está vacío y DEBUG=False
+else:
+    # Para desarrollo con DEBUG=True, podemos dejarlo vacío o añadir hosts de desarrollo
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 LOGIN_URL = 'login'  # El nombre de la URL de inicio de sesión (Django usa 'login' por defecto con django.contrib.auth.urls)
 LOGIN_REDIRECT_URL = 'mi_semana_actual_url' # A dónde ir después de un inicio de sesión exitoso
@@ -126,13 +147,21 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+STATIC_ROOT = BASE_DIR / "staticfiles_production"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
+    EMAIL_HOST = os.environ.get('EMAIL_HOST')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # Configuraciones de Django Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
