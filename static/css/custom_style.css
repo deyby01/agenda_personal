@@ -9,3 +9,69 @@ body {
 .action-buttons-semana a small { 
     font-size: 0.7rem; 
 }
+
+/* --- INICIO DE ESTILOS RESPONSIVOS PARA VISTA SEMANAL --- */
+/* Aplicaremos estos estilos a pantallas más pequeñas que 768px (breakpoint 'md' de Bootstrap) */
+/* Esto cubrirá cuando tengas 2 columnas (xs, sm) o incluso si tuvieras 1 columna en xs. */
+@media (max-width: 767.98px) {
+    /* --- Cabecera de la tarjeta del día --- */
+    .card-header h5.small { /* Contenedor del texto del día: "Lunes", "19", "May" */
+        font-size: 0.8rem; /* Reduce el tamaño general si es necesario */
+        line-height: 1.2; /* Ajusta el interlineado */
+    }
+    .card-header h5.small .fs-5.fw-bold { /* Número del día, ej: "19" */
+        font-size: 1.1rem !important; /* Reduce el tamaño del número del día */
+    }
+    .card-header h5.small .small { /* Nombre del mes, ej: "May" */
+        font-size: 0.7rem; /* Reduce el tamaño del mes */
+    }
+
+    /* --- Cuerpo de la tarjeta del día --- */
+    .card-body.p-2 { /* Si tus card-body tienen padding p-2 */
+        padding: 0.5rem !important; /* Ajusta el padding interno del cuerpo de la tarjeta */
+    }
+
+    /* --- Tareas dentro de la tarjeta del día --- */
+    .card-body ul.list-unstyled li .fw-bold.small { /* Título de la tarea */
+        font-size: 0.85rem; /* Reduce el tamaño del título de la tarea */
+        white-space: normal;   /* Permite que el título se divida en múltiples líneas */
+        word-break: break-word;/* Rompe palabras largas para evitar desbordamiento horizontal */
+        line-height: 1.3;      /* Ajusta interlineado del título de tarea */
+    }
+    .card-body ul.list-unstyled li .text-muted.d-block { /* Tiempo estimado de la tarea */
+        font-size: 0.75rem;
+        line-height: 1;
+        margin-top: 0.1rem !important; /* Reduce espacio sobre el tiempo estimado */
+        margin-bottom: 0.2rem !important; /* Reduce espacio debajo del tiempo estimado */
+    }
+    .card-body ul.list-unstyled li .action-buttons-semana {
+        margin-top: 0.2rem !important; /* Reduce espacio sobre los botones E/X */
+    }
+     .card-body ul.list-unstyled li .me-2.pt-1 { /* Contenedor del checkbox */
+        padding-top: 0.1rem !important; /* Ajusta alineación vertical del checkbox con el título */
+    }
+
+
+    /* --- Footer de la tarjeta del día --- */
+    .card-footer.p-1 .btn-sm small { /* Botón "+ Añadir" */
+        font-size: 0.75rem;
+    }
+    .card-footer.p-1 .btn-sm { /* Botón "+ Añadir" en sí */
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+    }
+
+    /* --- Sección de Proyectos Activos (si también necesita ajuste) --- */
+    .list-group-item h5.mb-1 { /* Título del proyecto */
+        font-size: 0.9rem;
+    }
+    .list-group-item .small.text-muted, 
+    .list-group-item .mt-1 .ms-2.text-muted { /* Descripción/Estado/Tiempo Estimado del proyecto */
+        font-size: 0.75rem;
+    }
+    .list-group-item .mt-2.text-end .btn-sm { /* Botón Editar Proyecto */
+         padding: .15rem .4rem;
+         font-size: .75rem;
+    }
+}
+/* --- FIN DE ESTILOS RESPONSIVOS PARA VISTA SEMANAL --- */

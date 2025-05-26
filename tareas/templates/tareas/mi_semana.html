@@ -4,25 +4,27 @@
 {% block title %}Mi Semana ({{ rango_fechas_str }}){% endblock title %}
 
 {% block content %}
-<div class="d-flex justify-content-center align-items-center my-4 position-relative">
-    {# Botón Semana Anterior (condicional) #}
-    {% if semana_anterior_url %}
-        <a href="{{ semana_anterior_url }}" class="btn btn-outline-secondary position-absolute start-0" style="top: 50%; transform: translateY(-50%);">&laquo; Sem Anterior</a>
-    {% else %}
-        {# Espacio reservado para mantener el título centrado si el botón no está #}
-        <span class="btn btn-outline-secondary invisible position-absolute start-0" style="top: 50%; transform: translateY(-50%);">&laquo; Sem Anterior</span>
-    {% endif %}
-
-    <div class="text-center">
-        <h1 class="mb-0">Mi Semana</h1>
-        <h4 class="text-muted fw-normal">{{ rango_fechas_str }} {% if es_semana_actual %}(Semana Actual){% endif %}</h4>
+<div class="text-center my-4">
+    <h1 class="mb-1">Mi Semana</h1>
+    <h4 class="text-muted fw-normal mb-3">{{ rango_fechas_str }} {% if es_semana_actual %}<span class="badge bg-primary align-middle">Semana Actual</span>{% endif %}</h4>
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+        {# Botón Semana Anterior (condicional) #}
+        <div class="mb-2 mb-sm-0"> {# Margen inferior en móvil, ninguno en sm y superior #}
+            {% if semana_anterior_url %}
+                <a href="{{ semana_anterior_url }}" class="btn btn-outline-secondary">&laquo; Semana Anterior</a>
+            {% else %}
+                {# Espacio invisible para mantener el equilibrio si el botón no está, o simplemente no mostrar nada #}
+                <a href="#" class="btn btn-outline-secondary invisible disabled" aria-disabled="true">&laquo; Semana Anterior</a>
+            {% endif %}
+        </div>
+        {# Botón Semana Siguiente #}
+        <div>
+            <a href="{{ semana_siguiente_url }}" class="btn btn-outline-secondary">Semana Siguiente &raquo;</a>
+        </div>
     </div>
-
-    {# Botón Semana Siguiente #}
-    <a href="{{ semana_siguiente_url }}" class="btn btn-outline-secondary position-absolute end-0" style="top: 50%; transform: translateY(-50%);">Sem Siguiente &raquo;</a>
 </div>
 
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-7 g-3">
+<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-7 g-3">
     {# Para 7 columnas en pantallas XL, 4 en LG, 3 en MD, 2 en SM, 1 por defecto #}
     {% for dia_info in dias_con_tareas %}
         <div class="col">
