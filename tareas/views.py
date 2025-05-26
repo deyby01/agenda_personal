@@ -131,7 +131,8 @@ def eliminar_tarea(request, tarea_id): # 'tarea_id' vendrá de la URL
 
     # Si la solicitud no es POST (es GET), mostramos la página de confirmación.
     contexto = {
-        'tarea': tarea_obj,
+        'objeto': tarea_obj,
+        'tipo_objeto': 'Tarea',
         'url_lista_retorno': 'lista_de_tareas_url', # Para el botón "Cancelar"
     }
     return render(request, 'tareas/confirmar_eliminacion_generica.html', contexto)

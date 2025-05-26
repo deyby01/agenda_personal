@@ -12,7 +12,7 @@
             <div class="card-body">
                 {# Usamos 'objeto.titulo' o 'objeto.nombre' dependiendo del tipo_objeto #}
                 {# O podemos simplemente mostrar el objeto, que usará su método __str__ #}
-                <p class="card-text fs-5 mt-3">¿Estás seguro de que quieres eliminar {{ tipo_objeto.lower }}:<br>"<strong>{{ objeto }}</strong>"?</p>
+                <p class="card-text fs-5 mt-3">¿Estás seguro de que quieres eliminar {{ tipo_objeto|lower }}:<br>"<strong>{{ objeto }}</strong>"?</p>
                 <p class="text-muted"><small>Esta acción no se puede deshacer.</small></p>
 
                 <form method="POST" class="mt-4"> {# La action irá a la URL actual por defecto #}
