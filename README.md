@@ -8,7 +8,7 @@ Una aplicación web completa desarrollada con Django para la gestión de tareas 
 
 Este proyecto fue desarrollado como parte de mi portafolio para demostrar mis habilidades en el desarrollo backend con Django y la construcción de aplicaciones web full-stack. La aplicación permite a los usuarios registrarse, iniciar sesión y gestionar su propia agenda personal, organizando tareas diarias/semanales y proyectos a largo plazo.
 
-El objetivo era construir una aplicación funcional, segura y desplegada en un entorno de producción, cubriendo todo el ciclo de vida del desarrollo web, esto me permitio aprender nuevas cosas a travez del camino y aunque no lo hice 100% solo ya que fue estruturado mediante un aprendizaje independiente, aun sigo aprendiendo como funciona en su totalidad.
+El objetivo era construir una aplicación funcional, segura y desplegada en un entorno de producción, cubriendo todo el ciclo de vida del desarrollo web, esto me permitio aprender nuevas cosas a travez del camino y aunque no lo hice 100% solo ya que fue estruturado mediante un aprendizaje independiente, aun sigo aprendiendo como funciona en su totalidad, cabe recalcar que el frontend lo desarrolle siguiendo las instrucciones de la ruta de este proyecto.
 
 ## Características Principales
 
