@@ -1,15 +1,13 @@
-from multiprocessing import context
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse_lazy # Para redirigir después de un registro exitoso
-from django.views import generic, View # Para vistas basadas en clases genéricas
+from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse_lazy 
+from django.views import generic, View 
 from .models import Tarea, Proyecto
-from .forms import TareaForm, CustomUserCreationForm, ProyectoForm # Importamos nuestro formulario de tareas
+from .forms import TareaForm, CustomUserCreationForm, ProyectoForm
 import datetime
 from django.utils import timezone
 from django.urls import reverse
-from django.db.models import Q # Para consultas OR complejas
-from django.contrib import messages # ¡Importamos el framework de mensajes!
+from django.db.models import Q 
+from django.contrib import messages 
 from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView, TemplateView
 

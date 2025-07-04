@@ -1,6 +1,6 @@
-from django.urls import path  # path nos permite definir patrones de URL
-from . import views          # Importamos el módulo views.py de nuestra app tareas
-from .views import VistaRegistro  # Importamos la vista de registro de usuarios
+from django.urls import path 
+from . import views          
+from .views import VistaRegistro  
 
 
 urlpatterns = [

@@ -58,7 +58,7 @@
                 </div>
             </div>
             {# Aquí podríamos listar tareas asociadas si las tuviéramos #}
-            {# {% if tareas_del_proyecto %}
+            {% if tareas_del_proyecto %}
                 <hr>
                 <h5 class="card-subtitle my-3 text-muted">Tareas Asociadas:</h5>
                 <ul>
@@ -66,7 +66,7 @@
                         <li><a href="{% url 'detalle_tarea_url' tarea.id %}">{{ tarea.titulo }}</a> - {% if tarea.completada %}Completada{% else %}Pendiente{% endif %}</li>
                     {% endfor %}
                 </ul>
-            {% endif %} #}
+            {% endif %}
         </div>
         <div class="card-footer bg-light text-end">
             <a href="{% url 'lista_de_proyectos_url' %}" class="btn btn-outline-secondary me-2">Volver a Proyectos</a>
