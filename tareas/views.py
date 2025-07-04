@@ -299,28 +299,43 @@ class UpdateViewProject(LoginRequiredMixin, UpdateView):
         return context
 
 
+class DeleteViewProject(LoginRequiredMixin, DeleteView):
+    """
+    Handles the deletion of a specific Proyecto (Project).
 
+    This view first shows a confirmation page before deleting the
+    object. It is secured to ensure users can only delete projects
+    they own and provides extra context to the template for the
+    'Cancel' button URL.
+    """
+    model = Proyecto
+    template_name = 'tareas/confirmar_eliminacion_generica.html'
+    success_url = reverse_lazy('lista_de_proyectos_url')
+    context_object_name = 'objeto'  
+    
+    def get_queryset(self):
+        """
+        Ensures users can only access projects they own.
+        """
+        return super().get_queryset().filter(usuario=self.request.user)
+    
+    def delete(self, request, *args, **kwargs):
+        """
+        Adds a success message before deleting the object.
+        """
+        object_title = self.get_object().nombre
+        messages.success(request, f'¡Proyecto "{object_title}" eliminado exitosamente!')
+        return super().delete(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        """
+        Adds extra context for the generic confirmation template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['url_lista_retorno'] = 'lista_de_proyectos_url' 
+        context['tipo_objeto'] = 'Proyecto' 
+        return context
 
-@login_required
-def eliminar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
-    # Obtenemos la instancia del Proyecto que queremos eliminar.
-    # Solo el usuario propietario puede eliminarlo.
-    proyecto_obj = get_object_or_404(Proyecto, id=proyecto_id, usuario=request.user)
-
-    if request.method == 'POST':
-        nombre_eliminado = proyecto_obj.nombre # Guardamos el nombre del proyecto para el mensaje
-        proyecto_obj.delete() # Eliminamos el objeto Proyecto de la base de datos.
-        messages.success(request, f"¡Proyecto '{nombre_eliminado}' eliminado exitosamente!")
-        return redirect('lista_de_proyectos_url') # Redirigimos a la lista de proyectos.
-
-    # Si la solicitud no es POST (es GET), mostramos la página de confirmación.
-    contexto = {
-        'objeto': proyecto_obj, # Usaremos 'objeto' para que la plantilla sea más genérica
-        'tipo_objeto': 'Proyecto',
-        'url_lista_retorno': 'lista_de_proyectos_url' # Para el botón "Cancelar"
-    }
-    # Reutilizaremos la plantilla de confirmación de eliminación
-    return render(request, 'tareas/confirmar_eliminacion_generica.html', contexto)
 
 
 @login_required
