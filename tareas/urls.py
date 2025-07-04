@@ -15,7 +15,7 @@ urlpatterns = [
     path('registro/', VistaRegistro.as_view(), name='registro_url'),
     
     
-    path('proyectos/', views.lista_proyectos, name='lista_de_proyectos_url'),
+    path('proyectos/', views.ListViewProjects.as_view(), name='lista_de_proyectos_url'),
     path('proyectos/<int:proyecto_id>/', views.detalle_proyecto, name='detalle_proyecto_url'),
     path('proyectos/nuevo/', views.crear_proyecto, name='crear_proyecto_url'),
     path('proyectos/editar/<int:proyecto_id>/', views.editar_proyecto, name='editar_proyecto_url'),

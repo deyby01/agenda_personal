@@ -199,17 +199,27 @@ class VistaRegistro(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'registration/registro.html' 
     
-    
-@login_required # Protegemos la lista de proyectos
-def lista_proyectos(request):
-    # Filtramos los proyectos para mostrar solo los del usuario actual
-    # Ordenamos por fecha_fin_estimada y luego por nombre
-    proyectos = Proyecto.objects.filter(usuario=request.user).order_by('fecha_fin_estimada', 'nombre')
 
-    contexto = {
-        'lista_de_proyectos_template': proyectos
-    }
-    return render(request, 'tareas/lista_proyectos.html', contexto) # Usaremos una nueva plantilla
+class ListViewProjects(LoginRequiredMixin, ListView):
+    """
+    Displays a list of projects owned by the current user.
+
+    The view is restricted to authenticated users and filters the
+    projects to show only those belonging to the person making the
+    request. The projects are ordered by their estimated end date
+    and then by name.
+    """
+    model = Proyecto
+    template_name = 'tareas/lista_proyectos.html'
+    context_object_name = 'lista_de_proyectos_template'
+    
+    def get_queryset(self):
+        """
+        Returns a queryset of projects filtered by the current user.
+        """
+        return Proyecto.objects.filter(usuario=self.request.user).order_by('fecha_fin_estimada', 'nombre')
+    
+
 
 
 @login_required
