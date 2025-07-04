@@ -23,56 +23,68 @@ class ListViewTasks(LoginRequiredMixin, ListView):
         return Tarea.objects.filter(usuario=self.request.user).order_by('fecha_asignada', 'titulo')
 
 
-@login_required  # Aseguramos que solo los usuarios autenticados puedan acceder a esta vista.
-def crear_tarea(request):
-    # --- INICIO DE LA MODIFICACIÓN ---
-    initial_data = {} # Un diccionario para los datos iniciales del formulario
-    fecha_asignada_param = request.GET.get('fecha_asignada') # Intenta obtener el parámetro de la URL
-
-    if fecha_asignada_param:
-        try:
-            # Intenta convertir el string de fecha a un objeto date
-            initial_data['fecha_asignada'] = datetime.datetime.strptime(fecha_asignada_param, '%Y-%m-%d').date()
-        except ValueError:
-            # Si el formato de fecha es incorrecto, simplemente ignora el parámetro
-            pass
-    # --- FIN DE LA MODIFICACIÓN ---
+class CreateViewTask(LoginRequiredMixin, CreateView):
+    """ 
+    Handle the creation of a new Tarea (task).
     
-    # Verificamos si el método de la solicitud es POST.
-    # Esto sucede cuando el usuario envía (submits) el formulario.
-    if request.method == 'POST':
-        # Creamos una instancia del formulario y la llenamos con los datos de la solicitud (request.POST).
-        # request.POST contiene todos los datos enviados por el formulario.
-        form = TareaForm(request.POST)
-
-        # Verificamos si el formulario es válido según las reglas definidas
-        # (ej. campos obligatorios, tipos de datos correctos).
-        if form.is_valid():
-            # Antes de guardar, asignamos el usuario actual a la tarea
-            tarea = form.save(commit=False) # No guardamos en BD todavía
-            tarea.usuario = request.user    # Asignamos el usuario
-            tarea.save()                    # Ahora sí guardamos
-            messages.success(request, f'¡Tarea "{tarea.titulo}" creada exitosamente!') # Mensaje de éxito
-
-            # Después de guardar, redirigimos al usuario a la página de la lista de tareas.
-            # 'lista_de_tareas_url' es el nombre que le dimos a la URL de la lista de tareas en urls.py.
-            # redirect() busca una URL con ese nombre y envía al navegador del usuario allí.
-            return redirect('lista_de_tareas_url')
-    else:
-        # Si el método no es POST (es decir, es GET, lo que significa que el usuario
-        # acaba de navegar a la URL para crear una tarea),
-        # creamos una instancia vacía del formulario.
-        form = TareaForm(initial=initial_data) # ESTA LÍNEA ES CRUCIAL
-
-    # Preparamos el contexto para la plantilla.
-    # Pasamos el formulario (ya sea vacío o con errores si no fue válido) a la plantilla.
-    contexto = {
-        'formulario': form,
-        'accion': 'Crear',
-        'tipo_objeto': 'Tarea' # Para usar en la plantilla del formulario
-    }
-    # Renderizamos la plantilla 'tareas/crear_tarea.html' con el contexto.
-    return render(request, 'tareas/formulario_generico.html', contexto)
+    This view ensures that only logged-in users can create tasks.
+    It uses a custom form , TareaForm, and processes several pieces
+    of custom logic, such as setting the task owner automatically,
+    handling initial data from URL parameters, and adding extra
+    context to the template.
+    """
+    model = Tarea
+    template_name = 'tareas/formulario_generico.html'
+    form_class = TareaForm
+    success_url = reverse_lazy('lista_de_tareas_url') 
+    
+    def form_valid(self, form):
+        """ 
+        Assigns the current user as the task owner before saving.
+        
+        This method is called when the submitted form is valid. It
+        intercepts the saving process to set the 'usuario' field
+        to self.request.user and adds a success message before
+        allowing the process to continue.
+        """
+        tarea = form.save(commit=False)
+        tarea.usuario = self.request.user 
+        tarea.save()
+        messages.success(self.request, f'¡Tarea "{tarea.titulo}" creada exitosamente!') 
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """
+        Adds extra context variables to the template.
+        
+        This is used to pass strings for the template's title and
+        button text, making the form template more reusable.
+        """
+        context = super().get_context_data(**kwargs)
+        context['accion'] = 'Crear'
+        context['tipo_objeto'] = 'Tarea' 
+        # add this line for the context worker the same as in the other views
+        context['formulario'] = context['form']
+        return context
+    
+    def get_initial(self):
+        """ 
+        Sets initial data for the form from URL parameters.
+        
+        Specifically, it checks for a 'fecha_asignada', parameter in
+        the url (ej: ?fecha_asignada=2025-07-04) to pre-fill the 
+        date field of the form.
+        """
+        initial_data = {}
+        fecha_asignada_param = self.request.GET.get('fecha_asignada') 
+        if fecha_asignada_param:
+            try:
+                initial_data['fecha_asignada'] = datetime.datetime.strptime(fecha_asignada_param, '%Y-%m-%d').date()
+            except ValueError:
+                # Ignores invalid date formats silently
+                pass
+        return initial_data
+    
 
 
 @login_required  # Aseguramos que solo los usuarios autenticados puedan acceder a esta vista.

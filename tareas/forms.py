@@ -5,27 +5,11 @@ from django.contrib.auth.models import User # Importamos el modelo User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, HTML, Row, Column, Div
 
-# Creamos una clase TareaForm que hereda de forms.ModelForm
-# ModelForm es una clase especial que crea un formulario a partir de un modelo de Django.
 class TareaForm(forms.ModelForm):
-    # La clase 'Meta' dentro de un ModelForm le dice a Django
-    # sobre qué modelo debe basarse el formulario y qué campos incluir.
     class Meta:
-        # Especificamos el modelo del cual se creará el formulario.
         model = Tarea
-
-        # 'fields' es una lista de los nombres de los campos del modelo Tarea
-        # que queremos incluir en nuestro formulario.
-        # No incluimos 'fecha_creacion' porque se establece automáticamente (auto_now_add=True).
-        # 'completada' podría tener un valor por defecto (False), pero es bueno permitir marcarla al crear.
         fields = ['titulo', 'descripcion', 'tiempo_estimado', 'fecha_asignada', 'completada']
 
-        # 'widgets' nos permite personalizar cómo se muestra cada campo en el HTML.
-        # Por ejemplo, para 'fecha_asignada', queremos usar el input de tipo 'date' de HTML5
-        # para que aparezca un selector de fecha en el navegador.
-        # Para 'tiempo_estimado', podemos dejar que Django use su widget por defecto por ahora,
-        # o podríamos intentar personalizarlo si el que viene por defecto no es muy usable.
-        # Para 'descripcion', podemos usar un Textarea.
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}), # Añadido
             'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Añade una descripción detallada...', 'class': 'form-control'}), # Añadido class
@@ -33,8 +17,6 @@ class TareaForm(forms.ModelForm):
             'tiempo_estimado': forms.TextInput(attrs={'placeholder': 'Ej: 1h30m o 0:45:00', 'class': 'form-control'}), # Añadido class
             'completada': forms.CheckboxInput(attrs={'class': 'form-check-input'}), # Para checkboxes
         }
-
-        # 'labels' nos permite personalizar las etiquetas que se muestran junto a cada campo.
         labels = {
             'titulo': 'Título de la Tarea',
             'descripcion': 'Descripción Detallada',
@@ -42,10 +24,8 @@ class TareaForm(forms.ModelForm):
             'fecha_asignada': 'Fecha Asignada',
             'completada': '¿Está Completada?',
         }
-
-        # 'help_texts' nos permite añadir textos de ayuda adicionales para cada campo.
         help_texts = {
-            'tiempo_estimado': 'Usa un formato como "1h 30m", "2 horas", "45 minutos". Django intentará interpretarlo.',
+            'tiempo_estimado': 'Usa un formato como "1h 30m", "00:30:00". Django intentará interpretarlo.',
         }
 
 

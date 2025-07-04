@@ -2,32 +2,25 @@ from django.urls import path  # path nos permite definir patrones de URL
 from . import views          # Importamos el módulo views.py de nuestra app tareas
 from .views import VistaRegistro  # Importamos la vista de registro de usuarios
 
-# urlpatterns es una lista de patrones de URL que Django buscará.
-# Es un nombre especial que Django espera encontrar.
+
 urlpatterns = [
     path('', views.mi_semana_view, name='mi_semana_actual_url'),
     path('lista-tareas/', views.ListViewTasks.as_view(), name='lista_de_tareas_url'),
-    path('nueva/', views.crear_tarea, name='crear_tarea_url'),
-    # NUEVA URL para el detalle de una tarea
+    path('nueva/', views.CreateViewTask.as_view(), name='crear_tarea_url'),
     path('tarea/<int:tarea_id>/', views.detalle_tarea, name='detalle_tarea_url'),
-    # Ej: /agenda/editar/1/ llamará a views.editar_tarea(request, tarea_id=1)
     path('editar/<int:tarea_id>/', views.editar_tarea, name='editar_tarea_url'),
     path('eliminar/<int:tarea_id>/', views.eliminar_tarea, name='eliminar_tarea_url'),
-    # La ruta será '/agenda/registro/' si el prefijo en el urls.py principal es 'agenda/'
+    
+    
     path('registro/', VistaRegistro.as_view(), name='registro_url'),
     
+    
     path('proyectos/', views.lista_proyectos, name='lista_de_proyectos_url'),
-    # NUEVA URL para el detalle de un proyecto
     path('proyectos/<int:proyecto_id>/', views.detalle_proyecto, name='detalle_proyecto_url'),
-    
-    # NUEVA URL para crear proyectos
     path('proyectos/nuevo/', views.crear_proyecto, name='crear_proyecto_url'),
-    
-    # NUEVA URL para editar proyectos
     path('proyectos/editar/<int:proyecto_id>/', views.editar_proyecto, name='editar_proyecto_url'),
-    
-    # NUEVA URL para eliminar proyectos
     path('proyectos/eliminar/<int:proyecto_id>/', views.eliminar_proyecto, name='eliminar_proyecto_url'),
+    
     
     # URLs para la Vista Semanal
     
