@@ -84,38 +84,48 @@ class CreateViewTask(LoginRequiredMixin, CreateView):
                 # Ignores invalid date formats silently
                 pass
         return initial_data
+
+
+class UpdateViewTask(LoginRequiredMixin, UpdateView):
+    """ 
+    Handles editing an existing Tarea (task).
     
+    This view ensures a user can only edit their own tasks by filtering
+    the queryset. It uses the same generic form template as the create
+    view but provides different context to change titles and button text.
+    """
+    model = Tarea
+    form_class = TareaForm
+    template_name = 'tareas/formulario_generico.html'
+    success_url = reverse_lazy('lista_de_tareas_url')
+    
+    def get_queryset(self):
+        """
+        Ensures users can only edit tasks they own.
+        
+        This method filters the base queryset to include only the tasks
+        where the 'usuario' field matches the currently logged-in user.
+        This is a critical security measure.
+        """
+        return super().get_queryset().filter(usuario=self.request.user)  
+    
+    def form_valid(self, form):
+        """ 
+        Adds a success message after the form is successfully update
+        """
+        messages.success(self.request, f'¡Tarea "{form.instance.titulo}" actualizada exitosamente!')
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """ 
+        Adds extra context to the template to indicate an 'Edit' action.
+        """
+        context = super().get_context_data(**kwargs)
+        context['accion'] = 'Editar'
+        context['tipo_objeto'] = 'Tarea'
+        context['formulario'] = context['form']
+        return context
 
-
-@login_required  # Aseguramos que solo los usuarios autenticados puedan acceder a esta vista.
-def editar_tarea(request, tarea_id): # 'tarea_id' vendrá de la URL
-    # Nos aseguramos de que el usuario solo pueda editar SUS PROPIAS tareas
-    tarea_obj = get_object_or_404(Tarea, id=tarea_id, usuario=request.user)
-
-    if request.method == 'POST':
-        # Creamos una instancia del formulario y la llenamos con los datos de la solicitud (request.POST)
-        # Y MUY IMPORTANTE: le pasamos la 'instance=tarea_obj'.
-        # Esto le dice a Django que estamos editando una instancia existente, no creando una nueva.
-        form = TareaForm(request.POST, instance=tarea_obj)
-        if form.is_valid():
-            form.save() # Guarda los cambios en la tarea existente
-            messages.success(request, f'¡Tarea "{tarea_obj.titulo}" actualizada exitosamente!') # Mensaje de éxito
-            return redirect('lista_de_tareas_url')
-    else:
-        # Si es una solicitud GET, creamos una instancia del formulario
-        # y la poblamos con los datos de la tarea existente ('instance=tarea_obj').
-        # Así, el formulario aparecerá con los datos actuales de la tarea listos para editar.
-        form = TareaForm(instance=tarea_obj)
-
-    contexto = {
-        'formulario': form,
-        'accion': 'Editar', # Variable para el título/botón
-        'tarea': tarea_obj, # Opcional: pasar el objeto tarea por si lo necesitas en la plantilla
-        'tipo_objeto': 'Tarea'
-    }
-    # Reutilizaremos la plantilla del formulario, o crearemos una nueva si es necesario.
-    # Por ahora, asumamos que vamos a generalizar la plantilla 'crear_tarea.html'.
-    return render(request, 'tareas/formulario_generico.html', contexto)
 
 
 @login_required

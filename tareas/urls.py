@@ -8,7 +8,7 @@ urlpatterns = [
     path('lista-tareas/', views.ListViewTasks.as_view(), name='lista_de_tareas_url'),
     path('nueva/', views.CreateViewTask.as_view(), name='crear_tarea_url'),
     path('tarea/<int:tarea_id>/', views.detalle_tarea, name='detalle_tarea_url'),
-    path('editar/<int:tarea_id>/', views.editar_tarea, name='editar_tarea_url'),
+    path('editar/<int:pk>/', views.UpdateViewTask.as_view(), name='editar_tarea_url'),
     path('eliminar/<int:tarea_id>/', views.eliminar_tarea, name='eliminar_tarea_url'),
     
     
