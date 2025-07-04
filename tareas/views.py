@@ -48,10 +48,10 @@ class CreateViewTask(LoginRequiredMixin, CreateView):
         to self.request.user and adds a success message before
         allowing the process to continue.
         """
-        tarea = form.save(commit=False)
-        tarea.usuario = self.request.user 
-        tarea.save()
-        messages.success(self.request, f'¡Tarea "{tarea.titulo}" creada exitosamente!') 
+        task = form.save(commit=False)
+        task.usuario = self.request.user
+        task.save()
+        messages.success(self.request, f'¡Tarea "{task.titulo}" creada exitosamente!')
         return super().form_valid(form)
     
     def get_context_data(self, **kwargs):
@@ -220,31 +220,46 @@ class ListViewProjects(LoginRequiredMixin, ListView):
         return Proyecto.objects.filter(usuario=self.request.user).order_by('fecha_fin_estimada', 'nombre')
     
 
+class CreateViewProject(LoginRequiredMixin, CreateView):
+    """
+    Handles the creation of a new Proyecto (Project).
 
+    This view ensures only authenticated users can create projects.
+    It automatically assigns the new project to the current user
+    and provides extra context to the generic form template.
+    """
+    model = Proyecto
+    template_name = 'tareas/formulario_generico.html'
+    form_class = ProyectoForm
+    success_url = reverse_lazy('lista_de_proyectos_url')
+    
+    def form_valid(self, form):
+        """
+        Assigns the current user as the project owner before saving.
 
-@login_required
-def crear_proyecto(request):
-    if request.method == 'POST':
-        form = ProyectoForm(request.POST)
-        if form.is_valid():
-            proyecto = form.save(commit=False) # No guardar en BD todavía
-            proyecto.usuario = request.user    # Asignar el usuario actual
-            proyecto.save()                     # Ahora guardar en BD
-            messages.success(request, f'¡Proyecto "{proyecto.nombre}" creado exitosamente!') # Mensaje de éxito
-            return redirect('lista_de_proyectos_url') # Redirigir a la lista de proyectos
-    else:
-        form = ProyectoForm()
+        This method is called after form validation. It sets the 'usuario'
+        field to the current user and adds a success message before the
+        final save and redirect.
+        """
+        project = form.save(commit=False)
+        project.usuario = self.request.user
+        project.save()
+        messages.success(self.request, f'¡Proyecto "{project.nombre}" creado exitosamente!')
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """
+        Adds extra context for the generic form template.
 
-    contexto = {
-        'formulario': form,
-        'tipo_objeto': 'Proyecto', # Para usar en la plantilla del formulario
-        'accion': 'Crear'
-    }
-    # Podríamos crear una plantilla específica 'formulario_proyecto.html' o generalizar más.
-    # Por ahora, vamos a crear una copia de formulario_tarea.html y la llamaremos formulario_generico.html
-    return render(request, 'tareas/formulario_generico.html', contexto)
-
-
+        This includes providing the correct variable name ('formulario')
+        that the template expects for the form object.
+        """
+        context = super().get_context_data(**kwargs)
+        context['accion'] = 'Crear'
+        context['tipo_objeto'] = 'Proyecto'
+        context['formulario'] = context['form']
+        return context
+    
 @login_required
 def editar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
     # Obtenemos la instancia del Proyecto que queremos editar.

@@ -99,17 +99,14 @@ class CustomUserCreationForm(UserCreationForm):
 class ProyectoForm(forms.ModelForm):
     class Meta:
         model = Proyecto
-        # Excluimos 'usuario' porque se asignará automáticamente en la vista.
-        # Excluimos 'fecha_creacion_proyecto' porque es auto_now_add.
         fields = ['nombre', 'descripcion', 'tiempo_estimado_general', 'fecha_inicio', 'fecha_fin_estimada', 'estado']
 
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control'}), # Añadido
-            'descripcion': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}), # Añadido class
-            'tiempo_estimado_general': forms.TextInput(attrs={'class': 'form-control'}), # Añadido
-            'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), # Añadido class
-            'fecha_fin_estimada': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), # Añadido class
-            'estado': forms.Select(attrs={'class': 'form-select'}), # Para <select>, Bootstrap usa form-select
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'tiempo_estimado_general': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'fecha_fin_estimada': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), 
         }
 
         labels = {
