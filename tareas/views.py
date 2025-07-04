@@ -1,3 +1,4 @@
+from multiprocessing import context
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy # Para redirigir después de un registro exitoso
@@ -127,26 +128,49 @@ class UpdateViewTask(LoginRequiredMixin, UpdateView):
         return context
 
 
-
-@login_required
-def eliminar_tarea(request, tarea_id): # 'tarea_id' vendrá de la URL
-    # Nos aseguramos de que el usuario solo pueda eliminar SUS PROPIAS tareas
-    tarea_obj = get_object_or_404(Tarea, id=tarea_id, usuario=request.user)
-
-    # Si la solicitud es POST, significa que el usuario ha confirmado la eliminación.
-    if request.method == 'POST':
-        tarea_obj.delete() # Eliminamos el objeto Tarea de la base de datos.
-        messages.success(request, f'¡Tarea "{tarea_obj.titulo}" eliminada exitosamente!') # Mensaje de éxito
-        return redirect('lista_de_tareas_url') # Redirigimos a la lista de tareas.
-
-    # Si la solicitud no es POST (es GET), mostramos la página de confirmación.
-    contexto = {
-        'objeto': tarea_obj,
-        'tipo_objeto': 'Tarea',
-        'url_lista_retorno': 'lista_de_tareas_url', # Para el botón "Cancelar"
-    }
-    return render(request, 'tareas/confirmar_eliminacion_generica.html', contexto)
-
+class DeleteViewTask(LoginRequiredMixin, DeleteView):
+    """ 
+    Handles the deletion of a specific Tarea (task).
+    
+    This view first shows a confirmation page before deleting the object.
+    It is secured to ensure users can only delete their own tasks.
+    It also provides extra context to the template for dynamic content,
+    such as the URL for the 'Cancel' button.
+    """
+    model = Tarea
+    template_name = 'tareas/confirmar_eliminacion_generica.html'
+    success_url = reverse_lazy('lista_de_tareas_url')
+    context_object_name = 'objeto' 
+    
+    def get_queryset(self):
+        """ 
+        Ensures users can only access tasks they own.
+        
+        This method filters the queryset to include only tasks where the
+        'usuario' field matches the currently logged-in user, preventing
+        unauthorized access to other users' tasks.
+        """
+        return super().get_queryset().filter(usuario=self.request.user)
+    
+    def delete(self, request, *args, **kwargs):
+        """ 
+        Adds a success message before deleting the object.
+        
+        This method is called when the user confirms the deletion via on POST
+        request. It retrieves the object's title for the message and then 
+        calls the parent method to perform the actual deletion.
+        """
+        object_title = self.get_object().titulo
+        messages.success(request, f'¡Tarea "{object_title}" eliminada exitosamente!')
+        return super().delete(request, *args, **kwargs)        
+    
+    def get_context_data(self, **kwargs):
+        """ 
+        Adds the specific URL name for the 'Cancel' button to the context.
+        """
+        context = super().get_context_data(**kwargs)
+        context['url_lista_retorno'] = 'lista_de_tareas_url'
+        return context
 
 
 class VistaRegistro(generic.CreateView):

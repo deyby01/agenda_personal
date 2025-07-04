@@ -9,7 +9,7 @@ urlpatterns = [
     path('nueva/', views.CreateViewTask.as_view(), name='crear_tarea_url'),
     path('tarea/<int:tarea_id>/', views.detalle_tarea, name='detalle_tarea_url'),
     path('editar/<int:pk>/', views.UpdateViewTask.as_view(), name='editar_tarea_url'),
-    path('eliminar/<int:tarea_id>/', views.eliminar_tarea, name='eliminar_tarea_url'),
+    path('eliminar/<int:pk>/', views.DeleteViewTask.as_view(), name='eliminar_tarea_url'),
     
     
     path('registro/', VistaRegistro.as_view(), name='registro_url'),
