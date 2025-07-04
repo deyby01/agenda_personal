@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.db.models import Q # Para consultas OR complejas
 from django.contrib import messages # ¡Importamos el framework de mensajes!
 from django.contrib.auth.mixins import LoginRequiredMixin 
-from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView, TemplateView
 
 
 class ListViewTasks(LoginRequiredMixin, ListView):
@@ -355,84 +355,108 @@ class DeleteViewProject(LoginRequiredMixin, DeleteView):
         return context
 
 
+class MyWeekView(LoginRequiredMixin, TemplateView):
+    """
+    Displays a weekly dashboard of tasks and active projects.
 
-@login_required
-def mi_semana_view(request, anio=None, mes=None, dia=None):
-    # Determinar la fecha base para la semana
-    if anio and mes and dia:
-        try:
-            fecha_base = datetime.date(int(anio), int(mes), int(dia))
-        except ValueError:
-            # Si la fecha no es válida, redirigir a la semana actual
-            return redirect(reverse('mi_semana_actual_url')) # Necesitaremos esta URL
-    else:
-        fecha_base = timezone.localdate()
+    This view calculates a seven-day week based on URL parameters or the
+    current date. It aggregates all tasks for each day of the week and
+    also queries for all projects that are active during that same
+    period, serving as a central planning dashboard for the user.
+    """
+    template_name = 'tareas/mi_semana.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Validates date parts from the URL before proceeding.
 
-    # Calcular el inicio de la semana (lunes) y el fin de la semana (domingo)
-    # weekday() devuelve 0 para lunes y 6 para domingo
-    inicio_semana = fecha_base - datetime.timedelta(days=fecha_base.weekday())
-    fin_semana = inicio_semana + datetime.timedelta(days=6)
+        This method acts as a gatekeeper. If date parameters are provided
+        in the URL and they form an invalid date, it redirects the user
+        before any complex logic in get_context_data is executed.
+        """
+        year = self.kwargs.get('anio')
+        month = self.kwargs.get('mes')
+        day = self.kwargs.get('dia')
 
-    # Fechas para los botones de navegación
-    semana_anterior_fecha = inicio_semana - datetime.timedelta(days=7)
-    semana_siguiente_fecha = inicio_semana + datetime.timedelta(days=7)
+        if year and month and day:
+            try:
+                datetime.date(int(year), int(month), int(day))
+            except ValueError:
+                return redirect(reverse('mi_semana_actual_url'))
+        
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        """
+        Prepares all data for the weekly dashboard template.
 
-    # Determinar si es la semana actual
-    hoy = timezone.localdate()
-    es_semana_actual = (inicio_semana <= hoy <= fin_semana)
-
-    # Preparar datos para la plantilla
-    dias_con_tareas = []
-    for i in range(7):
-        fecha_dia_actual = inicio_semana + datetime.timedelta(days=i)
-        tareas_del_dia = Tarea.objects.filter(
-            usuario=request.user,
-            fecha_asignada=fecha_dia_actual
-        ).order_by('completada', 'titulo') # Ordenar por completada y luego título
-
-        # Para el enlace "+Añadir Tarea"
-        url_crear_tarea_dia = f"{reverse('crear_tarea_url')}?fecha_asignada={fecha_dia_actual.strftime('%Y-%m-%d')}"
-
-        dias_con_tareas.append({
-            'fecha': fecha_dia_actual,
-            'tareas': tareas_del_dia,
-            'es_hoy': fecha_dia_actual == hoy,
-            'url_crear_tarea_dia': url_crear_tarea_dia
-        })
-
-    # Formatear rango de fechas para el título
-    # Si el inicio y fin de semana están en el mismo mes
-    if inicio_semana.month == fin_semana.month:
-        rango_fechas_str = f"{inicio_semana.strftime('%d')} - {fin_semana.strftime('%d %b %Y')}"
-    else: # Si abarcan meses diferentes
-        rango_fechas_str = f"{inicio_semana.strftime('%d %b')} - {fin_semana.strftime('%d %b %Y')}"
-
-    # --- NUEVA LÓGICA PARA PROYECTOS ACTIVOS EN LA SEMANA ---
-    proyectos_activos = Proyecto.objects.filter(
-        Q(usuario=request.user),
-        # Proyectos que comienzan antes o durante esta semana Y terminan durante o después de esta semana.
-        # O proyectos sin fecha de inicio pero que terminan durante o después de esta semana.
-        # O proyectos sin fecha de fin pero que comienzan antes o durante esta semana.
-        # O proyectos sin fechas de inicio ni fin (se muestran siempre si no están completados/cancelados)
-        (
-            Q(fecha_inicio__lte=fin_semana, fecha_fin_estimada__gte=inicio_semana) | # Caso principal: se solapa
-            Q(fecha_inicio__lte=fin_semana, fecha_fin_estimada__isnull=True) |       # Inicia en/antes, sin fecha fin
-            Q(fecha_inicio__isnull=True, fecha_fin_estimada__gte=inicio_semana) |    # Sin fecha inicio, termina en/después
-            Q(fecha_inicio__isnull=True, fecha_fin_estimada__isnull=True)            # Sin fechas (mostrar siempre activos)
-        ),
-        ~Q(estado__in=['completado', 'cancelado']) # Excluir completados o cancelados
-    ).distinct().order_by('fecha_fin_estimada', 'nombre')
-    # El .distinct() es importante si un proyecto pudiera coincidir con múltiples condiciones Q y duplicarse.
-
-    contexto = {
-        'dias_con_tareas': dias_con_tareas,
-        'rango_fechas_str': rango_fechas_str,
-        'es_semana_actual': es_semana_actual,
-        'semana_anterior_url': reverse('mi_semana_especifica_url', args=[semana_anterior_fecha.year, semana_anterior_fecha.month, semana_anterior_fecha.day]) if not es_semana_actual else None,
-        'semana_siguiente_url': reverse('mi_semana_especifica_url', args=[semana_siguiente_fecha.year, semana_siguiente_fecha.month, semana_siguiente_fecha.day]),
-        'proyectos_activos': proyectos_activos, # <--- NUEVO DATO PARA LA PLANTILLA
-    }
-    return render(request, 'tareas/mi_semana.html', contexto) 
+        This method calculates the date range for the week, loops through
+        each day to fetch its tasks, runs a complex query for all
+        active projects within the week, and prepares navigation URLs.
+        """
+        context = super().get_context_data(**kwargs)
+        
+        # --- Date determination (now simpler) ---
+        year = self.kwargs.get('anio')
+        month = self.kwargs.get('mes')
+        day = self.kwargs.get('dia')
+        
+        if year and month and day:
+            base_date = datetime.date(int(year), int(month), int(day))
+        else:
+            base_date = timezone.localdate()
+            
+        start_week = base_date - datetime.timedelta(days=base_date.weekday())
+        end_week = start_week + datetime.timedelta(days=6)
+        
+        previous_week_date = start_week - datetime.timedelta(days=7)
+        next_week_date = start_week + datetime.timedelta(days=7)
+        
+        today = timezone.localdate()
+        is_current_week = (start_week <= today <= end_week)
+        
+        days_with_tasks = []
+        for i in range(7):
+            current_date = start_week + datetime.timedelta(days=i)
+            tasks_for_day = Tarea.objects.filter(
+                usuario=self.request.user,
+                fecha_asignada=current_date
+            ).order_by('completada', 'titulo')
+            
+            url_create_task_day = f"{reverse('crear_tarea_url')}?fecha_asignada={current_date.strftime('%Y-%m-%d')}"
+            
+            days_with_tasks.append({
+                'fecha': current_date,
+                'tareas': tasks_for_day,
+                'es_hoy': current_date == today,
+                'url_crear_tarea_dia': url_create_task_day
+            })
+        
+        if start_week.month == end_week.month:
+            date_range_str = f"{start_week.strftime('%d')} - {end_week.strftime('%d %b %Y')}"
+        else:
+            date_range_str = f"{start_week.strftime('%d %b')} - {end_week.strftime('%d %b %Y')}"
+            
+        active_projects = Proyecto.objects.filter(
+            Q(usuario=self.request.user),
+            (
+                Q(fecha_inicio__lte=end_week, fecha_fin_estimada__gte=start_week) |
+                Q(fecha_inicio__lte=end_week, fecha_fin_estimada__isnull=True) |
+                Q(fecha_inicio__isnull=True, fecha_fin_estimada__gte=start_week) |
+                Q(fecha_inicio__isnull=True, fecha_fin_estimada__isnull=True)
+            ),
+            ~Q(estado__in=['completado', 'cancelado'])
+        ).distinct().order_by('fecha_fin_estimada', 'nombre')
+        
+        context['dias_con_tareas'] = days_with_tasks
+        context['rango_fechas_str'] = date_range_str
+        context['es_semana_actual'] = is_current_week
+        context['semana_anterior_url'] = reverse('mi_semana_especifica_url', args=[previous_week_date.year, previous_week_date.month, previous_week_date.day]) if not is_current_week else None
+        context['semana_siguiente_url'] = reverse('mi_semana_especifica_url', args=[next_week_date.year, next_week_date.month, next_week_date.day])
+        context['proyectos_activos'] = active_projects
+        
+        return context
+            
 
 
 class ToggleTaskStatusView(LoginRequiredMixin, View):
