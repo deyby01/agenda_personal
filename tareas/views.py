@@ -9,30 +9,18 @@ from django.utils import timezone
 from django.urls import reverse
 from django.db.models import Q # Para consultas OR complejas
 from django.contrib import messages # ¡Importamos el framework de mensajes!
+from django.contrib.auth.mixins import LoginRequiredMixin 
+from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 
-# Definimos una función llamada 'lista_tareas' que toma un objeto 'request' como argumento.
-# El objeto 'request' contiene información sobre la solicitud web actual (quién la hizo, qué datos envió, etc.).
-@login_required  # Decorador que asegura que solo los usuarios autenticados puedan acceder a esta vista.
-def lista_tareas(request):
-    # Filtramos las tareas para mostrar solo las del usuario actual
-    tareas = Tarea.objects.filter(usuario=request.user).order_by('fecha_asignada', 'titulo')
 
-    # Creamos un 'contexto'. Un contexto es un diccionario de Python donde las claves
-    # son los nombres que usaremos en la plantilla, y los valores son los datos
-    # que queremos pasar a la plantilla.
-    # Aquí, la plantilla podrá acceder a la lista de tareas usando la variable 'lista_de_tareas_template'.
-    contexto = {
-        'lista_de_tareas_template': tareas
-    }
-
-    # Usamos la función render() para generar la respuesta HTTP.
-    # Argumentos de render():
-    # 1. request: El objeto de solicitud original.
-    # 2. 'tareas/lista_tareas.html': La ruta a la plantilla HTML que queremos usar.
-    #    Django buscará esta plantilla en las carpetas de plantillas configuradas.
-    # 3. contexto: El diccionario con los datos que la plantilla usará.
-    return render(request, 'tareas/lista_tareas.html', contexto)
-
+class ListViewTasks(LoginRequiredMixin, ListView):
+    model = Tarea
+    template_name = 'tareas/lista_tareas.html'
+    context_object_name = 'lista_de_tareas_template'
+    
+    # Override the method to filter tasks by the logged-in user
+    def get_queryset(self):
+        return Tarea.objects.filter(usuario=self.request.user).order_by('fecha_asignada', 'titulo')
 
 
 @login_required  # Aseguramos que solo los usuarios autenticados puedan acceder a esta vista.
