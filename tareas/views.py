@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.db.models import Q # Para consultas OR complejas
 from django.contrib import messages # ¡Importamos el framework de mensajes!
 from django.contrib.auth.mixins import LoginRequiredMixin 
-from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView
 
 
 class ListViewTasks(LoginRequiredMixin, ListView):
@@ -85,6 +85,27 @@ class CreateViewTask(LoginRequiredMixin, CreateView):
                 # Ignores invalid date formats silently
                 pass
         return initial_data
+
+
+class DetailViewTask(LoginRequiredMixin, DetailView):
+    """ 
+    Displays the details of a single Tarea (task).
+    
+    This view is secured to ensure that users can only view the
+    details of tasks that they own.
+    """
+    model = Tarea
+    template_name = 'tareas/detalle_tarea.html'
+    context_object_name = 'tarea'
+    
+    def get_queryset(self):
+        """ 
+        Ensures users can only view tasks they own.
+        
+        This method filters the queryset to only include tasks where the
+        'usuario' field matches the currently logged-in user.
+        """
+        return Tarea.objects.filter(usuario=self.request.user)
 
 
 class UpdateViewTask(LoginRequiredMixin, UpdateView):
@@ -174,17 +195,9 @@ class DeleteViewTask(LoginRequiredMixin, DeleteView):
 
 
 class VistaRegistro(generic.CreateView):
-    # Usamos el UserCreationForm que Django provee.
-    form_class = CustomUserCreationForm # Usamos nuestro formulario personalizado
-
-    # En caso de éxito (el formulario es válido y el usuario se crea),
-    # redirigimos al usuario a la URL nombrada 'login'.
-    # reverse_lazy se usa aquí porque las URLs no se cargan cuando se importa el archivo,
-    # por lo que necesitamos una forma "perezosa" (lazy) de obtener la URL.
+    form_class = CustomUserCreationForm 
     success_url = reverse_lazy('login')
-
-    # Especificamos la plantilla HTML que se usará para mostrar el formulario de registro.
-    template_name = 'registration/registro.html' # La crearemos a continuación
+    template_name = 'registration/registro.html' 
     
     
 @login_required # Protegemos la lista de proyectos
@@ -379,14 +392,6 @@ def cambiar_estado_tarea(request, tarea_id):
     return redirect(reverse('mi_semana_actual_url'))
 
 
-# NUEVA VISTA para el detalle de una tarea
-@login_required
-def detalle_tarea(request, tarea_id):
-    tarea = get_object_or_404(Tarea, id=tarea_id, usuario=request.user)
-    contexto = {
-        'tarea': tarea
-    }
-    return render(request, 'tareas/detalle_tarea.html', contexto)
 
 
 # NUEVA VISTA para el detalle de un proyecto
