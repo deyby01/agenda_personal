@@ -260,32 +260,45 @@ class CreateViewProject(LoginRequiredMixin, CreateView):
         context['formulario'] = context['form']
         return context
     
-@login_required
-def editar_proyecto(request, proyecto_id): # 'proyecto_id' vendrá de la URL
-    # Obtenemos la instancia del Proyecto que queremos editar.
-    # Solo el usuario propietario puede editarlo.
-    proyecto_obj = get_object_or_404(Proyecto, id=proyecto_id, usuario=request.user)
 
-    if request.method == 'POST':
-        # Creamos una instancia del formulario con los datos de la solicitud (request.POST)
-        # y la instancia del proyecto existente (instance=proyecto_obj).
-        form = ProyectoForm(request.POST, instance=proyecto_obj)
-        if form.is_valid():
-            form.save() # Guarda los cambios en el proyecto existente
-            messages.success(request, f"¡Proyecto '{proyecto_obj.nombre}' actualizado exitosamente!")
-            return redirect('lista_de_proyectos_url') # Redirige a la lista de proyectos
-    else:
-        # Si es una solicitud GET, creamos una instancia del formulario
-        # poblada con los datos del proyecto existente (instance=proyecto_obj).
-        form = ProyectoForm(instance=proyecto_obj)
+class UpdateViewProject(LoginRequiredMixin, UpdateView):
+    """
+    Handles editing an existing Proyecto (Project).
 
-    contexto = {
-        'formulario': form,
-        'accion': 'Editar',
-        'tipo_objeto': 'Proyecto',
-        'objeto': proyecto_obj # Pasamos el objeto por si queremos mostrar su nombre u otra info en la plantilla
-    }
-    return render(request, 'tareas/formulario_generico.html', contexto)
+    This view is secured to ensure a user can only edit their own
+    projects by filtering the queryset. It uses a generic form
+    template and provides extra context to customize it for an
+    "Edit" action.
+    """
+    model = Proyecto
+    form_class = ProyectoForm
+    template_name = 'tareas/formulario_generico.html'
+    success_url = reverse_lazy('lista_de_proyectos_url')
+
+    def get_queryset(self):
+        """
+        Ensures users can only edit projects they own.
+        """
+        return super().get_queryset().filter(usuario=self.request.user)
+    
+    def form_valid(self, form):
+        """
+        Adds a success message after the form is successfully updated.
+        """
+        messages.success(self.request, f'¡Proyecto "{form.instance.nombre}" actualizado exitosamente!')
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        """
+        Adds extra context for the generic form template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['accion'] = 'Editar'
+        context['tipo_objeto'] = 'Proyecto'
+        context['formulario'] = context['form']
+        return context
+
+
 
 
 @login_required

@@ -18,7 +18,7 @@ urlpatterns = [
     path('proyectos/', views.ListViewProjects.as_view(), name='lista_de_proyectos_url'),
     path('proyectos/<int:proyecto_id>/', views.detalle_proyecto, name='detalle_proyecto_url'),
     path('proyectos/nuevo/', views.CreateViewProject.as_view(), name='crear_proyecto_url'),
-    path('proyectos/editar/<int:proyecto_id>/', views.editar_proyecto, name='editar_proyecto_url'),
+    path('proyectos/editar/<int:pk>/', views.UpdateViewProject.as_view(), name='editar_proyecto_url'),
     path('proyectos/eliminar/<int:proyecto_id>/', views.eliminar_proyecto, name='eliminar_proyecto_url'),
     
     
