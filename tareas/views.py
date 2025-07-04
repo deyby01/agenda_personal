@@ -259,7 +259,25 @@ class CreateViewProject(LoginRequiredMixin, CreateView):
         context['tipo_objeto'] = 'Proyecto'
         context['formulario'] = context['form']
         return context
+
+
+class DetailViewProject(LoginRequiredMixin, DetailView):
+    """
+    Displays the details of a single Proyecto (Project).
+
+    This view is secured to ensure that users can only view the
+    details of projects that they own.
+    """
+    model = Proyecto
+    template_name = 'tareas/detalle_proyecto.html'
+    context_object_name = 'proyecto'
     
+    def get_queryset(self):
+        """
+        Ensures users can only view projects they own.
+        """
+        return Proyecto.objects.filter(usuario=self.request.user)
+  
 
 class UpdateViewProject(LoginRequiredMixin, UpdateView):
     """
@@ -443,20 +461,3 @@ def cambiar_estado_tarea(request, tarea_id):
 
     # Fallback a la semana actual si no se especifica 'next_week_view'
     return redirect(reverse('mi_semana_actual_url'))
-
-
-
-
-# NUEVA VISTA para el detalle de un proyecto
-@login_required
-def detalle_proyecto(request, proyecto_id):
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id, usuario=request.user)
-    # Opcional: Podríamos obtener tareas asociadas a este proyecto si tuviéramos una relación
-    # tareas_del_proyecto = Tarea.objects.filter(proyecto=proyecto, usuario=request.user) 
-    # Pero actualmente no hay un campo 'proyecto' en el modelo Tarea.
-
-    contexto = {
-        'proyecto': proyecto,
-        # 'tareas_del_proyecto': tareas_del_proyecto, # Si las tuviéramos
-    }
-    return render(request, 'tareas/detalle_proyecto.html', contexto)
