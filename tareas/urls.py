@@ -5,14 +5,8 @@ from .views import VistaRegistro  # Importamos la vista de registro de usuarios
 # urlpatterns es una lista de patrones de URL que Django buscará.
 # Es un nombre especial que Django espera encontrar.
 urlpatterns = [
-    # Cuando un usuario visite la URL raíz de esta aplicación de tareas (ej. /agenda/),
-    # se llamará a la función 'lista_tareas' que está en views.py.
-    # El argumento 'name="lista_tareas"' le da un nombre a esta URL,
-    # lo cual es útil para referenciarla desde otras partes de Django (como plantillas).
-    
-    # Para la semana actual (sin parámetros de fecha en la URL)
     path('', views.mi_semana_view, name='mi_semana_actual_url'),
-    path('lista-tareas/', views.lista_tareas, name='lista_de_tareas_url'),
+    path('lista-tareas/', views.ListViewTasks.as_view(), name='lista_de_tareas_url'),
     path('nueva/', views.crear_tarea, name='crear_tarea_url'),
     # NUEVA URL para el detalle de una tarea
     path('tarea/<int:tarea_id>/', views.detalle_tarea, name='detalle_tarea_url'),
