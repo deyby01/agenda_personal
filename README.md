@@ -43,48 +43,6 @@ El objetivo era construir una aplicación funcional, segura y desplegada en un e
 * **Plataforma de Despliegue:** PythonAnywhere
 * **Control de Versiones:** Git, GitHub
 
-## Instalación y Ejecución Local
-
-Para ejecutar este proyecto en un entorno de desarrollo local, sigue estos pasos:
-
-1.  **Clonar el repositorio:**
-    ```sh
-    git clone [https://github.com/deyby01/agenda_personal.git](https://github.com/deyby01/agenda_personal.git)
-    cd agenda_personal
-    ```
-
-2.  **Crear y activar un entorno virtual:**
-    ```sh
-    python -m venv venv
-    # En Windows: venv\Scripts\activate
-    # En macOS/Linux: source venv/bin/activate
-    ```
-
-3.  **Instalar las dependencias:**
-    ```sh
-    pip install -r requirements.txt
-    ```
-
-4.  **Configurar las variables de entorno:**
-    * Crea un archivo `.env` en la raíz del proyecto.
-    * Añade las siguientes variables:
-        ```env
-        SECRET_KEY='una_clave_secreta_fuerte_para_desarrollo'
-        DEBUG=True
-        ```
-
-5.  **Aplicar las migraciones y crear un superusuario:**
-    ```sh
-    python manage.py migrate
-    python manage.py createsuperuser
-    ```
-
-6.  **Ejecutar el servidor de desarrollo:**
-    ```sh
-    python manage.py runserver
-    ```
-    La aplicación estará disponible en `http://127.0.0.1:8000/`.
-
 ## Autor
 
 * **Deyby Camacho**
