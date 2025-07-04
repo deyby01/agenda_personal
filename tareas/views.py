@@ -2,7 +2,7 @@ from multiprocessing import context
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy # Para redirigir después de un registro exitoso
-from django.views import generic # Para vistas basadas en clases genéricas
+from django.views import generic, View # Para vistas basadas en clases genéricas
 from .models import Tarea, Proyecto
 from .forms import TareaForm, CustomUserCreationForm, ProyectoForm # Importamos nuestro formulario de tareas
 import datetime
@@ -435,29 +435,34 @@ def mi_semana_view(request, anio=None, mes=None, dia=None):
     return render(request, 'tareas/mi_semana.html', contexto) 
 
 
+class ToggleTaskStatusView(LoginRequiredMixin, View):
+    """
+    Handles toggling the completion status of a single task.
 
-@login_required
-def cambiar_estado_tarea(request, tarea_id):
-    tarea = get_object_or_404(Tarea, id=tarea_id, usuario=request.user)
-    if request.method == 'POST':
-        # No necesitamos un formulario completo aquí si solo cambiamos un booleano.
-        # Simplemente invertimos el estado.
-        tarea.completada = not tarea.completada
-        tarea.save()
-        estado_str = "completada" if tarea.completada else "marcada como pendiente"
-        messages.success(request, f'¡Tarea "{tarea.titulo}" {estado_str} exitosamente!') # Mensaje de éxito
+    This view does not render a template. It only responds to POST
+    requests to perform a specific action and then redirects the
+-    user, making it an efficient endpoint for quick updates.
+    """
+    def post(self, request, *args, **kwargs):
+        """
+        Inverts the 'completada' field of a specified Tarea.
 
-    # Redirigir de vuelta a la vista semanal.
-    # Necesitamos saber a qué semana volver. Podríamos pasar la fecha de inicio de semana
-    # como un parámetro en la URL de 'cambiar_estado_tarea' o en los datos POST.
-    # Por simplicidad ahora, redirigimos a la semana actual.
-    # Una mejor solución sería redirigir a la semana que se estaba viendo.
+        Fetches a task securely, ensuring it belongs to the logged-in
+        user, toggles its boolean 'completada' status, saves the
+        change, and adds a success message before redirecting.
+        """
+        task_id = self.kwargs.get('tarea_id')
+        task = get_object_or_404(Tarea, id=task_id, usuario=self.request.user)
+        
+        task.completada = not task.completada
+        task.save()
+        
+        status_str = "completada" if task.completada else "marcada como pendiente"
+        messages.success(request, f'¡Tarea "{task.titulo}" {status_str} exitosamente!')
+        
+        redirect_url_param = self.request.GET.get('next_week_view')
+        if redirect_url_param:
+            return redirect(redirect_url_param)
+        
+        return redirect('mi_semana_actual_url')
 
-    # Para redirigir a la semana que se estaba viendo, necesitamos esa fecha.
-    # Si la pasamos como parámetro GET en la URL de la acción del formulario:
-    redirect_url_param = request.GET.get('next_week_view')
-    if redirect_url_param:
-        return redirect(redirect_url_param)
-
-    # Fallback a la semana actual si no se especifica 'next_week_view'
-    return redirect(reverse('mi_semana_actual_url'))
