@@ -4,11 +4,14 @@
 {% block title %}Iniciar Sesión - Agenda Personal{% endblock title %}
 
 {% block content %}
-<div class="row justify-content-center mt-4"> {# Añadí mt-4 para consistencia #}
+
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h2 class="card-title mb-0 text-center">Iniciar Sesión</h2>
+        <div class="card login-card">
+            <div class="card-header login-header text-center">
+                <i class="fa fa-user-circle mb-2"></i>
+                <h2 class="card-title mb-0">Iniciar Sesión</h2>
+                <p class="mb-0 mt-1" style="font-size: 1rem; opacity: 0.85;">Bienvenido de nuevo a Agenda Personal</p>
             </div>
             <div class="card-body">
                 {% if form.errors %}
@@ -28,20 +31,21 @@
 
                 <form method="post" action="{% url 'login' %}">
                     {% csrf_token %}
-                    {{ form|crispy }} 
+                    {{ form|crispy }}
 
                     <div class="d-grid mt-3">
-                        <button type="submit" class="btn btn-success">Iniciar Sesión</button>
+                        <button type="submit" class="btn login-btn text-white shadow-sm">Iniciar Sesión</button>
                     </div>
                     <input type="hidden" name="next" value="{{ next }}">
                 </form>
                 <hr>
-                <div class="text-center">
-                    <p><a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a></p>
-                    <p>¿No tienes una cuenta? <a href="{% url 'registro_url' %}">Regístrate aquí</a></p>
+                <div class="text-center login-links">
+                    <p><a href="{% url 'password_reset' %}"><i class="fa fa-key"></i> ¿Olvidaste tu contraseña?</a></p>
+                    <p>¿No tienes una cuenta? <a href="{% url 'registro_url' %}"><i class="fa fa-user-plus"></i> Regístrate aquí</a></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock content %}

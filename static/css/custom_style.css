@@ -75,3 +75,137 @@ body {
     }
 }
 /* --- FIN DE ESTILOS RESPONSIVOS PARA VISTA SEMANAL --- */
+
+
+
+/* --- ESTILOS PARA EL LOGIN --- */
+.login-card {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 6px 32px rgba(0,0,0,0.10), 0 1.5px 6px rgba(0,0,0,0.08);
+    background: #fff;
+}
+.login-header {
+    background: linear-gradient(90deg, #1976d2 60%, #00bcd4 100%);
+    color: #fff;
+    padding: 1.5rem 1rem;
+}
+.login-header .fa-user-circle {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+.login-btn {
+    background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+    border: none;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+.login-btn:hover {
+    background: linear-gradient(90deg, #2e7d32 60%, #388e3c 100%);
+}
+.login-links a {
+    color: #1976d2;
+    text-decoration: none;
+}
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* --- ESTILOS PARA EL REGISTRO --- */
+.registro-card {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 6px 32px rgba(0,0,0,0.10), 0 1.5px 6px rgba(0,0,0,0.08);
+    background: #fff;
+}
+.registro-header {
+    background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+    color: #fff;
+    padding: 1.5rem 1rem;
+}
+.registro-header .fa-user-plus {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+.registro-btn {
+    background: linear-gradient(90deg, #1976d2 60%, #00bcd4 100%);
+    border: none;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+.registro-btn:hover {
+    background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+}
+.registro-links a {
+    color: #1976d2;
+    text-decoration: none;
+}
+.registro-links a:hover {
+    text-decoration: underline;
+}
+
+
+
+/*--ESTILOS BASE--*/
+
+/* Navbar gradiente y sombra */
+.bg-gradient-custom {
+    background: linear-gradient(90deg, #335577 60%, #1e9aaa 100%) !important;
+    box-shadow: 0 2px 12px rgba(25, 118, 210, 0.10);
+}
+
+/* Navbar brand más grande y con sombra */
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    letter-spacing: 1px;
+}
+
+/* Botones de sesión y registro llamativos */
+.btn-login {
+    background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+    color: #fff !important;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: background 0.2s;
+    border: none;
+    margin-right: 0.5rem;
+}
+.btn-login:hover, .btn-login:focus {
+    background: linear-gradient(90deg, #2e7d32 60%, #388e3c 100%);
+    color: #fff !important;
+}
+
+.btn-register {
+    background: linear-gradient(90deg, #ff9800 60%, #ffc107 100%);
+    color: #fff !important;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: background 0.2s;
+    border: none;
+}
+.btn-register:hover, .btn-register:focus {
+    background: linear-gradient(90deg, #f57c00 60%, #ff9800 100%);
+    color: #fff !important;
+}
+
+/* Footer moderno */
+.bg-footer {
+    background: linear-gradient(90deg, #335577 60%, #1e9aaa 100%) !important;
+    color: #fff;
+    border-top: 2px solid #5d6063;
+}
+.bg-footer .text-muted {
+    color: #e3f2fd !important;
+}
+.bg-footer .mt-1 {
+    color: #b3e5fc !important;
+}
+.bg-footer .small {
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
