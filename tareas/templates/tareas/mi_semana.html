@@ -28,7 +28,7 @@
     {# Para 7 columnas en pantallas XL, 4 en LG, 3 en MD, 2 en SM, 1 por defecto #}
     {% for dia_info in dias_con_tareas %}
         <div class="col">
-            <div class="card h-100 {% if dia_info.es_hoy %}border-primary border-2 shadow{% else %}shadow-sm{% endif %}">
+            <div class="card semana-dia h-100 {% if dia_info.es_hoy %}border-primary border-2 shadow{% else %}shadow-sm{% endif %}">
                 <div class="card-header {% if dia_info.es_hoy %}bg-primary text-white{% else %}bg-light{% endif %}">
                     <h5 class="mb-0 small text-center">
                         {{ dia_info.fecha|date:"l" }}<br>

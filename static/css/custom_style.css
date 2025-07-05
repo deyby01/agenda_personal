@@ -209,3 +209,100 @@ body {
     font-weight: 500;
     letter-spacing: 0.5px;
 }
+
+
+
+/*--- ESTILO MI SEMANA----*/
+
+/* Fondo plata con degradado sutil */
+.body-mi-semana, .main-mi-semana {
+    background: linear-gradient(135deg, #eceff1 0%, #f5f7fa 100%);
+    min-height: 100vh;
+}
+
+/* Tarjetas de días con efecto glass y sombra */
+.card.semana-dia {
+    background: rgba(255,255,255,0.85);
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(176,190,197,0.18), 0 1.5px 6px rgba(120,144,156,0.10);
+    border: 1.5px solid #cfd8dc;
+    transition: transform 0.12s, box-shadow 0.12s;
+}
+.card.semana-dia:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(120,144,156,0.18), 0 2px 8px rgba(120,144,156,0.12);
+}
+
+/* Cabecera del día */
+.card-header.bg-primary, .card-header.bg-light {
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom: 1px solid #b0bec5;
+}
+.card-header.bg-primary {
+    background: linear-gradient(90deg, #90caf9 60%, #eceff1 100%) !important;
+    color: #263238 !important;
+}
+.card-header.bg-light {
+    background: #f5f7fa !important;
+    color: #607d8b !important;
+}
+
+/* Botón + Añadir */
+.btn-outline-success {
+    border-radius: 16px;
+    font-weight: 600;
+    background: #e8f5e9;
+    border: 1.5px solid #66bb6a;
+    color: #388e3c;
+    transition: background 0.15s, color 0.15s;
+}
+.btn-outline-success:hover, .btn-outline-success:focus {
+    background: linear-gradient(90deg, #66bb6a 60%, #b2dfdb 100%);
+    color: #fff;
+    border-color: #388e3c;
+}
+
+/* Botones de acción de tarea */
+.action-buttons-semana .btn-outline-secondary {
+    border-radius: 12px;
+    font-size: 0.9em;
+}
+.action-buttons-semana .btn-outline-danger {
+    border-radius: 12px;
+    font-size: 0.9em;
+}
+
+/* Tarjetas de proyecto activo */
+.list-group-item {
+    background: rgba(255,255,255,0.92);
+    border-radius: 14px !important;
+    border: 1.5px solid #cfd8dc;
+    box-shadow: 0 2px 8px rgba(176,190,197,0.10);
+    margin-bottom: 0.7rem;
+}
+
+/* Badge de estado de proyecto */
+.badge {
+    font-size: 0.95em;
+    border-radius: 10px;
+    padding: 0.4em 0.8em;
+    font-weight: 500;
+}
+
+/* Títulos y subtítulos */
+h1, h2, h4 {
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+/* Responsive: menos padding en móvil */
+@media (max-width: 767.98px) {
+    .card.semana-dia {
+        border-radius: 12px;
+    }
+    .list-group-item {
+        border-radius: 10px !important;
+    }
+}
+
