@@ -1,6 +1,6 @@
 body {
     padding-top: 56px; /* Ajuste para la barra de navegación fija */
-    background-color: #a3e4d7;
+    background-color: #68e2ce;
 }
 .task-actions a {
     margin-left: 5px;
@@ -306,3 +306,47 @@ h1, h2, h4 {
     }
 }
 
+
+
+/*--- ESTILO MI SEMANA TITULOS Y BOTONES -----------------------------------------*/
+
+.titulo-mi-semana {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #ff1616;
+    text-shadow: 0 4px 18px rgb(0, 255, 242), 0 1.5px 6px rgba(0,0,0,0.08);
+    letter-spacing: 1px;
+    margin-bottom: 0.2em;
+}
+
+.subtitulo-mi-semana {
+    font-size: 1.3rem;
+    color: #006091 !important;
+    text-shadow: 0 2px 8px rgba(120,144,156,0.10);
+    font-weight: 600;
+}
+
+.btn-nav-semana {
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(120,144,156,0.10);
+    padding: 0.5em 1.2em;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    background: rgba(255,255,255,0.85);
+}
+.btn-nav-semana:hover, .btn-nav-semana:focus {
+    background: linear-gradient(90deg, #90caf9 60%, #eceff1 100%);
+    color: #1976d2;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+    border-color: #1976d2;
+}
+
+.titulo-proyectos-semana {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ff2121;
+    text-shadow: 0 2px 12px rgba(49, 235, 204, 0.1), 0 1.5px 6px rgba(0,0,0,0.08);
+    letter-spacing: 0.5px;
+    margin-bottom: 1em;
+}

@@ -5,21 +5,21 @@
 
 {% block content %}
 <div class="text-center my-4">
-    <h1 class="mb-1">Mi Semana</h1>
-    <h4 class="text-muted fw-normal mb-3">{{ rango_fechas_str }} {% if es_semana_actual %}<span class="badge bg-primary align-middle">Semana Actual</span>{% endif %}</h4>
+    <h1 class="mb-1 titulo-mi-semana">Mi Semana</h1>
+    <h4 class="text-muted fw-normal mb-3 subtitulo-mi-semana">{{ rango_fechas_str }} {% if es_semana_actual %}<span class="badge bg-primary align-middle">Semana Actual</span>{% endif %}</h4>
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
         {# Botón Semana Anterior (condicional) #}
         <div class="mb-2 mb-sm-0"> {# Margen inferior en móvil, ninguno en sm y superior #}
             {% if semana_anterior_url %}
-                <a href="{{ semana_anterior_url }}" class="btn btn-outline-secondary">&laquo; Semana Anterior</a>
+                <a href="{{ semana_anterior_url }}" class="btn btn-outline-secondary btn-nav-semana">&laquo; Semana Anterior</a>
             {% else %}
                 {# Espacio invisible para mantener el equilibrio si el botón no está, o simplemente no mostrar nada #}
-                <a href="#" class="btn btn-outline-secondary invisible disabled" aria-disabled="true">&laquo; Semana Anterior</a>
+                <a href="#" class="btn btn-outline-secondary invisible disabled btn-nav-semana" aria-disabled="true">&laquo; Semana Anterior</a>
             {% endif %}
         </div>
         {# Botón Semana Siguiente #}
         <div>
-            <a href="{{ semana_siguiente_url }}" class="btn btn-outline-secondary">Semana Siguiente &raquo;</a>
+            <a href="{{ semana_siguiente_url }}" class="btn btn-outline-secondary btn-nav-semana">Semana Siguiente &raquo;</a>
         </div>
     </div>
 </div>
@@ -103,7 +103,7 @@
 {# --- NUEVA SECCIÓN PARA PROYECTOS ACTIVOS --- #}
 {% if proyectos_activos %}
 <div class="mt-5 pt-3 border-top">
-    <h2 class="mb-3">Proyectos Activos Esta Semana</h2>
+    <h2 class="mb-3 titulo-proyectos-semana">Proyectos Activos Esta Semana</h2>
     <div class="list-group">
         {% for proyecto in proyectos_activos %}
         <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm rounded">
