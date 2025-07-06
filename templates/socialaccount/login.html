@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Inicio de Sesión{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-6 col-lg-5">
+            <div class="card login-card shadow">
+                <div class="card-header login-header text-center">
+                    <i class="fab fa-google mb-2" style="font-size:2.2rem; color:#4285F4;"></i>
+                    <h2 class="card-title mb-0">¡Casi listo!</h2>
+                    <p class="mb-0 mt-1" style="font-size: 1rem; opacity: 0.85;">Confirma tu inicio de sesión con Google</p>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-2">
+                        Vas a iniciar sesión con tu cuenta de Google:
+                    </p>
+                    <p class="fw-bold" style="font-size:1.1rem;">
+                        <i class="fa fa-envelope me-1 text-primary"></i> {{ account.extra_data.email }}
+                    </p>
+                    <p class="text-muted mb-4" style="font-size:0.98rem;">
+                        Al continuar, se creará una cuenta en <strong>Agenda Personal</strong> asociada a este correo si no existe una.
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-google-login text-white shadow-sm btn-lg w-100">
+                                <i class="fab fa-google me-2"></i> Continuar con Google
+                        </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

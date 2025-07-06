@@ -83,12 +83,12 @@
                             aria-labelledby="navbarDropdownUser"
                         >
                             <li>
-                                <a class="dropdown-item" href="{% url 'password_change' %}">Cambiar Contraseña</a>
+                                <a class="dropdown-item" href="{% url 'account_reset_password' %}">Cambiar Contraseña</a>
                             </li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>
                                 {# REEMPLAZAMOS EL ENLACE CON UN FORMULARIO #}
-                                <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: inline;">
+                                <form id="logout-form" method="post" action="{% url 'account_logout' %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item">Cerrar Sesión</button>
                                 </form>
@@ -98,8 +98,8 @@
                     {% else %}
                     <li class="nav-item">
                         <a
-                            class="nav-link btn btn-login me-2 px-3 py-1 {% if request.resolver_match.url_name == 'login' %}active{% endif %}"
-                            href="{% url 'login' %}"
+                            class="nav-link btn btn-login me-2 px-3 py-1 {% if request.resolver_match.url_name == 'account_login' %}active{% endif %}"
+                            href="{% url 'account_login' %}"
                             >Iniciar Sesión</a>
                     </li>
                     <li class="nav-item">
@@ -159,10 +159,10 @@
 
         togglePasswordButtons.forEach(button => {
             button.addEventListener('click', function() {
-                const passwordInputId = this.getAttribute('data-target');
-                const passwordInput = document.getElementById(passwordInputId);
+                // Busca el input que está justo antes del botón
+                const passwordInput = this.previousElementSibling;
 
-                if (passwordInput) {
+                if (passwordInput && (passwordInput.tagName === 'INPUT')) {
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
                     this.textContent = type === 'password' ? '👁️ Ver' : '🙈 Ocultar';

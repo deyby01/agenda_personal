@@ -49,10 +49,13 @@ else:
     # Para desarrollo con DEBUG=True, podemos dejarlo vacío o añadir hosts de desarrollo
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-LOGIN_URL = 'login'  # El nombre de la URL de inicio de sesión (Django usa 'login' por defecto con django.contrib.auth.urls)
+LOGIN_URL = 'account_login'  # El nombre de la URL de inicio de sesión (Django usa 'login' por defecto con django.contrib.auth.urls)
 LOGIN_REDIRECT_URL = 'mi_semana_actual_url' # A dónde ir después de un inicio de sesión exitoso
-LOGOUT_REDIRECT_URL = 'login' # A dónde ir después de cerrar sesión (podría ser 'logged_out' o la página principal)
+LOGOUT_REDIRECT_URL = 'account_login' # A dónde ir después de cerrar sesión (podría ser 'logged_out' o la página principal)
 
+# Configuraciones de allauth
+ACCOUNT_EMAIL_VERIFICATION = 'none' # Para no requerir verificar email al inicio
+ACCOUNT_LOGOUT_ON_GET = True # Permite cerrar sesión con una petición GET
 
 # Application definition
 
@@ -66,7 +69,38 @@ INSTALLED_APPS = [
     'tareas',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django.contrib.sites',
+    
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    
+    # Proveedor google
+    'allauth.socialaccount.providers.google',
 ]
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Dile a allauth que el método de autenticación es el email.
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+# Exige que el email sea obligatorio para registrarse.
+ACCOUNT_EMAIL_REQUIRED = True
+
+# Haz que el nombre de usuario ya no sea obligatorio.
+ACCOUNT_USERNAME_REQUIRED = False
+
+ACCOUNT_FORMS = {
+    'login': 'tareas.forms.CustomLoginForm',
+    'signup': 'tareas.forms.CustomUserCreationForm',
+}
+
+ACCOUNT_SESSION_REMEMBER = True 
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -76,6 +110,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'proyecto_agenda.urls'

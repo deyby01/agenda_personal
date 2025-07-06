@@ -110,7 +110,14 @@ body {
 .login-links a:hover {
     text-decoration: underline;
 }
-
+/*Regla para quitar un forget password para no tener 2*/
+/* Oculta el enlace automático de "Forgot your password?" en el login */
+/* Oculta cualquier enlace de "Forgot your password?" generado por Allauth o Django */
+form a[href*="password/reset"], 
+form .helptext a[href*="password/reset"], 
+form small a[href*="password/reset"] {
+    display: none !important;
+}
 
 
 /* --- ESTILOS PARA EL REGISTRO --- */
@@ -349,4 +356,58 @@ h1, h2, h4 {
     text-shadow: 0 2px 12px rgba(49, 235, 204, 0.1), 0 1.5px 6px rgba(0,0,0,0.08);
     letter-spacing: 0.5px;
     margin-bottom: 1em;
+}
+
+
+
+/*--- ESTILO LOGIN SOCIAL GOOGLE ----*/
+.btn-google-login {
+    background: linear-gradient(90deg, #ea4335 60%, #ff7961 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 22px;
+    font-weight: 600;
+    font-size: 1.08rem;
+    box-shadow: 0 2px 8px rgba(234,67,53,0.10);
+    padding: 0.7em 1.2em;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    width: 100%;
+    max-width: 320px;
+    display: inline-block;
+    text-align: center;
+}
+.btn-google-login:hover, .btn-google-login:focus {
+    background: linear-gradient(90deg, #ea4335 0%, #c62828 100%);
+    color: #fff !important;
+    border: none;
+    box-shadow: 0 4px 16px rgba(234,67,53,0.18);
+}
+.btn-google-login .fab.fa-google {
+    font-size: 1.3em;
+}
+
+/*--- ESTILO CONFIRMAR LOGIN GOOGLE ROJO CENTRADO ----*/
+.btn-google-login-red {
+    background: linear-gradient(90deg, #ea4335 60%, #ff7961 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 22px;
+    font-weight: 600;
+    font-size: 1.08rem;
+    box-shadow: 0 2px 8px rgba(234,67,53,0.10);
+    padding: 0.7em 1.2em;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    min-width: 260px;
+    max-width: 340px;
+    display: inline-block;
+    text-align: center;
+}
+.btn-google-login-red:hover, .btn-google-login-red:focus {
+    background: linear-gradient(90deg, #ea4335 0%, #c62828 100%);
+    color: #fff !important;
+    border: none;
+    box-shadow: 0 4px 16px rgba(234,67,53,0.18);
+}
+.btn-google-login-red .fab.fa-google {
+    font-size: 1.3em;
 }
