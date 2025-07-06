@@ -20,18 +20,7 @@ from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('agenda/', include('tareas.urls')),  # Incluimos las URLs de la app 'tareas'
-    
-    # URLs de autenticación de Django
-    # Esto proporciona URLs como:
-    # accounts/login/
-    # accounts/logout/
-    # accounts/password_change/
-    # accounts/password_change/done/
-    # accounts/password_reset/
-    # accounts/password_reset/done/
-    # accounts/reset/<uidb64>/<token>/
-    # accounts/reset/done/
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('', RedirectView.as_view(pattern_name='mi_semana_actual_url', permanent=False)), # Redirige la raíz del sitio
+    path('agenda/', include('tareas.urls')),  
+    path('accounts/', include('allauth.urls')),
+    path('', RedirectView.as_view(pattern_name='mi_semana_actual_url', permanent=False)), 
 ]

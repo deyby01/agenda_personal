@@ -4,27 +4,32 @@
 {% block title %}Registrarse - Agenda Personal{% endblock title %}
 
 {% block content %}
-<div class="row justify-content-center mt-4"> {# Añadí un poco de margen superior mt-4 #}
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h2 class="card-title mb-0 text-center">Crear una Cuenta Nueva</h2>
+{% block extra_body_class %}{% endblock %}
+<div class="bg-overlay">
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-5 col-lg-5">
+        <div class="card registro-card">
+            <div class="card-header registro-header text-center">
+                <i class="fa fa-user-plus mb-2"></i>
+                <h2 class="card-title mb-0">Crear una Cuenta Nueva</h2>
+                <p class="mb-0 mt-1" style="font-size: 1rem; opacity: 0.85;">¡Únete a Agenda Personal!</p>
             </div>
-            <div class="card-body">
+            <div class="card-body registro-body">
                 <form method="post">
                     {% csrf_token %}
                     {{ form|crispy }}
 
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary">Registrarse</button>
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn registro-btn text-white shadow-sm">Registrarse</button>
                     </div>
                 </form>
                 <hr>
-                <div class="text-center">
-                    <p>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a></p>
+                <div class="text-center registro-links">
+                    <p>¿Ya tienes una cuenta? <a href="{% url 'account_login' %}"><i class="fa fa-sign-in-alt"></i> Inicia sesión aquí</a></p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock content %}

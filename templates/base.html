@@ -14,10 +14,12 @@
         crossorigin="anonymous"
     />
     <link rel="stylesheet" href="{% static 'css/custom_style.css' %}">
+    <!-- FontAwesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+<body class="d-flex flex-column min-vh-100 {% block extra_body_class %}{% endblock %}">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-custom fixed-top shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'mi_semana_actual_url' %}">Mi Agenda Personal</a>
             <button
@@ -31,7 +33,9 @@
             >
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
+                {% if user.is_authenticated %}
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     {# me-auto empuja lo siguiente a la derecha #}
                     <li class="nav-item">
@@ -59,8 +63,9 @@
                     </li>
                     {% endif %}
                 </ul>
+                {% endif %}
                 {# Sección de Usuario / Login / Logout a la derecha #}
-                <ul class="navbar-nav">
+                <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a
@@ -78,12 +83,12 @@
                             aria-labelledby="navbarDropdownUser"
                         >
                             <li>
-                                <a class="dropdown-item" href="{% url 'password_change' %}">Cambiar Contraseña</a>
+                                <a class="dropdown-item" href="{% url 'account_reset_password' %}">Cambiar Contraseña</a>
                             </li>
                             <li><hr class="dropdown-divider" /></li>
                             <li>
                                 {# REEMPLAZAMOS EL ENLACE CON UN FORMULARIO #}
-                                <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: inline;">
+                                <form id="logout-form" method="post" action="{% url 'account_logout' %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item">Cerrar Sesión</button>
                                 </form>
@@ -93,14 +98,14 @@
                     {% else %}
                     <li class="nav-item">
                         <a
-                            class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}"
-                            href="{% url 'login' %}"
+                            class="nav-link btn btn-login me-2 px-3 py-1 {% if request.resolver_match.url_name == 'account_login' %}active{% endif %}"
+                            href="{% url 'account_login' %}"
                             >Iniciar Sesión</a>
                     </li>
                     <li class="nav-item">
                         {# Asumimos que la URL de registro se llamará 'registro_url' #}
                         <a
-                            class="nav-link {% if request.resolver_match.url_name == 'registro_url' %}active{% endif %}"
+                            class="nav-link btn btn-register px-3 py-1 {% if request.resolver_match.url_name == 'registro_url' %}active{% endif %}"
                             href="{% url 'registro_url' %}"
                             >Registrarse</a>
                     </li>
@@ -129,7 +134,7 @@
         {% block content %} {% endblock content %}
     </main>
 
-    <footer class="py-4 bg-light mt-auto text-center ">
+    <footer class="py-4 bg-footer mt-auto text-center">
         {# Añadido text-center para esta opción #}
         <div class="container-fluid px-4">
             <div class="small">
@@ -154,10 +159,10 @@
 
         togglePasswordButtons.forEach(button => {
             button.addEventListener('click', function() {
-                const passwordInputId = this.getAttribute('data-target');
-                const passwordInput = document.getElementById(passwordInputId);
+                // Busca el input que está justo antes del botón
+                const passwordInput = this.previousElementSibling;
 
-                if (passwordInput) {
+                if (passwordInput && (passwordInput.tagName === 'INPUT')) {
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
                     this.textContent = type === 'password' ? '👁️ Ver' : '🙈 Ocultar';

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load socialaccount %}
+
+{% block title %}Iniciar Sesión - Agenda Personal{% endblock title %}
+
+{% block content %}
+
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card login-card">
+            <div class="card-header login-header text-center">
+                <i class="fa fa-user-circle mb-2"></i>
+                <h2 class="card-title mb-0">Iniciar Sesión</h2>
+                <p class="mb-0 mt-1" style="font-size: 1rem; opacity: 0.85;">Bienvenido de nuevo a Agenda Personal</p>
+            </div>
+            <div class="card-body">
+
+                {% if next %}
+                    {% if user.is_authenticated %}
+                    <p class="text-muted">Tu cuenta no tiene acceso a esta página. Para proceder,
+                    por favor inicia sesión con una cuenta que tenga acceso.</p>
+                    {% else %}
+                    <p class="text-muted">Por favor, inicia sesión para ver esta página.</p>
+                    {% endif %}
+                {% endif %}
+
+                <form method="post" action="{% url 'account_login' %}">
+                    {% csrf_token %}
+                    <div class="mb-0">
+                        <label for="{{ form.login.id_for_label }}" class="form-label">{{ form.login.label }}</label>
+                    </div>
+                    <input type="email"
+                            name="{{ form.login.name }}"
+                            class="form-control"
+                            placeholder="tucorreo@mail.com"
+                            required
+                            id="{{ form.login.id_for_label }}">
+                    {% for error in form.login.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+
+                    <div class="mb-1 my-2">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                        <div class="input-group ">
+                            <input type="password"
+                                    name="{{ form.password.name }}"
+                                    class="form-control"
+                                    placeholder="Contraseña"
+                                    required
+                                    id="{{ form.password.id_for_label }}">
+                            <button class="btn btn-outline-secondary toggle-password" type="button">👁️ Ver</button>
+                        </div>
+                        {% for error in form.password.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-2 my-3">
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                    name="{{ form.remember.name }}"
+                                    class="form-check-input"
+                                    id="{{ form.remember.id_for_label }}">
+                            <label class="form-check-label" for="{{ form.remember.id_for_label }}">{{ form.remember.label }} Recordarme</label>
+                        </div>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn login-btn text-white shadow-sm">Iniciar Sesión</button>
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                </form>
+                <hr>
+                <div class="text-center login-links">
+                    <p><a href="{% url 'account_reset_password' %}"><i class="fa fa-key"></i> ¿Olvidaste tu contraseña?</a></p>
+                    <p>¿No tienes una cuenta? <a href="{% url 'registro_url' %}"><i class="fa fa-user-plus"></i> Regístrate aquí</a></p>
+                </div>
+                <hr>
+                <div class="text-center login-social">
+                    <p class="text-muted mb-2" style="font-weight: 500;">O inicia sesión con:</p>
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google-login d-flex align-items-center justify-content-center mx-auto mb-2">
+                        <i class="fab fa-google me-2"></i>
+                        Iniciar sesión con Google
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

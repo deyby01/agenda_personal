@@ -3,7 +3,9 @@ from .models import Tarea, Proyecto # Importamos nuestro modelo Tarea y Proyecto
 from django.contrib.auth.forms import UserCreationForm # Importamos el UserCreationForm base
 from django.contrib.auth.models import User # Importamos el modelo User
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, HTML, Row, Column, Div
+from crispy_forms.layout import Layout, Field, HTML, Div
+from allauth.account.forms import LoginForm
+from crispy_forms.bootstrap import AppendedText
 
 class TareaForm(forms.ModelForm):
     class Meta:
@@ -31,70 +33,53 @@ class TareaForm(forms.ModelForm):
 
 
 class CustomUserCreationForm(UserCreationForm):
-    # Añadimos los campos que queremos: email y first_name
-    # El campo 'email' en el modelo User es obligatorio por defecto en algunas configuraciones,
-    # así que es bueno incluirlo y hacerlo requerido.
     email = forms.EmailField(required=True, help_text='Requerido. Se necesita una dirección de correo válida.')
     first_name = forms.CharField(max_length=100, required=True, label='Nombre', help_text='Requerido.')
-    last_name = forms.CharField(max_length=100, required=False, label='Apellido') # Opcional si lo quieres
+    last_name = forms.CharField(max_length=100, required=False, label='Apellido')
 
     class Meta(UserCreationForm.Meta):
-        # Heredamos de la Meta clase de UserCreationForm
-        model = User # Nos aseguramos de que el modelo sea el User de Django
-        # Incluimos los campos originales de UserCreationForm (username, password1, password2)
-        # y añadimos los nuestros. El orden aquí definirá el orden en el formulario.
-        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email') # Si añadiste last_name, ponlo aquí también
-        
+        model = User
+        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
-        # No necesitamos un botón de submit aquí si ya lo tenemos en la plantilla HTML
-        # self.helper.add_input(Submit('submit', 'Registrarse', css_class='btn-primary'))
         
-        # Definimos el layout del formulario
+        # ... tu layout ...
         self.helper.layout = Layout(
-            # UserCreationForm tiene 'username', luego muestro 'first_name', 'last_name' y 'email'
-            ## y luego 'password1', 'password2' (que se llaman new_password1 y new_password2 internamente)
             'username',
             'first_name',
             'last_name',
             'email',
-            # Para los campos de contraseña, usaremos un Div para envolver el input-group
-            # Accedemos a los campos de contraseña que UserCreationForm define: new_password1 y new_password2
-            Div(
-                Field('new_password1', wrapper_class='mb-0'), # mb-0 para el Field para que el input-group maneje el margen
-                HTML("""
-                    <button class="btn btn-outline-secondary toggle-password" type="button" 
-                            data-target="{{ form.new_password1.id_for_label }}">👁️ Ver</button>
-                """),
-                css_class='input-group mb-3' # mb-3 para el input-group
-            ),
-            Div(
-                Field('new_password2', wrapper_class='mb-0'),
-                HTML("""
-                    <button class="btn btn-outline-secondary toggle-password" type="button" 
-                            data-target="{{ form.new_password2.id_for_label }}">👁️ Ver</button>
-                """),
-                css_class='input-group mb-3'
-            ),
-            # Si tuvieras otros campos, los añadirías aquí
+            AppendedText('password', '<button class="btn btn-outline-secondary toggle-password" type="button">👁️ Ver</button>'),
+            AppendedText('password2', '<button class="btn btn-outline-secondary toggle-password" type="button">👁️ Ver</button>')
         )
-        # Si no quieres que Crispy renderice el <form> y {% csrf_token %} (porque ya lo tienes en la plantilla)
-        # self.helper.form_tag = False # Descomenta si es necesario
 
+    # --- MÉTODO SAVE (ESENCIAL) ---
     def save(self, commit=True):
-        # Sobrescribimos el método save para guardar también los campos adicionales.
-        user = super().save(commit=False) # Llama al save() del padre (UserCreationForm) sin guardar en BD aún
+        user = super().save(commit=False)
         user.first_name = self.cleaned_data["first_name"]
         user.email = self.cleaned_data["email"]
-        if self.cleaned_data.get("last_name"): # Si añadiste last_name
+        if self.cleaned_data.get("last_name"):
             user.last_name = self.cleaned_data["last_name"]
         if commit:
-            user.save() # Guarda el usuario en la base de datos
+            user.save()
         return user
-    
-    
+
+
+class CustomLoginForm(LoginForm):
+    # Definimos explícitamente los campos que queremos
+    login = forms.EmailField(
+        label="Correo Electrónico",
+        widget=forms.EmailInput(attrs={'placeholder': 'tucorreo@mail.com'})
+    )
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña'})
+    )
+    remember = forms.BooleanField(label="Recordarme", required=False)
+        
     
 class ProyectoForm(forms.ModelForm):
     class Meta:
