@@ -1,6 +1,6 @@
 body {
     padding-top: 56px; /* Ajuste para la barra de navegación fija */
-    background-color: #68e2ce;
+    background-color: #c4c4c4;
 }
 .task-actions a {
     margin-left: 5px;
@@ -86,7 +86,7 @@ body {
     background: #fff;
 }
 .login-header {
-    background: linear-gradient(90deg, #1976d2 60%, #00bcd4 100%);
+    background: linear-gradient(90deg, #202020 50%, #494949 100%);
     color: #fff;
     padding: 1.5rem 1rem;
 }
@@ -128,7 +128,7 @@ form small a[href*="password/reset"] {
     background: #fff;
 }
 .registro-header {
-    background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+    background: linear-gradient(90deg, #213522 50%, #658566 100%);
     color: #fff;
     padding: 1.5rem 1rem;
 }
@@ -159,7 +159,7 @@ form small a[href*="password/reset"] {
 
 /* Navbar gradiente y sombra */
 .bg-gradient-custom {
-    background: linear-gradient(90deg, #335577 60%, #1e9aaa 100%) !important;
+    background: linear-gradient(90deg, #000000 20%, #303030 100%) !important;
     box-shadow: 0 2px 12px rgba(25, 118, 210, 0.10);
 }
 
@@ -173,7 +173,7 @@ form small a[href*="password/reset"] {
 
 /* Botones de sesión y registro llamativos */
 .btn-login {
-    background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+    background: linear-gradient(90deg, #1c324b 50%, #667a8f 100%);
     color: #fff !important;
     border-radius: 20px;
     font-weight: 600;
@@ -182,12 +182,12 @@ form small a[href*="password/reset"] {
     margin-right: 0.5rem;
 }
 .btn-login:hover, .btn-login:focus {
-    background: linear-gradient(90deg, #2e7d32 60%, #388e3c 100%);
+    background: linear-gradient(90deg, #787c7c 60%, #bebebe 100%);
     color: #fff !important;
 }
 
 .btn-register {
-    background: linear-gradient(90deg, #ff9800 60%, #ffc107 100%);
+    background: linear-gradient(90deg, #255711 50%, #79cc79 100%);
     color: #fff !important;
     border-radius: 20px;
     font-weight: 600;
@@ -195,13 +195,13 @@ form small a[href*="password/reset"] {
     border: none;
 }
 .btn-register:hover, .btn-register:focus {
-    background: linear-gradient(90deg, #f57c00 60%, #ff9800 100%);
+    background: linear-gradient(90deg, #709e66 60%, #294126 100%);
     color: #fff !important;
 }
 
 /* Footer moderno */
 .bg-footer {
-    background: linear-gradient(90deg, #335577 60%, #1e9aaa 100%) !important;
+    background: linear-gradient(90deg, #000000 20%, #303030 100%) !important;
     color: #fff;
     border-top: 2px solid #5d6063;
 }
