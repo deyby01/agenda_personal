@@ -87,13 +87,13 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Dile a allauth que el método de autenticación es el email.
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS = {'email'}
 
 # Exige que el email sea obligatorio para registrarse.
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 # Haz que el nombre de usuario ya no sea obligatorio.
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']  
 
 ACCOUNT_FORMS = {
     'login': 'tareas.forms.CustomLoginForm',
