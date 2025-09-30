@@ -82,6 +82,8 @@ INSTALLED_APPS = [
     'rest_framework',
     # Token
     'rest_framework.authtoken',
+    'django_filters',
+    'drf_spectacular',
 ]
 
 REST_FRAMEWORK = {
@@ -91,6 +93,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Agenda semanal',
+    'DESCRIPTION': 'API para la gestión de tareas y proyectos semanales.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,# Opcional para ocultar el schema.yml de la UI
 }
 
 SITE_ID = 1
