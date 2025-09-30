@@ -503,8 +503,19 @@ class TareaViewSet(viewsets.ModelViewSet):
 
     This view is responsible for performing CRUD operations on the Tarea model.
     """
-    queryset = Tarea.objects.all()
     serializer_class = TareaSerializer
+
+    def get_queryset(self):
+        """
+        Returns a queryset of Tarea objects filtered by the current user.
+        """
+        return Tarea.objects.filter(usuario=self.request.user)
+    
+    def perform_create(self, serializer):
+        """
+        Saves a new Tarea instance with the current user as the author.
+        """
+        serializer.save(usuario=self.request.user)
 
 
 class ProyectoViewSet(viewsets.ModelViewSet):
@@ -513,5 +524,16 @@ class ProyectoViewSet(viewsets.ModelViewSet):
 
     This view is responsible for performing CRUD operations on the Proyecto model.
     """
-    queryset = Proyecto.objects.all()
     serializer_class = ProyectoSerializer
+    
+    def get_queryset(self):
+        """
+        Returns a queryset of Proyecto objects filtered by the current user.
+        """
+        return Proyecto.objects.filter(usuario=self.request.user)
+    
+    def perform_create(self, serializer):
+        """
+        Saves a new Proyecto instance with the current user as the author.
+        """
+        serializer.save(usuario=self.request.user)

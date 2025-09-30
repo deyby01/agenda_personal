@@ -16,12 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.authtoken import views
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('agenda/', include('tareas.urls')),
-    path('api/', include('tareas.api_urls')),  
+
+    path('api/', include('tareas.api_urls')), 
+    path('api-token-auth/', views.obtain_auth_token, name='api-token-auth'),
+
     path('accounts/', include('allauth.urls')),
     path('', RedirectView.as_view(pattern_name='mi_semana_actual_url', permanent=False)), 
 ]
