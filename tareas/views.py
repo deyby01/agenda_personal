@@ -10,6 +10,11 @@ from django.db.models import Q
 from django.contrib import messages 
 from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView, TemplateView
+from rest_framework import viewsets
+from .serializers import TareaSerializer, ProyectoSerializer
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 
 class ListViewTasks(LoginRequiredMixin, ListView):
@@ -488,3 +493,60 @@ class ToggleTaskStatusView(LoginRequiredMixin, View):
         
         return redirect('mi_semana_actual_url')
 
+
+
+
+
+
+
+# =========== VIEWS FOR API ===========
+class TareaViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for Tarea model.
+
+    This view is responsible for performing CRUD operations on the Tarea model.
+    """
+    serializer_class = TareaSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['completada']
+    search_fields = ['titulo', 'descripcion']
+
+    def get_queryset(self):
+        """
+        Returns a queryset of Tarea objects filtered by the current user.
+        """
+        if getattr(self, 'swagger_fake_view', False):
+            return Tarea.objects.none()
+        return Tarea.objects.filter(usuario=self.request.user)
+    
+    def perform_create(self, serializer):
+        """
+        Saves a new Tarea instance with the current user as the author.
+        """
+        serializer.save(usuario=self.request.user)
+
+
+class ProyectoViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for Proyecto model.
+
+    This view is responsible for performing CRUD operations on the Proyecto model.
+    """
+    serializer_class = ProyectoSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['estado']
+    search_fields = ['nombre', 'descripcion']
+    
+    def get_queryset(self):
+        """
+        Returns a queryset of Proyecto objects filtered by the current user.
+        """
+        if getattr(self, 'swagger_fake_view', False):
+            return Proyecto.objects.none()
+        return Proyecto.objects.filter(usuario=self.request.user)
+    
+    def perform_create(self, serializer):
+        """
+        Saves a new Proyecto instance with the current user as the author.
+        """
+        serializer.save(usuario=self.request.user)

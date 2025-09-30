@@ -77,7 +77,33 @@ INSTALLED_APPS = [
     
     # Proveedor google
     'allauth.socialaccount.providers.google',
+
+    # api
+    'rest_framework',
+    # Token
+    'rest_framework.authtoken',
+    'django_filters',
+    'drf_spectacular',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Agenda semanal',
+    'DESCRIPTION': 'API para la gestión de tareas y proyectos semanales.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,# Opcional para ocultar el schema.yml de la UI
+}
 
 SITE_ID = 1
 
@@ -87,13 +113,13 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Dile a allauth que el método de autenticación es el email.
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS = {'email'}
 
 # Exige que el email sea obligatorio para registrarse.
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 # Haz que el nombre de usuario ya no sea obligatorio.
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']  
 
 ACCOUNT_FORMS = {
     'login': 'tareas.forms.CustomLoginForm',
