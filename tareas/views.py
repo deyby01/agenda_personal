@@ -10,6 +10,8 @@ from django.db.models import Q
 from django.contrib import messages 
 from django.contrib.auth.mixins import LoginRequiredMixin 
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, DeleteView, TemplateView
+from rest_framework import viewsets
+from .serializers import TareaSerializer, ProyectoSerializer
 
 
 class ListViewTasks(LoginRequiredMixin, ListView):
@@ -488,3 +490,28 @@ class ToggleTaskStatusView(LoginRequiredMixin, View):
         
         return redirect('mi_semana_actual_url')
 
+
+
+
+
+
+
+# =========== VIEWS FOR API ===========
+class TareaViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for Tarea model.
+
+    This view is responsible for performing CRUD operations on the Tarea model.
+    """
+    queryset = Tarea.objects.all()
+    serializer_class = TareaSerializer
+
+
+class ProyectoViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for Proyecto model.
+
+    This view is responsible for performing CRUD operations on the Proyecto model.
+    """
+    queryset = Proyecto.objects.all()
+    serializer_class = ProyectoSerializer

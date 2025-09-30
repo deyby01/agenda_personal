@@ -20,7 +20,8 @@ from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('agenda/', include('tareas.urls')),  
+    path('agenda/', include('tareas.urls')),
+    path('api/', include('tareas.api_urls')),  
     path('accounts/', include('allauth.urls')),
     path('', RedirectView.as_view(pattern_name='mi_semana_actual_url', permanent=False)), 
 ]

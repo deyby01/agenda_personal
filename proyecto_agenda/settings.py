@@ -77,6 +77,9 @@ INSTALLED_APPS = [
     
     # Proveedor google
     'allauth.socialaccount.providers.google',
+
+    # api
+    'rest_framework',
 ]
 
 SITE_ID = 1
