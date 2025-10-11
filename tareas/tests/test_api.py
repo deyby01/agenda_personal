@@ -286,13 +286,13 @@ class TareaAPITest(TestCase):
         """
         Test: Paginación debe limitar resultados según configuración
         
-        Tu configuración: PAGE_SIZE = 5
+        Tu configuración: PAGE_SIZE = 20
         Si hay más de 5 tareas, debe paginar
         """
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token1.key)
 
-        # Crear 7 tareas adicionales (+ 1 existente = 8 total)
-        for i in range(7):
+        # Crear 10 tareas adicionales (+ 1 existente = 11 total)
+        for i in range(10):
             Tarea.objects.create(
                 usuario=self.user1,
                 titulo=f'Tarea paginacion {i}',
@@ -308,13 +308,13 @@ class TareaAPITest(TestCase):
         data = response.json()
 
         # Debe mostra maximo 5 resultados
-        self.assertEqual(len(data['results']), 5)
+        self.assertEqual(len(data['results']), 10)
 
         # Debe indicar que hay mas paginas
         self.assertIsNotNone(data['next'])
 
         # Total debe ser 8
-        self.assertEqual(data['count'], 8)
+        self.assertEqual(data['count'], 11)
 
 
     def test_api_actualizar_parcial_patch(self):
