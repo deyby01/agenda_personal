@@ -31,19 +31,12 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-# Si DEBUG es False, debes llenar ALLOWED_HOSTS.
-# Podríamos hacer esto condicional o leerlo desde una variable de entorno.
-# Ejemplo de cómo podría ser:
+
 if not DEBUG:
-    # En producción, leer ALLOWED_HOSTS de una variable de entorno
-    # que podría ser una lista separada por comas.
     allowed_hosts_env = os.environ.get('ALLOWED_HOSTS')
     if allowed_hosts_env:
         ALLOWED_HOSTS = allowed_hosts_env.split(',')
     else:
-        # Si no se define la variable de entorno, es un error de configuración en producción
-        # Aquí podrías lanzar un error o dejarlo vacío y que Django falle (lo cual es seguro).
-        # Por ahora, lo dejamos así; PythonAnywhere nos ayudará a configurarlo.
         ALLOWED_HOSTS = [] # Django se quejará si está vacío y DEBUG=False
 else:
     # Para desarrollo con DEBUG=True, podemos dejarlo vacío o añadir hosts de desarrollo
@@ -94,7 +87,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 5,
+    'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
