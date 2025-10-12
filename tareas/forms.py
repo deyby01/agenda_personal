@@ -8,9 +8,18 @@ from allauth.account.forms import LoginForm
 from crispy_forms.bootstrap import AppendedText
 
 class TareaForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        # Extract user from kwargs if provided
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # Filter projects to only user's projects
+        if self.user:
+            self.fields['proyecto'].queryset = Proyecto.objects.filter(usuario=self.user)
+
     class Meta:
         model = Tarea
-        fields = ['titulo', 'descripcion', 'tiempo_estimado', 'fecha_asignada', 'completada']
+        fields = ['titulo', 'descripcion', 'tiempo_estimado', 'fecha_asignada', 'proyecto', 'completada']
 
         widgets = {
             'titulo': forms.TextInput(attrs={'class': 'form-control'}), # Añadido
@@ -18,6 +27,7 @@ class TareaForm(forms.ModelForm):
             'fecha_asignada': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}), # Añadido class
             'tiempo_estimado': forms.TextInput(attrs={'placeholder': 'Ej: 1h30m o 0:45:00', 'class': 'form-control'}), # Añadido class
             'completada': forms.CheckboxInput(attrs={'class': 'form-check-input'}), # Para checkboxes
+            'proyecto': forms.Select(attrs={'class': 'form-control'}), 
         }
         labels = {
             'titulo': 'Título de la Tarea',
@@ -25,9 +35,11 @@ class TareaForm(forms.ModelForm):
             'tiempo_estimado': 'Tiempo Estimado (ej: 2h, 45m)',
             'fecha_asignada': 'Fecha Asignada',
             'completada': '¿Está Completada?',
+            'proyecto': 'Proyecto (Opcional)',
         }
         help_texts = {
-            'tiempo_estimado': 'Usa un formato como "1h 30m", "00:30:00". Django intentará interpretarlo.',
+            'tiempo_estimado': 'Usa un formato como "1h 30m", "00:30:00".',
+            'proyecto': 'Selecciona el proyecto para organizar esta tarea (opcional).',
         }
 
 
