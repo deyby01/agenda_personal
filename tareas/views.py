@@ -41,6 +41,12 @@ class CreateViewTask(LoginRequiredMixin, CreateView):
     template_name = 'tareas/formulario_generico.html'
     form_class = TareaForm
     success_url = reverse_lazy('lista_de_tareas_url') 
+
+    def get_form_kwargs(self):
+        """ Pass user to form for project filtering """
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user # Pass user to form
+        return kwargs
     
     def form_valid(self, form):
         """ 
@@ -123,6 +129,12 @@ class UpdateViewTask(LoginRequiredMixin, UpdateView):
     form_class = TareaForm
     template_name = 'tareas/formulario_generico.html'
     success_url = reverse_lazy('lista_de_tareas_url')
+
+    def get_form_kwargs(self):
+        """ Pass user to form for project filtering """
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user # Pass user to form
+        return kwargs
     
     def get_queryset(self):
         """
@@ -132,7 +144,7 @@ class UpdateViewTask(LoginRequiredMixin, UpdateView):
         where the 'usuario' field matches the currently logged-in user.
         This is a critical security measure.
         """
-        return super().get_queryset().filter(usuario=self.request.user)  
+        return Tarea.objects.filter(usuario=self.request.user)  
     
     def form_valid(self, form):
         """ 
@@ -508,7 +520,7 @@ class TareaViewSet(viewsets.ModelViewSet):
     """
     serializer_class = TareaSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['completada']
+    filterset_fields = ['completada', 'proyecto']
     search_fields = ['titulo', 'descripcion']
 
     def get_queryset(self):
@@ -521,9 +533,19 @@ class TareaViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        Saves a new Tarea instance with the current user as the author.
+        Saves a new Tarea instance with the current user as the author and handle 
+        project assigment during creation.
         """
-        serializer.save(usuario=self.request.user)
+        proyecto_id = serializer.validated_data.pop('proyecto_id', None)
+        tarea = serializer.save(usuario=self.request.user)
+
+        if proyecto_id:
+            try:
+                proyecto = Proyecto.objects.get(id=proyecto_id, usuario=self.request.user)
+                tarea.proyecto = proyecto
+                tarea.save()
+            except Proyecto.DoesNotExist:
+                pass
 
 
 class ProyectoViewSet(viewsets.ModelViewSet):

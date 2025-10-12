@@ -177,3 +177,127 @@ class ProyectoModelTest(TestCase):
         
         self.assertEqual(str(proyecto), 'Nombre str')
         self.assertEqual(proyecto.usuario, self.user)
+
+
+
+class ProjectTaskRelationshipTest(TestCase):
+    """
+    TDD Tests for Project-Task Relationship
+    These test WILL FAIL initially (RED phase)
+    """
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='tdduser',
+            email='tdd@test.com',
+            password='tddpass123'
+        )
+
+        self.proyecto = Proyecto.objects.create(
+            usuario=self.user,
+            nombre='Proyecto TDD Test',
+            descripcion='Proyecto creado para testing TDD',
+            estado='en_curso',
+            fecha_inicio=timezone.now().date(),
+            fecha_fin_estimada=timezone.now().date() + datetime.timedelta(days=30)
+        )
+
+    def test_task_can_be_assigned_to_project(self):
+        """
+        TEST 1: Una tarea puede ser asignada a un proyecto
+        Este test fallara porque Tarea no tiene campo proyecto
+        """
+        tarea = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea TDD Test',
+            descripcion='Tarea para probar relationship TDD',
+            proyecto=self.proyecto
+        )
+
+        # Verificar que la relacion funciona
+        self.assertEqual(tarea.proyecto, self.proyecto)
+        self.assertEqual(tarea.proyecto.nombre, 'Proyecto TDD Test')
+
+    
+    def test_project_shows_related_tasks(self):
+        """
+        TEST 2: Un proyecto puede mostrar sus tareas relacionadas
+        este test fallara por que no existe el related_name
+        """
+        # Crear tareas del proyecto
+        tarea1 = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Primera tarea TDD',
+            proyecto=self.proyecto
+        )
+
+        tarea2 = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Segunda tarea TDD',
+            proyecto=self.proyecto
+        )
+
+        # Verificar reverse relationship
+        tareas_del_proyecto = self.proyecto.tareas.all()
+        self.assertEqual(tareas_del_proyecto.count(), 2)
+        self.assertIn(tarea1, tareas_del_proyecto)
+        self.assertIn(tarea2, tareas_del_proyecto)
+
+    def test_task_without_project_is_valid(self):
+        """
+        TEST 3: Las tareas pueden existir sin proyecto (opcional)
+        """
+        tarea_sin_proyecto = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea independiente'
+        )
+
+        self.assertIsNone(tarea_sin_proyecto.proyecto)
+        self.assertTrue(tarea_sin_proyecto.pk)
+
+    def test_deleting_project_nullifies_task_project(self):
+        """
+        TEST 4: Borrar proyecto pone tasks.proyecto = NULL (no borra tasks)
+        """
+        tarea = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea que sobrevive',
+            proyecto=self.proyecto
+        )
+
+        proyecto_id = self.proyecto.pk
+        self.proyecto.delete()
+
+        # Tarea debe seguir existiendo
+        tarea_update = Tarea.objects.get(pk=tarea.pk)
+        self.assertIsNone(tarea_update.proyecto)
+        self.assertEqual(tarea_update.titulo, 'Tarea que sobrevive')
+
+    def test_projecto_completion_percentage(self):
+        """
+        TEST 5: Proyecto puede calcular porcentaje de completado.
+        """
+        # Crear tareas completadas y pendientes.
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea completada',
+            proyecto=self.proyecto,
+            completada=True
+        )
+
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea completada 2',
+            proyecto=self.proyecto,
+            completada=True
+        )
+
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea pendiente',
+            proyecto=self.proyecto,
+            completada=False
+        )
+
+        # 2 de 3 tareas completadas =   66.67%
+        porcentaje = self.proyecto.get_completion_percentage()
+        self.assertEqual(round(porcentaje, 1), 66.7)
