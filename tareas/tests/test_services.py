@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 from unittest.mock import patch
 
-from tareas.services import WeekCalculatorService, WeekNavegationService, WeekRange
+from tareas.services import WeekCalculatorService, WeekNavigationService, WeekRange
 
 class WeekRangeTest(TestCase):
     """ Test WeekRange value object """
@@ -165,7 +165,7 @@ class WeekNavigationServiceTest(TestCase):
         """
         get_navigation_urls debe generar todas las URLs si no es semana actual.
         """
-        urls = WeekNavegationService.get_navigation_urls(self.current_week, self.navigation_weeks)
+        urls = WeekNavigationService.get_navigation_urls(self.current_week, self.navigation_weeks)
 
         self.assertIsNotNone(urls['previous'])
         self.assertIsNotNone(urls['next'])
@@ -178,7 +178,7 @@ class WeekNavigationServiceTest(TestCase):
         """
         get_navigation_urls debe devolver previous=None si es semana actual.
         """
-        urls = WeekNavegationService.get_navigation_urls(self.current_week, self.navigation_weeks)
+        urls = WeekNavigationService.get_navigation_urls(self.current_week, self.navigation_weeks)
 
         self.assertIsNone(urls['previous'])
         self.assertIsNotNone(urls['next'])
@@ -188,7 +188,7 @@ class WeekNavigationServiceTest(TestCase):
         """
         get_create_task_urls debe generar URLs para crear tareas por dia
         """
-        urls = WeekNavegationService.get_create_task_urls(self.current_week)
+        urls = WeekNavigationService.get_create_task_urls(self.current_week)
 
         self.assertEqual(len(urls), 7)
         self.assertIn('monday', urls)

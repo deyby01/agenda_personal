@@ -14,6 +14,8 @@ from rest_framework import viewsets
 from .serializers import TareaSerializer, ProyectoSerializer
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
+from .services import WeekCalculatorService, WeekNavigationService
+from .repositories import TareaRepository, ProyectoRepository
 
 
 
@@ -372,106 +374,103 @@ class DeleteViewProject(LoginRequiredMixin, DeleteView):
 
 class MyWeekView(LoginRequiredMixin, TemplateView):
     """
-    Displays a weekly dashboard of tasks and active projects.
+    SOLID-Compliant MyWeekView implementation
 
-    This view calculates a seven-day week based on URL parameters or the
-    current date. It aggregates all tasks for each day of the week and
-    also queries for all projects that are active during that same
-    period, serving as a central planning dashboard for the user.
+    Single Responsibility: ONLY handles HTTP request/response and template rendering.
+    - No business logic (delegated to services)
+    - No data access logic (delegated to repositories) 
+    - No date calculations (delegated to services)
+    
+    This follows:
+    - SRP: Single responsibility (HTTP handling only)
+    - DIP: Depends on abstractions (services/repositories)
+    - OCP: Open for extension via service composition
     """
     template_name = 'tareas/mi_semana.html'
-    
-    def dispatch(self, request, *args, **kwargs):
-        """
-        Validates date parts from the URL before proceeding.
 
-        This method acts as a gatekeeper. If date parameters are provided
-        in the URL and they form an invalid date, it redirects the user
-        before any complex logic in get_context_data is executed.
-        """
-        year = self.kwargs.get('anio')
-        month = self.kwargs.get('mes')
-        day = self.kwargs.get('dia')
-
-        if year and month and day:
-            try:
-                datetime.date(int(year), int(month), int(day))
-            except ValueError:
-                return redirect(reverse('mi_semana_actual_url'))
-        
-        return super().dispatch(request, *args, **kwargs)
-    
     def get_context_data(self, **kwargs):
-        """
-        Prepares all data for the weekly dashboard template.
-
-        This method calculates the date range for the week, loops through
-        each day to fetch its tasks, runs a complex query for all
-        active projects within the week, and prepares navigation URLs.
-        """
         context = super().get_context_data(**kwargs)
-        
-        # --- Date determination (now simpler) ---
-        year = self.kwargs.get('anio')
-        month = self.kwargs.get('mes')
-        day = self.kwargs.get('dia')
-        
-        if year and month and day:
-            base_date = datetime.date(int(year), int(month), int(day))
-        else:
-            base_date = timezone.localdate()
-            
-        start_week = base_date - datetime.timedelta(days=base_date.weekday())
-        end_week = start_week + datetime.timedelta(days=6)
-        
-        previous_week_date = start_week - datetime.timedelta(days=7)
-        next_week_date = start_week + datetime.timedelta(days=7)
-        
+
+        base_date = WeekCalculatorService.parse_date_params(
+            kwargs.get('anio'),
+            kwargs.get('mes'),
+            kwargs.get('dia')
+        )
+
+        # Calculate week range (Service Responsability)
+        current_week = WeekCalculatorService.get_week_range(base_date)
+
+        # Get navigation data (Service Responsability)
+        navigation_week = WeekCalculatorService.get_navigation_weeks(current_week)
+        navigation_urls = WeekNavigationService.get_navigation_urls(current_week, navigation_week)
+        create_task_urls = WeekNavigationService.get_create_task_urls(current_week)
+
+        # Get user's tasks for the week (Repository Responsibility)
+        tasks_by_date = TareaRepository.get_tasks_grouped_by_date(self.request.user, current_week)
+
+        # Get active projects (Repository Responsibility)
+        active_projects = ProyectoRepository.get_active_projects_for_user_in_period(
+            self.request.user,
+            current_week.start_date,
+            current_week.end_date,
+        )
+
+        # Get week statistics (Repository Responsibility)
+        completed_count = TareaRepository.get_completed_tasks_count(self.request.user, current_week)
+        total_count = TareaRepository.get_total_tasks_count(self.request.user, current_week)
+
+        # Build context (View responsibility - presentation logic only)
+        context.update({
+            'rango_fechas_str': current_week.format_display(),
+            'es_semana_actual': current_week.is_current_week,
+            'dias_con_tareas': self._transform_tasks_to_template_format(tasks_by_date, create_task_urls),
+            'semana_anterior_url': navigation_urls.get('previous'),
+            'semana_siguiente_url': navigation_urls.get('next'),
+            'proyectos_activos': active_projects,
+
+            'completed_count': completed_count,
+            'total_count': total_count,
+            'completion_percentage': self._calculate_completion_percentage(completed_count, total_count)
+
+        })
+
+        return context
+    
+
+    def _transform_tasks_to_template_format(self, tasks_by_date, create_task_urls):
+        """
+        Transforms SOLID repository data to match original template structure.
+        This is pure presentation logic - stays in view.
+        """
+
         today = timezone.localdate()
-        is_current_week = (start_week <= today <= end_week)
-        
-        days_with_tasks = []
-        for i in range(7):
-            current_date = start_week + datetime.timedelta(days=i)
-            tasks_for_day = Tarea.objects.filter(
-                usuario=self.request.user,
-                fecha_asignada=current_date
-            ).order_by('completada', 'titulo')
-            
-            url_create_task_day = f"{reverse('crear_tarea_url')}?fecha_asignada={current_date.strftime('%Y-%m-%d')}"
-            
-            days_with_tasks.append({
-                'fecha': current_date,
-                'tareas': tasks_for_day,
-                'es_hoy': current_date == today,
-                'url_crear_tarea_dia': url_create_task_day
+
+        dias_con_tareas = []
+
+        # Iterate through week days in order
+        for date in sorted(tasks_by_date.keys()):
+            # Map day name for URL lookup
+            day_name = date.strftime('%A').lower()
+
+            dias_con_tareas.append({
+                'fecha': date,
+                'tareas': tasks_by_date[date], # Lists of taks for this day
+                'es_hoy': date == today,
+                'url_crear_tarea_dia': create_task_urls.get(day_name, '')
             })
         
-        if start_week.month == end_week.month:
-            date_range_str = f"{start_week.strftime('%d')} - {end_week.strftime('%d %b %Y')}"
-        else:
-            date_range_str = f"{start_week.strftime('%d %b')} - {end_week.strftime('%d %b %Y')}"
-            
-        active_projects = Proyecto.objects.filter(
-            Q(usuario=self.request.user),
-            (
-                Q(fecha_inicio__lte=end_week, fecha_fin_estimada__gte=start_week) |
-                Q(fecha_inicio__lte=end_week, fecha_fin_estimada__isnull=True) |
-                Q(fecha_inicio__isnull=True, fecha_fin_estimada__gte=start_week) |
-                Q(fecha_inicio__isnull=True, fecha_fin_estimada__isnull=True)
-            ),
-            ~Q(estado__in=['completado', 'cancelado'])
-        ).distinct().order_by('fecha_fin_estimada', 'nombre')
-        
-        context['dias_con_tareas'] = days_with_tasks
-        context['rango_fechas_str'] = date_range_str
-        context['es_semana_actual'] = is_current_week
-        context['semana_anterior_url'] = reverse('mi_semana_especifica_url', args=[previous_week_date.year, previous_week_date.month, previous_week_date.day]) if not is_current_week else None
-        context['semana_siguiente_url'] = reverse('mi_semana_especifica_url', args=[next_week_date.year, next_week_date.month, next_week_date.day])
-        context['proyectos_activos'] = active_projects
-        
-        return context
-            
+        return dias_con_tareas
+    
+    def _calculate_completion_percentage(self, completed: int, total: int) -> float:
+        """
+        Simple helper method for presentation calculation.
+        This stays in the view beacuse it's pure presentation logic,
+        not business logic that would need testing.
+        """
+        if total == 0.0:
+            return 0.0
+        return round((completed / total) * 100, 1)    
+
 
 
 class ToggleTaskStatusView(LoginRequiredMixin, View):

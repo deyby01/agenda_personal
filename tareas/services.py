@@ -60,7 +60,7 @@ class WeekCalculatorService:
             base_date = timezone.localdate()
 
         # Calcular lunes de la semana (weekday 0 = lunes)
-        start_week = base_date -datetime.timedelta(days=base_date.weekday())
+        start_week = base_date - datetime.timedelta(days=base_date.weekday())
         # Calcular domingo de la semana
         end_week = start_week + datetime.timedelta(days=6)
 
@@ -108,7 +108,7 @@ class WeekCalculatorService:
         return timezone.localdate()
 
 
-class WeekNavegationService:
+class WeekNavigationService:
     """
     Servicio para generar URLs de navegacion de semana.
 
