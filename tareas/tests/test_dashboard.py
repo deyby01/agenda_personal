@@ -129,6 +129,84 @@ class DashboardViewTest(TestCase):
         self.assertContains(response, 'Future Task')
 
         # Advanced checks: Should organized by priority zones
-        self.assertContains(response, 'Critical') # Critical zone section
-        self.assertContains(response, 'Attention') # Attention zone section
-        self.assertContains(response, 'Future') # Future zone section
+        self.assertContains(response, 'critical') # Critical zone section
+        self.assertContains(response, 'attention') # Attention zone section
+        self.assertContains(response, 'future') # Future zone section
+
+
+    def test_dashboard_shows_project_health_overview(self):
+        """
+        Dashboard should show project health using ProjectProgressCalculator
+        
+        Testing Deyby's vision:
+        - Active, paused, completed, cancelled projects  
+        - Progress percentage for each project
+        - Time remaining calculations
+        - Health status indicators (🟢 Healthy, ⚠️ At Risk, 🚨 Critical)
+        """
+        # Login user
+        self.client.login(username='testuser', password='testpassword')
+        
+        # Create test projects with different health states
+        today = timezone.now().date()
+        
+        # HEALTHY PROJECT - On track
+        healthy_project = Proyecto.objects.create(
+            usuario=self.user,
+            nombre='Healthy Project',
+            descripcion='This project is on track',
+            fecha_inicio=today - datetime.timedelta(days=10),
+            fecha_fin_estimada=today + datetime.timedelta(days=20),  # 30 total days, 10 used
+            estado='en_curso'
+        )
+        
+        # AT RISK PROJECT - Tight timeline
+        risk_project = Proyecto.objects.create(
+            usuario=self.user,
+            nombre='At Risk Project', 
+            descripcion='This project needs attention',
+            fecha_inicio=today - datetime.timedelta(days=25),
+            fecha_fin_estimada=today + datetime.timedelta(days=5),   # 30 total days, 25 used
+            estado='en_curso'
+        )
+        
+        # OVERDUE PROJECT - Past deadline
+        overdue_project = Proyecto.objects.create(
+            usuario=self.user,
+            nombre='Overdue Project',
+            descripcion='This project is overdue',
+            fecha_inicio=today - datetime.timedelta(days=40),
+            fecha_fin_estimada=today - datetime.timedelta(days=5),  # Past deadline
+            estado='en_curso'
+        )
+        
+        # COMPLETED PROJECT - Success story
+        completed_project = Proyecto.objects.create(
+            usuario=self.user,
+            nombre='Completed Project',
+            descripcion='Successfully finished',
+            fecha_inicio=today - datetime.timedelta(days=30),
+            fecha_fin_estimada=today - datetime.timedelta(days=5),
+            estado='completado'
+        )
+        
+        # Access dashboard
+        url = reverse('dashboard')
+        response = self.client.get(url)
+        
+        # Should show project information
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Healthy Project')
+        self.assertContains(response, 'At Risk Project')
+        self.assertContains(response, 'Overdue Project')  
+        self.assertContains(response, 'Completed Project')
+        
+        # Should show project health sections  
+        self.assertContains(response, 'Proyectos')  # Projects section exists
+        self.assertContains(response, 'Salud')     # Health indicators exist
+        
+        # Should show progress information
+        self.assertContains(response, '%')         # Progress percentages
+        self.assertContains(response, 'días')      # Time remaining info
+
+

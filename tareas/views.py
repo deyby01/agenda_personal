@@ -2,7 +2,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy 
 from django.views import generic, View
 
-from tareas.business_logic import PriorityLevel, TaskPrioritizationEngine 
+from tareas.business_logic import PriorityLevel, TaskPrioritizationEngine, ProjectProgressCalculator
 from .models import Tarea, Proyecto
 from .forms import TareaForm, CustomUserCreationForm, ProyectoForm
 import datetime
@@ -494,9 +494,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         # Get user's tasks
         user_tasks = Tarea.objects.filter(usuario=self.request.user)
+        # Get user's projects
+        user_projects = Proyecto.objects.filter(usuario=self.request.user)
         
         # 🚀 USE YOUR TaskPrioritizationEngine
-        from .business_logic import TaskPrioritizationEngine, PriorityLevel
         prioritized_task_scores = TaskPrioritizationEngine.prioritize_tasks(user_tasks)
         
         # Create efficient task lookup dictionary
@@ -529,6 +530,66 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 attention_tasks.append(task_data)
             else:  # LOW priority
                 future_tasks.append(task_data)
+
+        # DUAL ORGANIZATION - Health status + Project state
+        projects_by_health = {
+            'healthy': [],
+            'at_risk': [],
+            'critical': [],
+            'completed': []
+        }
+
+        projects_by_status = {
+            'planificado': [],
+            'en_curso': [],
+            'completado': [],
+            'en_espera': [],
+            'cancelado': []
+        }
+
+        total_projects = 0
+
+        for proyecto in user_projects:
+            # Calculate ADVANCED progress for each project
+            progress_data = ProjectProgressCalculator.calculate_advanced_progress(proyecto)
+
+            # Calculate days remaining manually
+            if proyecto.fecha_fin_estimada:
+                today = timezone.now().date()
+                days_remaining = (proyecto.fecha_fin_estimada - today).days
+            else:
+                days_remaining = None
+
+            # Create comprehensive project data
+            project_data = {
+                'project': proyecto,
+                'progress_data': progress_data,
+                'percentage': progress_data['completion_percentage'],
+                'velocity': progress_data['velocity'],
+                'days_remaining': days_remaining,
+                'health_status': progress_data['health_status'],
+                'estimated_completion': progress_data['estimated_completion'],
+                'total_tasks': progress_data['total_tasks'],
+                'completed_tasks': progress_data['completed_tasks'],
+                'pending_tasks': progress_data['pending_tasks'],
+                'critical_tasks': progress_data['critical_tasks']
+            }
+
+            # ORGANIZATION 1: By Health Status 
+            if proyecto.estado == 'completado':
+                projects_by_health['completed'].append(project_data)
+            elif progress_data['health_status'] == 'critical':
+                projects_by_health['critical'].append(project_data)
+            elif progress_data['health_status'] == 'at_risk':
+                projects_by_health['at_risk'].append(project_data)
+            else: # Healthy
+                projects_by_health['healthy'].append(project_data)
+
+            # Organize by project status
+            if proyecto.estado in projects_by_status:
+                projects_by_status[proyecto.estado].append(project_data)
+
+            total_projects += 1
         
         # Add to context
         context.update({
@@ -536,6 +597,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'attention_tasks': attention_tasks, 
             'future_tasks': future_tasks,
             'total_tasks': len(prioritized_task_scores),
+
+            'projects_by_health': projects_by_health,
+            'projects_by_status': projects_by_status,
+            'total_projects': total_projects,
+
+            # Quick stats with correct names
+            'planificado_count': len(projects_by_status['planificado']),
+            'en_curso_count': len(projects_by_status['en_curso']),
+            'completado_count': len(projects_by_status['completado']),
+            'en_espera_count': len(projects_by_status['en_espera']),
+            'cancelado_count': len(projects_by_status['cancelado']),
         })
         
         return context
