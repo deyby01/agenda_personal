@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Inteligente{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1>🎯 Dashboard Inteligente</h1>
+            <p>Bienvenido, <strong>{{ user.username }}</strong>! Tienes {{ total_tasks }} tareas activas.</p>
+            
+            <!-- CRITICAL ZONE -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h4><i class="fas fa-exclamation-triangle"></i> 🚨 Zona Critica ({{ critical_tasks|length }})</h4>
+                            <small>Tareas que requieren atención inmediata</small>
+                        </div>
+                        <div class="card-body">
+                            {% if critical_tasks %}
+                                {% for item in critical_tasks %}
+                                    <div class="alert alert-danger">
+                                        <strong>{{ item.task.titulo }}</strong><br>
+                                        <small>{{ item.task.descripcion|default:"Sin descripción" }}</small><br>
+                                        <small class="text-muted">Vence: {{ item.task.fecha_asignada|date:"d M Y" }}</small><br>
+                                        <div class="mt-2">
+                                            {% for reason in item.reasons %}
+                                                <small class="badge bg-danger me-1">{{ reason }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">¡Excelente! No tienes tareas críticas.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ATTENTION ZONE -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning">
+                            <h4><i class="fas fa-clock"></i> ⚠️ Zona Atención ({{ attention_tasks|length }})</h4>
+                            <small>Tareas para planificar y organizar</small>
+                        </div>
+                        <div class="card-body">
+                            {% if attention_tasks %}
+                                {% for item in attention_tasks %}
+                                    <div class="alert alert-warning">
+                                        <strong>{{ item.task.titulo }}</strong><br>
+                                        <small>{{ item.task.descripcion|default:"Sin descripción" }}</small><br>
+                                        <small class="text-muted">Vence: {{ item.task.fecha_asignada|date:"d M Y" }}</small><br>
+                                        <div class="mt-2">
+                                            {% for reason in item.reasons %}
+                                                <small class="badge bg-warning text-dark me-1">{{ reason }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No tienes tareas en zona de atención.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FUTURE ZONE -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h4><i class="fas fa-calendar-alt"></i> ✅ Zona Futuro ({{ future_tasks|length }})</h4>
+                            <small>Tareas con tiempo suficiente</small>
+                        </div>
+                        <div class="card-body">
+                            {% if future_tasks %}
+                                {% for item in future_tasks %}
+                                    <div class="alert alert-success">
+                                        <strong>{{ item.task.titulo }}</strong><br>
+                                        <small>{{ item.task.descripcion|default:"Sin descripción" }}</small><br>
+                                        <small class="text-muted">Vence: {{ item.task.fecha_asignada|date:"d M Y" }}</small><br>
+                                        <div class="mt-2">
+                                            {% for reason in item.reasons %}
+                                                <small class="badge bg-success me-1">{{ reason }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No tienes tareas en el futuro lejano.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5>Acciones Rápidas</h5>
+                            <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary me-2">
+                                <i class="fas fa-plus"></i> Nueva Tarea
+                            </a>
+                            <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-secondary">
+                                <i class="fas fa-list"></i> Ver Todas las Tareas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

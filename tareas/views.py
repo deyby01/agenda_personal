@@ -1,6 +1,8 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy 
-from django.views import generic, View 
+from django.views import generic, View
+
+from tareas.business_logic import PriorityLevel, TaskPrioritizationEngine 
 from .models import Tarea, Proyecto
 from .forms import TareaForm, CustomUserCreationForm, ProyectoForm
 import datetime
@@ -469,8 +471,74 @@ class MyWeekView(LoginRequiredMixin, TemplateView):
         """
         if total == 0.0:
             return 0.0
-        return round((completed / total) * 100, 1)    
+        return round((completed / total) * 100, 1)  
 
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    """
+    Intelligent Dashboard View - Deyby's Vision Implementation
+    
+    Features:
+    - Task prioritization using TaskPrioritizationEngine  
+    - Priority zones: Critical, Attention, Future
+    - Real-time task scoring and categorization
+    
+    Security: Requires authentication via LoginRequiredMixin
+    """
+    template_name = 'dashboard.html'
+    
+    def get_context_data(self, **kwargs):
+        """Prepare intelligent dashboard data using business logic"""
+        context = super().get_context_data(**kwargs)
+        
+        # Get user's tasks
+        user_tasks = Tarea.objects.filter(usuario=self.request.user)
+        
+        # 🚀 USE YOUR TaskPrioritizationEngine
+        from .business_logic import TaskPrioritizationEngine, PriorityLevel
+        prioritized_task_scores = TaskPrioritizationEngine.prioritize_tasks(user_tasks)
+        
+        # Create efficient task lookup dictionary
+        tasks_dict = {task.id: task for task in user_tasks}
+        
+        # Organize by priority zones
+        critical_tasks = []
+        attention_tasks = []
+        future_tasks = []
+        
+        for task_score in prioritized_task_scores:
+            # Get actual task object using task_id
+            task = tasks_dict.get(task_score.task_id)
+            if not task:
+                continue
+                
+            # Create combined data for template  
+            task_data = {
+                'task': task,
+                'priority_level': task_score.priority_level,
+                'urgency_level': task_score.urgency_level,
+                'score': task_score.score,
+                'reasons': task_score.reasons
+            }
+            
+            # Categorize into priority zones
+            if task_score.priority_level == PriorityLevel.CRITICAL:
+                critical_tasks.append(task_data)
+            elif task_score.priority_level in [PriorityLevel.HIGH, PriorityLevel.MEDIUM]:
+                attention_tasks.append(task_data)
+            else:  # LOW priority
+                future_tasks.append(task_data)
+        
+        # Add to context
+        context.update({
+            'critical_tasks': critical_tasks,
+            'attention_tasks': attention_tasks, 
+            'future_tasks': future_tasks,
+            'total_tasks': len(prioritized_task_scores),
+        })
+        
+        return context
 
 
 class ToggleTaskStatusView(LoginRequiredMixin, View):

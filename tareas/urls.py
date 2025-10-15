@@ -5,6 +5,7 @@ from .views import VistaRegistro
 
 urlpatterns = [
     path('', views.MyWeekView.as_view(), name='mi_semana_actual_url'),
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('lista-tareas/', views.ListViewTasks.as_view(), name='lista_de_tareas_url'),
     path('nueva/', views.CreateViewTask.as_view(), name='crear_tarea_url'),
     path('tarea/<int:pk>/', views.DetailViewTask.as_view(), name='detalle_tarea_url'),

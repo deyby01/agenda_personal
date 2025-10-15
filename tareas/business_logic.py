@@ -117,7 +117,7 @@ class TaskPrioritizationEngine:
         # 3. Bonus por tarea antigua
         if tarea.fecha_creacion and cls._is_old_task(tarea.fecha_creacion, today):
             score += cls.OLD_TASK_BONUS
-            reasons.append(f"Tarea antigua (>{cls.DAYS_THRESHOLD_OLD_TASK} días)")
+            reasons.append(f"Tarea antigua (mas de {cls.DAYS_THRESHOLD_OLD_TASK} días)")
 
         # 4. Determinar nivel de prioridad
         priority_level = cls._score_to_priority_level(score)
