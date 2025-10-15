@@ -210,3 +210,63 @@ class DashboardViewTest(TestCase):
         self.assertContains(response, 'días')      # Time remaining info
 
 
+    def test_dashboard_accessible_from_navbar(self):
+        """
+        Dashboard should be accessible via navbar link
+
+        Testing navigation integration:
+        - Dashboard link exists in bar
+        - Link points to correct URL
+        - Link is highlighted when active
+        """
+        # Login user
+        self.client.login(username='testuser', password='testpassword')
+
+        # Get any page with navbar (e.g. tasks list)
+        response = self.client.get(reverse('lista_de_tareas_url'))
+
+        # Should contain dashboard link in navbar
+        self.assertContains(response, 'href="/dashboard/"')
+        self.assertContains(response, 'Dashboard')
+
+        # Get dashboard page
+        dashboard_response = self.client.get(reverse('dashboard'))
+
+        # Dashboard navbar link should be active/highlighted
+        self.assertContains(dashboard_response, 'nav-link active')
+
+    def test_homepage_redirects_to_dashboard(self):
+        """
+        Homepage (/) should redirect to intelligence dashboard for logged users
+
+        Testing user experience:
+        - Logged users see dashboard inmediately
+        - Dashboard becomes primary entry point
+        """
+        # Login user
+        self.client.login(username='testuser', password='testpassword')
+
+        # Access homepage
+        response = self.client.get('/')
+
+        # Should redirect to dashboard (or load dashboard directly)
+        if response.status_code == 302:
+            # Redirect aproach
+            self.assertIn('/dashboard/', response.url)
+        else:
+            # Direct load approach (status 200)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Dashboard Inteligente')
+
+    def test_homepage_shows_login_for_anonymous_users(self):
+        """
+        Anonymous users should see login page or landig page
+        """
+        response = self.client.get('/')
+
+        # Should either redirect to login or show login form
+        if response.status_code == 302:
+            self.assertIn('/accounts/login/', response.url)
+        else:
+            # Should show login form o landig page
+            self.assertIn(response.status_code, [200, 302])

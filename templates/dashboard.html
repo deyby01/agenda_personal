@@ -336,23 +336,54 @@
 
 
             
-            <!-- Quick Actions -->
-            <div class="row">
+            <!-- ENHANCED QUICK ACTIONS -->
+            <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-body text-center">
-                            <h5>Acciones Rápidas</h5>
-                            <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary me-2">
-                                <i class="fas fa-plus"></i> Nueva Tarea
-                            </a>
-                            <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-secondary">
-                                <i class="fas fa-list"></i> Ver Todas las Tareas
-                            </a>
+                        <div class="card-header bg-light">
+                            <h5><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                            <small>Gestiona tus tareas y proyectos desde aquí</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Task Actions -->
+                                <div class="col-md-6 mb-3">
+                                    <h6>📋 Gestión de Tareas</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Nueva Tarea
+                                        </a>
+                                        <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-list"></i> Ver Todas ({{ total_tasks }})
+                                        </a>
+                                        <a href="{% url 'mi_semana_actual_url' %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-calendar-week"></i> Mi Semana
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Project Actions -->
+                                <div class="col-md-6 mb-3">
+                                    <h6>📊 Gestión de Proyectos</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'crear_proyecto_url' %}" class="btn btn-success">
+                                            <i class="fas fa-plus"></i> Nuevo Proyecto
+                                        </a>
+                                        <a href="{% url 'lista_de_proyectos_url' %}" class="btn btn-outline-success">
+                                            <i class="fas fa-project-diagram"></i> Ver Todos ({{ total_projects }})
+                                        </a>
+                                        {% if critical_count > 0 %}
+                                        <button class="btn btn-outline-danger" onclick="document.querySelector('.border-danger').scrollIntoView()">
+                                            <i class="fas fa-exclamation-triangle"></i> Ver Críticos ({{ critical_count }})
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 </div>
