@@ -12,6 +12,7 @@ Diferencias:
 
 import datetime
 from typing import List, Optional, Dict, Any, NamedTuple
+from django.forms.widgets import static
 from django.utils import timezone
 from dataclasses import dataclass
 from enum import Enum
@@ -193,19 +194,29 @@ class TaskPrioritizationEngine:
         else:
             return PriorityLevel.LOW
 
-    @classmethod
-    def prioritize_tasks(cls, tasks: List[Tarea]) -> List[TaskPriorityScore]:
+    @staticmethod
+    def prioritize_tasks(queryset) -> List[TaskPriorityScore]:
         """
-        Prioriza una lista de tareas y devuelve scores ordenados.
+        Prioriza tares en multiples criterios de urgencia e importancia.
+        Solo analizar tareas pendientes (completada=False)
 
         Args:
-            tasks: Lista de tareas a priorizar
-
+            queryset: QuerySet de tareas del usuario
         Returns:
-            Lista de TaskPriorityScore ordenada por prioridad (mayor a menor)
+            Lista de TaskPriorityScore: Tareas priorizadas solo pendientes
         """
-        priority_scores = [cls.calculate_priority_score(task) for task in tasks]
-        return sorted(priority_scores, key=lambda x: x.score, reverse=True)
+
+        pending_tasks = queryset.filter(completada=False)
+
+        results = []
+
+        # Solo analizar tareas pendientes
+        for task in pending_tasks:
+            task_priority_score = TaskPrioritizationEngine.calculate_priority_score(task)
+            results.append(task_priority_score)
+
+        return sorted(results, key=lambda x: x.score, reverse=True)
+            
 
 
 
