@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.views import generic, View
 
 from tareas.business_logic import PriorityLevel, TaskPrioritizationEngine, ProjectProgressCalculator
-from .models import Tarea, Proyecto
+from .models import Notification, Tarea, Proyecto
 from .forms import TareaForm, CustomUserCreationForm, ProyectoForm
 import datetime
 from django.utils import timezone
@@ -18,6 +18,7 @@ from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .services import WeekCalculatorService, WeekNavigationService
 from .repositories import TareaRepository, ProyectoRepository
+from .notification_service import NotificationService
 
 
 
@@ -591,6 +592,20 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
             total_projects += 1
         
+        # Noificaciones inteligentes.
+        # Generar notificaciones si no existen hoy
+        NotificationService.generate_daily_notifications(self.request.user)
+
+        # Obtener notificaciones activas para mostrar
+        recent_notifications = Notification.objects.filter(
+            usuario=self.request.user,
+            leida=False
+        ).order_by('-fecha_creacion')
+
+        # Contadores por tipo
+        critical_notifications = recent_notifications.filter(subtipo='critical').count()
+        warning_notifications = recent_notifications.filter(subtipo='warning').count()
+        recent_notifications_list = recent_notifications[:10] # Ultimas 10 no leidas para el template
         # Add to context
         context.update({
             'critical_tasks': critical_tasks,
@@ -608,6 +623,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'completado_count': len(projects_by_status['completado']),
             'en_espera_count': len(projects_by_status['en_espera']),
             'cancelado_count': len(projects_by_status['cancelado']),
+
+            # Notifications
+            'recent_notifications': recent_notifications_list,
+            'total_unread_notifications': recent_notifications.count(),
+            'critical_notifications': critical_notifications,
+            'warning_notifications': warning_notifications,
         })
         
         return context

@@ -1,3 +1,4 @@
+from time import timezone
 from django.db import models
 from django.contrib.auth.models import User
 import datetime
@@ -68,3 +69,103 @@ class Proyecto(models.Model):
         ordering = ['usuario', 'fecha_fin_estimada', 'nombre']
         verbose_name = "Proyecto" # Nombre singular para el admin
         verbose_name_plural = "Proyectos" # Nombre plural para el admin
+
+
+class Notification(models.Model):
+    """
+    Sistema de notificacion inteligentes
+    Proposito: Alertas automaticas basadas en business logic
+    Integracion: TaskPrioritizationEngine + ProjectProgressCalculator
+    """
+    # ===== Core fields =====
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Usuario", help_text="Usuario que recibe la notificación")
+    titulo = models.CharField(max_length=200, verbose_name='Titulo', help_text='Titulo breve y descriptivo de la notificación')
+    mensaje = models.TextField(verbose_name='Mensaje', help_text='Contenido detallado de la notificación')
+
+    # ===== CLASSIFICATION SYSTEM ======
+    TIPO_CHOICES = [
+        ('task', 'Tarea'),
+        ('project', 'Proyecto'),
+        ('system', 'Sistema'),
+        ('achievement', 'Logro'),
+    ]
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPO_CHOICES,
+        verbose_name="Tipo de Notificación"
+    )
+
+    SUBTIPO_CHOICES = [
+        ('critical', 'Crítico'),
+        ('warning', 'Advertencia'),
+        ('info', 'Información'),
+        ('success', 'Éxito'),
+    ]
+    subtipo = models.CharField(
+        max_length=20,
+        choices=SUBTIPO_CHOICES,
+        verbose_name="Nivel de Urgencia"
+    )
+
+    # ===== STATE MANAGEMENT ======
+    leida = models.BooleanField(default=False, verbose_name='Leída', help_text='Usuario ya vio la notificación')
+    accionada = models.BooleanField(default=False, verbose_name='Accionada', help_text='Usuario ya actuo sobre la notificación')
+
+    # ===== RELATIONS =====
+    tarea_relacionada = models.ForeignKey(
+        'Tarea',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name='Tarea Relacionada',
+    )
+    proyecto_relacionado = models.ForeignKey(
+        'Proyecto',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name='Proyecto Relacionado',
+    )
+
+    # ======  METADATA ======
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Creación')
+    fecha_vencimiento = models.DateTimeField(null=True, blank=True, verbose_name='Fecha de Vencimiento', help_text='Cuando caduca la relevancia de esta notificación')
+
+    # ===== BUSINESS LOGIC METADATA =====
+    business_context = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name='Contexto de Business Logic',
+        help_text = 'Datos adicionales del analisis que generó esta notificación'
+    )
+
+    def __str__(self):
+        return f"{self.titulo} ({self.usuario.username})"
+
+    @property
+    def is_expired(self):
+        """ Verifica si la notificación ya expiró """
+        if not self.fecha_vencimiento:
+            return False
+        return timezone.now() > self.fecha_vencimiento
+
+    @property
+    def urgency_icon(self):
+        """ Retorna el icono apropiado según el subtipo """
+        icons = {
+            'critical': '🚨',
+            'warning': '⚠️',
+            'info': 'ℹ️', 
+            'success': '✅'
+        }
+        return icons.get(self.subtipo, '📢')
+
+    class Meta:
+        ordering = ['-fecha_creacion']
+        verbose_name = 'Notificación'
+        verbose_name_plural = 'Notificaciones'
+        indexes = [
+            models.Index(fields=['usuario', 'leida']),
+            models.Index(fields=['usuario', 'tipo', 'subtipo']),
+            models.Index(fields=['fecha_creacion']),
+        ]
