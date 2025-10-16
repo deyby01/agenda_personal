@@ -226,7 +226,7 @@ class DashboardViewTest(TestCase):
         response = self.client.get(reverse('lista_de_tareas_url'))
 
         # Should contain dashboard link in navbar
-        self.assertContains(response, 'href="/dashboard/"')
+        self.assertContains(response, 'href="/agenda/dashboard/"')
         self.assertContains(response, 'Dashboard')
 
         # Get dashboard page

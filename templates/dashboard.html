@@ -7,52 +7,7 @@
     <div class="row">
         <div class="col-12">
             <h1>🎯 Dashboard Inteligente</h1>
-            <p>Bienvenido, <strong>{{ user.username }}</strong>! Tienes {{ total_tasks }} tareas activas 
-            y {{ total_unread_notifications }} notificaciones.</p>
-
-            <!-- CENTRO DE NOTIFICACIONES -->
-            {% if recent_notifications %}
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card border-info">
-                        <div class="card-header bg-info text-white">
-                            <h4><i class="fas fa-bell"></i> 🔔 Centro de Notificaciones</h4>
-                            <small>Alertas inteligentes generadas automáticamente</small>
-                        </div>
-                        <div class="card-body">
-                            {% for notification in recent_notifications %}
-                                <div class="alert 
-                                    {% if notification.subtipo == 'critical' %}alert-danger
-                                    {% elif notification.subtipo == 'warning' %}alert-warning  
-                                    {% elif notification.subtipo == 'success' %}alert-success
-                                    {% else %}alert-info{% endif %}
-                                    alert-dismissible fade show">
-                                    
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="alert-heading mb-1">{{ notification.titulo }}</h6>
-                                            <p class="mb-2">{{ notification.mensaje }}</p>
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock"></i> {{ notification.fecha_creacion|timesince }} ago
-                                                {% if notification.tarea_relacionada %}
-                                                    | <i class="fas fa-tasks"></i> Tarea relacionada
-                                                {% endif %}
-                                                {% if notification.proyecto_relacionado %}
-                                                    | <i class="fas fa-project-diagram"></i> Proyecto relacionado  
-                                                {% endif %}
-                                            </small>
-                                        </div>
-                                        <!-- Botón para marcar como leída -->
-                                        <button type="button" class="btn-close" aria-label="Close"
-                                                onclick="markNotificationRead({{ notification.id }})"></button>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+            <p>Bienvenido, <strong>{{ user.username }}</strong>! Tienes {{ total_tasks }} tareas activas.</p>
             
             <!-- CRITICAL ZONE -->
             <div class="row mb-4">

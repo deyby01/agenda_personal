@@ -73,6 +73,22 @@
                 {# Sección de Usuario / Login / Logout a la derecha #}
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
+
+                    <!-- CAMPANA DE NOTIFICACIONES - TU DISEÑO PROFESIONAL -->
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link position-relative text-decoration-none" 
+                        href="{% url 'centro_notificaciones' %}"
+                        title="Centro de Notificaciones">
+                            <i class="fas fa-bell fs-5"></i>
+                            {% if unread_notifications_count > 0 %}
+                                <span class="position-absolute top-0.5 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ unread_notifications_count }}
+                                    <span class="visually-hidden">notificaciones no leídas</span>
+                                </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
                     <li class="nav-item dropdown">
                         <a
                             class="nav-link dropdown-toggle"

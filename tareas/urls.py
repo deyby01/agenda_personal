@@ -24,4 +24,8 @@ urlpatterns = [
     # Para una semana específica basada en una fecha (año, mes, día)
     path('mi-semana/<int:anio>/<int:mes>/<int:dia>/', views.MyWeekView.as_view(), name='mi_semana_especifica_url'),
     path('tarea/cambiar-estado/<int:tarea_id>/', views.ToggleTaskStatusView.as_view(), name='cambiar_estado_tarea_url'),
+
+    # ===== NOIFICATIONS ======
+    path('notificaciones/', views.NotificationCenterView.as_view(), name='centro_notificaciones'),
+    path('notificaciones/<int:notification_id>/click/', views.NotificationClickView.as_view(), name='notification_click'),
 ]

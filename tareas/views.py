@@ -591,21 +591,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 projects_by_status[proyecto.estado].append(project_data)
 
             total_projects += 1
-        
-        # Noificaciones inteligentes.
-        # Generar notificaciones si no existen hoy
+
+        # Generar notificaciones al acceder al dashboard
         NotificationService.generate_daily_notifications(self.request.user)
 
-        # Obtener notificaciones activas para mostrar
-        recent_notifications = Notification.objects.filter(
-            usuario=self.request.user,
-            leida=False
-        ).order_by('-fecha_creacion')
-
-        # Contadores por tipo
-        critical_notifications = recent_notifications.filter(subtipo='critical').count()
-        warning_notifications = recent_notifications.filter(subtipo='warning').count()
-        recent_notifications_list = recent_notifications[:10] # Ultimas 10 no leidas para el template
         # Add to context
         context.update({
             'critical_tasks': critical_tasks,
@@ -623,15 +612,91 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'completado_count': len(projects_by_status['completado']),
             'en_espera_count': len(projects_by_status['en_espera']),
             'cancelado_count': len(projects_by_status['cancelado']),
-
-            # Notifications
-            'recent_notifications': recent_notifications_list,
-            'total_unread_notifications': recent_notifications.count(),
-            'critical_notifications': critical_notifications,
-            'warning_notifications': warning_notifications,
         })
         
         return context
+
+
+class NotificationCenterView(LoginRequiredMixin, ListView):
+    """
+    Centro de notificaciones
+
+    Caracteristicas:
+    - Todas las notificaciones del usuario
+    - Diferenciacion visual ( leidas vs no leidas )
+    - Ordenadas poro fecha ( más recientes primero )
+    - Paginación para performance
+    """
+    model = Notification
+    template_name = 'notificaciones/centro_notificaciones.html'
+    context_object_name = 'notificaciones'
+    paginate_by = 20
+
+    def get_queryset(self):
+        """ Solo notificaciones del usuario logeado """
+        return Notification.objects.filter(
+            usuario=self.request.user
+        ).select_related(
+            'tarea_relacionada',
+            'proyecto_relacionado'
+        ).order_by('-fecha_creacion')
+
+
+    def get_context_data(self, **kwargs):
+        """ Agregar estadisticas para la pagina """
+        context = super().get_context_data(**kwargs)
+        user_notifications = self.get_queryset()
+
+        context.update({
+            'total_notifications': user_notifications.count(),
+            'unread_count': user_notifications.filter(leida=False).count(),
+            'read_count': user_notifications.filter(leida=True).count(),
+            'critical_count': user_notifications.filter(subtipo='critical').count(),
+            'warning_count': user_notifications.filter(subtipo='warning').count()
+        })
+
+        return context
+
+class NotificationClickView(LoginRequiredMixin, View):
+    """
+    Manejo de click en notificación
+
+    Funcionalidad:
+    - Marcar notificación como leida
+    - Redirigir al origen (tarea/proyecto relacionado)
+    - Actualizar contador automaticamente
+    """
+    def get(self, request, notification_id):
+        """
+        Procesar click en notificación.
+        """
+        # Obtener notificacion del usuario
+        try:
+            notification = Notification.objects.get(
+                id=notification_id,
+                usuario=request.user
+            )
+        except Notification.DoesNotExist:
+            messages.error(request, 'Notificación no encontrada.')
+            return redirect('centro_notificaciones')
+
+        # Marcar como leida
+        notification.leida = True
+        notification.save()
+
+        # Redirect inteligente
+        if notification.tarea_relacionada:
+            messages.success(request, f'Revisando tarea: {notification.tarea_relacionada.titulo}')
+            return redirect('detalle_tarea_url', pk=notification.tarea_relacionada.id)
+        
+        elif notification.proyecto_relacionado:
+            messages.success(request, f'Revisando proyecto: {notification.proyecto_relacionado.nombre}')
+            return redirect('detalle_proyecto_url', pk=notification.proyecto_relacionado.id)
+
+        else:
+            # Notificación sin relación especifica
+            messages.info(request, 'Notificación marcada como leida.')
+            return redirect('centro_notificaciones')
 
 
 class ToggleTaskStatusView(LoginRequiredMixin, View):
