@@ -270,3 +270,57 @@ class DashboardViewTest(TestCase):
         else:
             # Should show login form o landig page
             self.assertIn(response.status_code, [200, 302])
+
+    def test_dashboard_shows_completed_tasks_section_for_motivation(self):
+        """
+        Dashboard debe mostrar sección motivacional de tareas completadas
+        
+        Feature: Gamification - mostrar logros para motivar al usuario
+        """
+        # Login usuario
+        self.client.login(username='testuser', password='testpassword')
+        
+        today = timezone.now().date()
+        
+        # Crear tareas completadas hoy
+        completed_task1 = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea Completada 1',
+            fecha_asignada=today,
+            completada=True  # Completada
+        )
+        
+        completed_task2 = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea Completada 2', 
+            fecha_asignada=today,
+            completada=True  # Completada
+        )
+        
+        # Crear tarea pendiente (no debe aparecer en sección de completadas)
+        pending_task = Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea Pendiente',
+            fecha_asignada=today,
+            completada=False  # Pendiente
+        )
+        
+        # Acceder al dashboard
+        response = self.client.get(reverse('dashboard'))
+        
+        # Verificar sección de completadas aparece
+        self.assertContains(response, 'Tareas Completadas!')
+        self.assertContains(response, 'fas fa-trophy')  # Ícono de logro
+        
+        # Verificar que muestra las tareas completadas
+        self.assertContains(response, 'Tarea Completada 1')
+        self.assertContains(response, 'Tarea Completada 2')
+        
+        # Verificar que NO muestra la tarea pendiente en sección de completadas
+        # (La pendiente debería estar en zona crítica, no en completadas)
+        completed_section = str(response.content).split('Tareas Completadas!')[1].split('</div>')[0]
+        self.assertNotIn('Tarea Pendiente', completed_section)
+        
+        # Verificar mensaje motivacional  
+        self.assertContains(response, '¡Sigue así!')
+        self.assertContains(response, 'total')  # Contador total de logros

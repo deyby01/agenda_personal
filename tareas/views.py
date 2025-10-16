@@ -19,7 +19,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .services import WeekCalculatorService, WeekNavigationService
 from .repositories import TareaRepository, ProyectoRepository
 from .notification_service import NotificationService
-
+from datetime import timedelta
 
 
 class ListViewTasks(LoginRequiredMixin, ListView):
@@ -595,6 +595,29 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Generar notificaciones al acceder al dashboard
         NotificationService.generate_daily_notifications(self.request.user)
 
+        today = timezone.now().date()
+
+        # Completadas hoy (para motivacion inmediata)
+        completed_today = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+            fecha_asignada=today, # Completadas que vencian hoy
+        ).order_by('-id')[:5] # Maximo 5 mas recientes
+
+        # Estadisticas motivacionales
+        completed_this_week = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+            fecha_asignada__gte=today - timedelta(days=7)
+        ).count()
+
+        total_completed_ever = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+        ).count()
+
+
+
         # Add to context
         context.update({
             'critical_tasks': critical_tasks,
@@ -612,6 +635,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'completado_count': len(projects_by_status['completado']),
             'en_espera_count': len(projects_by_status['en_espera']),
             'cancelado_count': len(projects_by_status['cancelado']),
+
+            # Gamificacion - Motivacion del usuario
+            'completed_tasks_today': completed_today,
+            'completed_this_week': completed_this_week,
+            'total_completed_ever': total_completed_ever,
         })
         
         return context
