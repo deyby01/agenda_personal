@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Inteligente{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1>🎯 Dashboard Inteligente</h1>
+            <p>Bienvenido, <strong>{{ user.username }}</strong>! Tienes {{ total_tasks }} tareas activas.</p>
+            
+            <!-- CRITICAL ZONE -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h4><i class="fas fa-exclamation-triangle"></i> 🚨 Zona Critica ({{ critical_tasks|length }})</h4>
+                            <small>Tareas que requieren atención inmediata</small>
+                        </div>
+                        <div class="card-body">
+                            {% if critical_tasks %}
+                                {% for item in critical_tasks %}
+                                    <div class="alert alert-danger">
+                                        <strong>{{ item.task.titulo }}</strong><br>
+                                        <small>{{ item.task.descripcion|default:"Sin descripción" }}</small><br>
+                                        <small class="text-muted">Vence: {{ item.task.fecha_asignada|date:"d M Y" }}</small><br>
+                                        <div class="mt-2">
+                                            {% for reason in item.reasons %}
+                                                <small class="badge bg-danger me-1">{{ reason }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">¡Excelente! No tienes tareas críticas.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ATTENTION ZONE -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning">
+                            <h4><i class="fas fa-clock"></i> ⚠️ Zona Atención ({{ attention_tasks|length }})</h4>
+                            <small>Tareas para planificar y organizar</small>
+                        </div>
+                        <div class="card-body">
+                            {% if attention_tasks %}
+                                {% for item in attention_tasks %}
+                                    <div class="alert alert-warning">
+                                        <strong>{{ item.task.titulo }}</strong><br>
+                                        <small>{{ item.task.descripcion|default:"Sin descripción" }}</small><br>
+                                        <small class="text-muted">Vence: {{ item.task.fecha_asignada|date:"d M Y" }}</small><br>
+                                        <div class="mt-2">
+                                            {% for reason in item.reasons %}
+                                                <small class="badge bg-warning text-dark me-1">{{ reason }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No tienes tareas en zona de atención.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FUTURE ZONE -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h4><i class="fas fa-calendar-alt"></i> ✅ Zona Futuro ({{ future_tasks|length }})</h4>
+                            <small>Tareas con tiempo suficiente</small>
+                        </div>
+                        <div class="card-body">
+                            {% if future_tasks %}
+                                {% for item in future_tasks %}
+                                    <div class="alert alert-success">
+                                        <strong>{{ item.task.titulo }}</strong><br>
+                                        <small>{{ item.task.descripcion|default:"Sin descripción" }}</small><br>
+                                        <small class="text-muted">Vence: {{ item.task.fecha_asignada|date:"d M Y" }}</small><br>
+                                        <div class="mt-2">
+                                            {% for reason in item.reasons %}
+                                                <small class="badge bg-success me-1">{{ reason }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No tienes tareas en el futuro lejano.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DE LOGROS - GAMIFICATION POR DEYBY -->
+            {% if completed_tasks_today %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4><i class="fas fa-trophy"></i> ✅ ¡Tareas Completadas!</h4>
+                                    <small>¡Excelente trabajo! Has completado {{ completed_tasks_today|length }} tarea{{ completed_tasks_today|length|pluralize }} hoy</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-light text-success fs-6">{{ completed_this_week }} esta semana</span>
+                                    <span class="badge bg-light text-success fs-6">{{ total_completed_ever }} total</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body bg-success-subtle">
+                            <div class="row">
+                                {% for task in completed_tasks_today %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex align-items-center p-2 bg-white rounded border border-success border-opacity-25">
+                                            <i class="fas fa-check-circle text-success me-2 fs-5"></i>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 text-decoration-line-through text-muted">{{ task.titulo }}</h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar-check"></i> Completada hoy
+                                                    {% if task.proyecto %}
+                                                        | <i class="fas fa-project-diagram"></i> {{ task.proyecto.nombre }}
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Mensaje motivacional -->
+                            <div class="text-center mt-3 p-2 bg-success bg-opacity-10 rounded">
+                                <small class="text-success fw-bold">
+                                    🎉 ¡Sigue así! Llevas {{ total_completed_ever }} tareas completadas en total. ¡Eres imparable! 💪
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+
+            <!-- PROJECT HEALTH OVERVIEW SECTION -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2>📊 Resumen de Proyectos ({{ total_projects }})</h2>
+                    <div class="row">
+                        <!-- Quick Stats Cards -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h4>{{ healthy_count }}</h4>
+                                    <small>🟢 Saludables</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-warning">
+                                <div class="card-body text-center">
+                                    <h4>{{ at_risk_count }}</h4>
+                                    <small>⚠️ En Riesgo</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body text-center">
+                                    <h4>{{ critical_count }}</h4>
+                                    <small>🚨 Críticos</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h4>{{ completed_count }}</h4>
+                                    <small>✅ Completados</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECTS BY HEALTH STATUS -->
+            {% if projects_by_health.critical %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h4>🚨 Proyectos Críticos - Acción Inmediata</h4>
+                            <small>Proyectos que necesitan atención urgente</small>
+                        </div>
+                        <div class="card-body">
+                            {% for item in projects_by_health.critical %}
+                                <div class="alert alert-danger">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6><strong>{{ item.project.nombre }}</strong></h6>
+                                            <p>{{ item.project.descripcion|default:"Sin descripción" }}</p>
+                                            <small class="text-muted">
+                                                {% if item.project.fecha_inicio %}Inicio: {{ item.project.fecha_inicio|date:"d M Y" }}{% endif %}
+                                                {% if item.project.fecha_fin_estimada %} | Fin estimado: {{ item.project.fecha_fin_estimada|date:"d M Y" }}{% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="progress mb-2">
+                                                <div class="progress-bar bg-danger" style="width: {{ item.percentage }}%"></div>
+                                            </div>
+                                            <small><strong>{{ item.percentage }}%</strong> completado</small><br>
+                                            {% if item.days_remaining %}
+                                                <small class="text-danger">
+                                                    {% if item.days_remaining < 0 %}
+                                                        {{ item.days_remaining|floatformat:0 }} días atrasado
+                                                    {% else %}
+                                                        {{ item.days_remaining }} días restantes
+                                                    {% endif %}
+                                                </small>
+                                            {% endif %}
+                                            <br><small>{{ item.total_tasks }} tareas ({{ item.completed_tasks }} ✅, {{ item.pending_tasks }} ⏳)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- HEALTHY PROJECTS -->
+            {% if projects_by_health.healthy %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h4>🟢 Proyectos Saludables</h4>
+                            <small>Proyectos con progreso normal</small>
+                        </div>
+                        <div class="card-body">
+                            {% for item in projects_by_health.healthy %}
+                                <div class="alert alert-success">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6><strong>{{ item.project.nombre }}</strong></h6>
+                                            <p>{{ item.project.descripcion|default:"Sin descripción" }}</p>
+                                            <small class="text-muted">
+                                                {% if item.project.fecha_inicio %}Inicio: {{ item.project.fecha_inicio|date:"d M Y" }}{% endif %}
+                                                {% if item.project.fecha_fin_estimada %} | Fin estimado: {{ item.project.fecha_fin_estimada|date:"d M Y" }}{% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="progress mb-2">
+                                                <div class="progress-bar bg-success" style="width: {{ item.percentage }}%"></div>
+                                            </div>
+                                            <small><strong>{{ item.percentage }}%</strong> completado</small><br>
+                                            {% if item.days_remaining %}
+                                                <small class="text-success">{{ item.days_remaining }} días restantes</small>
+                                            {% endif %}
+                                            <br><small>{{ item.total_tasks }} tareas ({{ item.completed_tasks }} ✅, {{ item.pending_tasks }} ⏳)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- PROJECTS BY STATUS - CORRECTED FOR YOUR MODEL -->
+            {% if total_projects > 0 %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h3>📋 Proyectos por Estado</h3>
+                    <div class="row">
+                        <!-- ACTIVE PROJECTS (en_curso) -->
+                        {% if projects_by_status.en_curso %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5>🚀 En Curso ({{ projects_by_status.en_curso|length }})</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% for item in projects_by_status.en_curso %}
+                                        <div class="mb-2 p-2 border-start border-primary border-3">
+                                            <strong>{{ item.project.nombre }}</strong><br>
+                                            <small>{{ item.percentage }}% | {{ item.total_tasks }} tareas</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- PLANNED PROJECTS -->
+                        {% if projects_by_status.planificado %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-dark">
+                                    <h5>📋 Planificados ({{ projects_by_status.planificado|length }})</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% for item in projects_by_status.planificado %}
+                                        <div class="mb-2 p-2 border-start border-info border-3">
+                                            <strong>{{ item.project.nombre }}</strong><br>
+                                            <small>{{ item.percentage }}% | {{ item.total_tasks }} tareas</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- COMPLETED PROJECTS -->  
+                        {% if projects_by_status.completado %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5>✅ Completados ({{ projects_by_status.completado|length }})</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% for item in projects_by_status.completado %}
+                                        <div class="mb-2 p-2 border-start border-success border-3">
+                                            <strong>{{ item.project.nombre }}</strong><br>
+                                            <small>{{ item.percentage }}% completado</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- ON HOLD PROJECTS -->
+                        {% if projects_by_status.en_espera %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5>⏸️ En Espera ({{ projects_by_status.en_espera|length }})</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% for item in projects_by_status.en_espera %}
+                                        <div class="mb-2 p-2 border-start border-secondary border-3">
+                                            <strong>{{ item.project.nombre }}</strong><br>
+                                            <small>{{ item.percentage }}% | Pausado</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- CANCELLED PROJECTS -->
+                        {% if projects_by_status.cancelado %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger text-white">
+                                    <h5>❌ Cancelados ({{ projects_by_status.cancelado|length }})</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% for item in projects_by_status.cancelado %}
+                                        <div class="mb-2 p-2 border-start border-danger border-3">
+                                            <strong>{{ item.project.nombre }}</strong><br>
+                                            <small>Cancelado</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+
+            
+            <!-- ENHANCED QUICK ACTIONS -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+                            <small>Gestiona tus tareas y proyectos desde aquí</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Task Actions -->
+                                <div class="col-md-6 mb-3">
+                                    <h6>📋 Gestión de Tareas</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Nueva Tarea
+                                        </a>
+                                        <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-list"></i> Ver Todas ({{ total_tasks }})
+                                        </a>
+                                        <a href="{% url 'mi_semana_actual_url' %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-calendar-week"></i> Mi Semana
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Project Actions -->
+                                <div class="col-md-6 mb-3">
+                                    <h6>📊 Gestión de Proyectos</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'crear_proyecto_url' %}" class="btn btn-success">
+                                            <i class="fas fa-plus"></i> Nuevo Proyecto
+                                        </a>
+                                        <a href="{% url 'lista_de_proyectos_url' %}" class="btn btn-outline-success">
+                                            <i class="fas fa-project-diagram"></i> Ver Todos ({{ total_projects }})
+                                        </a>
+                                        {% if critical_count > 0 %}
+                                        <button class="btn btn-outline-danger" onclick="document.querySelector('.border-danger').scrollIntoView()">
+                                            <i class="fas fa-exclamation-triangle"></i> Ver Críticos ({{ critical_count }})
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

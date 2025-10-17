@@ -1,7 +1,9 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy 
-from django.views import generic, View 
-from .models import Tarea, Proyecto
+from django.views import generic, View
+
+from tareas.business_logic import PriorityLevel, TaskPrioritizationEngine, ProjectProgressCalculator
+from .models import Notification, Tarea, Proyecto
 from .forms import TareaForm, CustomUserCreationForm, ProyectoForm
 import datetime
 from django.utils import timezone
@@ -14,7 +16,10 @@ from rest_framework import viewsets
 from .serializers import TareaSerializer, ProyectoSerializer
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
-
+from .services import WeekCalculatorService, WeekNavigationService
+from .repositories import TareaRepository, ProyectoRepository
+from .notification_service import NotificationService
+from datetime import timedelta
 
 
 class ListViewTasks(LoginRequiredMixin, ListView):
@@ -372,106 +377,354 @@ class DeleteViewProject(LoginRequiredMixin, DeleteView):
 
 class MyWeekView(LoginRequiredMixin, TemplateView):
     """
-    Displays a weekly dashboard of tasks and active projects.
+    SOLID-Compliant MyWeekView implementation
 
-    This view calculates a seven-day week based on URL parameters or the
-    current date. It aggregates all tasks for each day of the week and
-    also queries for all projects that are active during that same
-    period, serving as a central planning dashboard for the user.
+    Single Responsibility: ONLY handles HTTP request/response and template rendering.
+    - No business logic (delegated to services)
+    - No data access logic (delegated to repositories) 
+    - No date calculations (delegated to services)
+    
+    This follows:
+    - SRP: Single responsibility (HTTP handling only)
+    - DIP: Depends on abstractions (services/repositories)
+    - OCP: Open for extension via service composition
     """
     template_name = 'tareas/mi_semana.html'
-    
-    def dispatch(self, request, *args, **kwargs):
-        """
-        Validates date parts from the URL before proceeding.
 
-        This method acts as a gatekeeper. If date parameters are provided
-        in the URL and they form an invalid date, it redirects the user
-        before any complex logic in get_context_data is executed.
-        """
-        year = self.kwargs.get('anio')
-        month = self.kwargs.get('mes')
-        day = self.kwargs.get('dia')
-
-        if year and month and day:
-            try:
-                datetime.date(int(year), int(month), int(day))
-            except ValueError:
-                return redirect(reverse('mi_semana_actual_url'))
-        
-        return super().dispatch(request, *args, **kwargs)
-    
     def get_context_data(self, **kwargs):
-        """
-        Prepares all data for the weekly dashboard template.
-
-        This method calculates the date range for the week, loops through
-        each day to fetch its tasks, runs a complex query for all
-        active projects within the week, and prepares navigation URLs.
-        """
         context = super().get_context_data(**kwargs)
-        
-        # --- Date determination (now simpler) ---
-        year = self.kwargs.get('anio')
-        month = self.kwargs.get('mes')
-        day = self.kwargs.get('dia')
-        
-        if year and month and day:
-            base_date = datetime.date(int(year), int(month), int(day))
-        else:
-            base_date = timezone.localdate()
-            
-        start_week = base_date - datetime.timedelta(days=base_date.weekday())
-        end_week = start_week + datetime.timedelta(days=6)
-        
-        previous_week_date = start_week - datetime.timedelta(days=7)
-        next_week_date = start_week + datetime.timedelta(days=7)
-        
+
+        base_date = WeekCalculatorService.parse_date_params(
+            kwargs.get('anio'),
+            kwargs.get('mes'),
+            kwargs.get('dia')
+        )
+
+        # Calculate week range (Service Responsability)
+        current_week = WeekCalculatorService.get_week_range(base_date)
+
+        # Get navigation data (Service Responsability)
+        navigation_week = WeekCalculatorService.get_navigation_weeks(current_week)
+        navigation_urls = WeekNavigationService.get_navigation_urls(current_week, navigation_week)
+        create_task_urls = WeekNavigationService.get_create_task_urls(current_week)
+
+        # Get user's tasks for the week (Repository Responsibility)
+        tasks_by_date = TareaRepository.get_tasks_grouped_by_date(self.request.user, current_week)
+
+        # Get active projects (Repository Responsibility)
+        active_projects = ProyectoRepository.get_active_projects_for_user_in_period(
+            self.request.user,
+            current_week.start_date,
+            current_week.end_date,
+        )
+
+        # Get week statistics (Repository Responsibility)
+        completed_count = TareaRepository.get_completed_tasks_count(self.request.user, current_week)
+        total_count = TareaRepository.get_total_tasks_count(self.request.user, current_week)
+
+        # Build context (View responsibility - presentation logic only)
+        context.update({
+            'rango_fechas_str': current_week.format_display(),
+            'es_semana_actual': current_week.is_current_week,
+            'dias_con_tareas': self._transform_tasks_to_template_format(tasks_by_date, create_task_urls),
+            'semana_anterior_url': navigation_urls.get('previous'),
+            'semana_siguiente_url': navigation_urls.get('next'),
+            'proyectos_activos': active_projects,
+
+            'completed_count': completed_count,
+            'total_count': total_count,
+            'completion_percentage': self._calculate_completion_percentage(completed_count, total_count)
+
+        })
+
+        return context
+    
+
+    def _transform_tasks_to_template_format(self, tasks_by_date, create_task_urls):
+        """
+        Transforms SOLID repository data to match original template structure.
+        This is pure presentation logic - stays in view.
+        """
+
         today = timezone.localdate()
-        is_current_week = (start_week <= today <= end_week)
-        
-        days_with_tasks = []
-        for i in range(7):
-            current_date = start_week + datetime.timedelta(days=i)
-            tasks_for_day = Tarea.objects.filter(
-                usuario=self.request.user,
-                fecha_asignada=current_date
-            ).order_by('completada', 'titulo')
-            
-            url_create_task_day = f"{reverse('crear_tarea_url')}?fecha_asignada={current_date.strftime('%Y-%m-%d')}"
-            
-            days_with_tasks.append({
-                'fecha': current_date,
-                'tareas': tasks_for_day,
-                'es_hoy': current_date == today,
-                'url_crear_tarea_dia': url_create_task_day
+
+        dias_con_tareas = []
+
+        # Iterate through week days in order
+        for date in sorted(tasks_by_date.keys()):
+            # Map day name for URL lookup
+            day_name = date.strftime('%A').lower()
+
+            dias_con_tareas.append({
+                'fecha': date,
+                'tareas': tasks_by_date[date], # Lists of taks for this day
+                'es_hoy': date == today,
+                'url_crear_tarea_dia': create_task_urls.get(day_name, '')
             })
         
-        if start_week.month == end_week.month:
-            date_range_str = f"{start_week.strftime('%d')} - {end_week.strftime('%d %b %Y')}"
-        else:
-            date_range_str = f"{start_week.strftime('%d %b')} - {end_week.strftime('%d %b %Y')}"
-            
-        active_projects = Proyecto.objects.filter(
-            Q(usuario=self.request.user),
-            (
-                Q(fecha_inicio__lte=end_week, fecha_fin_estimada__gte=start_week) |
-                Q(fecha_inicio__lte=end_week, fecha_fin_estimada__isnull=True) |
-                Q(fecha_inicio__isnull=True, fecha_fin_estimada__gte=start_week) |
-                Q(fecha_inicio__isnull=True, fecha_fin_estimada__isnull=True)
-            ),
-            ~Q(estado__in=['completado', 'cancelado'])
-        ).distinct().order_by('fecha_fin_estimada', 'nombre')
+        return dias_con_tareas
+    
+    def _calculate_completion_percentage(self, completed: int, total: int) -> float:
+        """
+        Simple helper method for presentation calculation.
+        This stays in the view beacuse it's pure presentation logic,
+        not business logic that would need testing.
+        """
+        if total == 0.0:
+            return 0.0
+        return round((completed / total) * 100, 1)  
+
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    """
+    Intelligent Dashboard View - Deyby's Vision Implementation
+    
+    Features:
+    - Task prioritization using TaskPrioritizationEngine  
+    - Priority zones: Critical, Attention, Future
+    - Real-time task scoring and categorization
+    
+    Security: Requires authentication via LoginRequiredMixin
+    """
+    template_name = 'dashboard.html'
+    
+    def get_context_data(self, **kwargs):
+        """Prepare intelligent dashboard data using business logic"""
+        context = super().get_context_data(**kwargs)
         
-        context['dias_con_tareas'] = days_with_tasks
-        context['rango_fechas_str'] = date_range_str
-        context['es_semana_actual'] = is_current_week
-        context['semana_anterior_url'] = reverse('mi_semana_especifica_url', args=[previous_week_date.year, previous_week_date.month, previous_week_date.day]) if not is_current_week else None
-        context['semana_siguiente_url'] = reverse('mi_semana_especifica_url', args=[next_week_date.year, next_week_date.month, next_week_date.day])
-        context['proyectos_activos'] = active_projects
+        # Get user's tasks
+        user_tasks = Tarea.objects.filter(usuario=self.request.user)
+        # Get user's projects
+        user_projects = Proyecto.objects.filter(usuario=self.request.user)
+        
+        # 🚀 USE YOUR TaskPrioritizationEngine
+        prioritized_task_scores = TaskPrioritizationEngine.prioritize_tasks(user_tasks)
+        
+        # Create efficient task lookup dictionary
+        tasks_dict = {task.id: task for task in user_tasks}
+        
+        # Organize by priority zones
+        critical_tasks = []
+        attention_tasks = []
+        future_tasks = []
+        
+        for task_score in prioritized_task_scores:
+            # Get actual task object using task_id
+            task = tasks_dict.get(task_score.task_id)
+            if not task:
+                continue
+                
+            # Create combined data for template  
+            task_data = {
+                'task': task,
+                'priority_level': task_score.priority_level,
+                'urgency_level': task_score.urgency_level,
+                'score': task_score.score,
+                'reasons': task_score.reasons
+            }
+            
+            # Categorize into priority zones
+            if task_score.priority_level == PriorityLevel.CRITICAL:
+                critical_tasks.append(task_data)
+            elif task_score.priority_level in [PriorityLevel.HIGH, PriorityLevel.MEDIUM]:
+                attention_tasks.append(task_data)
+            else:  # LOW priority
+                future_tasks.append(task_data)
+
+        # DUAL ORGANIZATION - Health status + Project state
+        projects_by_health = {
+            'healthy': [],
+            'at_risk': [],
+            'critical': [],
+            'completed': []
+        }
+
+        projects_by_status = {
+            'planificado': [],
+            'en_curso': [],
+            'completado': [],
+            'en_espera': [],
+            'cancelado': []
+        }
+
+        total_projects = 0
+
+        for proyecto in user_projects:
+            # Calculate ADVANCED progress for each project
+            progress_data = ProjectProgressCalculator.calculate_advanced_progress(proyecto)
+
+            # Calculate days remaining manually
+            if proyecto.fecha_fin_estimada:
+                today = timezone.now().date()
+                days_remaining = (proyecto.fecha_fin_estimada - today).days
+            else:
+                days_remaining = None
+
+            # Create comprehensive project data
+            project_data = {
+                'project': proyecto,
+                'progress_data': progress_data,
+                'percentage': progress_data['completion_percentage'],
+                'velocity': progress_data['velocity'],
+                'days_remaining': days_remaining,
+                'health_status': progress_data['health_status'],
+                'estimated_completion': progress_data['estimated_completion'],
+                'total_tasks': progress_data['total_tasks'],
+                'completed_tasks': progress_data['completed_tasks'],
+                'pending_tasks': progress_data['pending_tasks'],
+                'critical_tasks': progress_data['critical_tasks']
+            }
+
+            # ORGANIZATION 1: By Health Status 
+            if proyecto.estado == 'completado':
+                projects_by_health['completed'].append(project_data)
+            elif progress_data['health_status'] == 'critical':
+                projects_by_health['critical'].append(project_data)
+            elif progress_data['health_status'] == 'at_risk':
+                projects_by_health['at_risk'].append(project_data)
+            else: # Healthy
+                projects_by_health['healthy'].append(project_data)
+
+            # Organize by project status
+            if proyecto.estado in projects_by_status:
+                projects_by_status[proyecto.estado].append(project_data)
+
+            total_projects += 1
+
+        # Generar notificaciones al acceder al dashboard
+        NotificationService.generate_daily_notifications(self.request.user)
+
+        today = timezone.now().date()
+
+        # Completadas hoy (para motivacion inmediata)
+        completed_today = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+            fecha_asignada=today, # Completadas que vencian hoy
+        ).order_by('-id')[:5] # Maximo 5 mas recientes
+
+        # Estadisticas motivacionales
+        completed_this_week = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+            fecha_asignada__gte=today - timedelta(days=7)
+        ).count()
+
+        total_completed_ever = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+        ).count()
+
+
+
+        # Add to context
+        context.update({
+            'critical_tasks': critical_tasks,
+            'attention_tasks': attention_tasks, 
+            'future_tasks': future_tasks,
+            'total_tasks': len(prioritized_task_scores),
+
+            'projects_by_health': projects_by_health,
+            'projects_by_status': projects_by_status,
+            'total_projects': total_projects,
+
+            # Quick stats with correct names
+            'planificado_count': len(projects_by_status['planificado']),
+            'en_curso_count': len(projects_by_status['en_curso']),
+            'completado_count': len(projects_by_status['completado']),
+            'en_espera_count': len(projects_by_status['en_espera']),
+            'cancelado_count': len(projects_by_status['cancelado']),
+
+            # Gamificacion - Motivacion del usuario
+            'completed_tasks_today': completed_today,
+            'completed_this_week': completed_this_week,
+            'total_completed_ever': total_completed_ever,
+        })
         
         return context
-            
+
+
+class NotificationCenterView(LoginRequiredMixin, ListView):
+    """
+    Centro de notificaciones
+
+    Caracteristicas:
+    - Todas las notificaciones del usuario
+    - Diferenciacion visual ( leidas vs no leidas )
+    - Ordenadas poro fecha ( más recientes primero )
+    - Paginación para performance
+    """
+    model = Notification
+    template_name = 'notificaciones/centro_notificaciones.html'
+    context_object_name = 'notificaciones'
+    paginate_by = 20
+
+    def get_queryset(self):
+        """ Solo notificaciones del usuario logeado """
+        return Notification.objects.filter(
+            usuario=self.request.user
+        ).select_related(
+            'tarea_relacionada',
+            'proyecto_relacionado'
+        ).order_by('-fecha_creacion')
+
+
+    def get_context_data(self, **kwargs):
+        """ Agregar estadisticas para la pagina """
+        context = super().get_context_data(**kwargs)
+        user_notifications = self.get_queryset()
+
+        context.update({
+            'total_notifications': user_notifications.count(),
+            'unread_count': user_notifications.filter(leida=False).count(),
+            'read_count': user_notifications.filter(leida=True).count(),
+            'critical_count': user_notifications.filter(subtipo='critical').count(),
+            'warning_count': user_notifications.filter(subtipo='warning').count()
+        })
+
+        return context
+
+class NotificationClickView(LoginRequiredMixin, View):
+    """
+    Manejo de click en notificación
+
+    Funcionalidad:
+    - Marcar notificación como leida
+    - Redirigir al origen (tarea/proyecto relacionado)
+    - Actualizar contador automaticamente
+    """
+    def get(self, request, notification_id):
+        """
+        Procesar click en notificación.
+        """
+        # Obtener notificacion del usuario
+        try:
+            notification = Notification.objects.get(
+                id=notification_id,
+                usuario=request.user
+            )
+        except Notification.DoesNotExist:
+            messages.error(request, 'Notificación no encontrada.')
+            return redirect('centro_notificaciones')
+
+        # Marcar como leida
+        notification.leida = True
+        notification.save()
+
+        # Redirect inteligente
+        if notification.tarea_relacionada:
+            messages.success(request, f'Revisando tarea: {notification.tarea_relacionada.titulo}')
+            return redirect('detalle_tarea_url', pk=notification.tarea_relacionada.id)
+        
+        elif notification.proyecto_relacionado:
+            messages.success(request, f'Revisando proyecto: {notification.proyecto_relacionado.nombre}')
+            return redirect('detalle_proyecto_url', pk=notification.proyecto_relacionado.id)
+
+        else:
+            # Notificación sin relación especifica
+            messages.info(request, 'Notificación marcada como leida.')
+            return redirect('centro_notificaciones')
 
 
 class ToggleTaskStatusView(LoginRequiredMixin, View):

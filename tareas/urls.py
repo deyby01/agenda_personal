@@ -5,6 +5,7 @@ from .views import VistaRegistro
 
 urlpatterns = [
     path('', views.MyWeekView.as_view(), name='mi_semana_actual_url'),
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('lista-tareas/', views.ListViewTasks.as_view(), name='lista_de_tareas_url'),
     path('nueva/', views.CreateViewTask.as_view(), name='crear_tarea_url'),
     path('tarea/<int:pk>/', views.DetailViewTask.as_view(), name='detalle_tarea_url'),
@@ -23,4 +24,8 @@ urlpatterns = [
     # Para una semana específica basada en una fecha (año, mes, día)
     path('mi-semana/<int:anio>/<int:mes>/<int:dia>/', views.MyWeekView.as_view(), name='mi_semana_especifica_url'),
     path('tarea/cambiar-estado/<int:tarea_id>/', views.ToggleTaskStatusView.as_view(), name='cambiar_estado_tarea_url'),
+
+    # ===== NOIFICATIONS ======
+    path('notificaciones/', views.NotificationCenterView.as_view(), name='centro_notificaciones'),
+    path('notificaciones/<int:notification_id>/click/', views.NotificationClickView.as_view(), name='notification_click'),
 ]
