@@ -151,16 +151,17 @@ class NotificationModelTest(TestCase):
     def test_notification_service_no_duplicates_same_day(self):
         """
         No debe crear notificaciones duplicadas el mismo día
+        
+        CORREGIDO: Task debe estar pendiente para ser procesada por engine
         """
-        # Crear tarea crítica
+        # Crear tarea crítica PENDIENTE
         today = timezone.now().date()
         critical_task = Tarea.objects.create(
             usuario=self.user,
             titulo='Tarea para Duplicados Test',
-            fecha_asignada=today - datetime.timedelta(days=2)
+            fecha_asignada=today - datetime.timedelta(days=2),
+            completada=False  # ← AGREGAR ESTA LÍNEA - CRÍTICA
         )
-        
-        from tareas.notification_service import NotificationService
         
         # PRIMERA LLAMADA: Generar notificaciones
         first_batch = NotificationService.generate_task_notifications(self.user)
@@ -178,7 +179,7 @@ class NotificationModelTest(TestCase):
         # SEGUNDA LLAMADA: Intentar generar duplicados (mismo día)
         second_batch = NotificationService.generate_task_notifications(self.user)
         
-        # NO debe crear nuevas notificaciones
+        # NO debe crear nuevas notificaciones (tu anti-duplicate logic)
         self.assertEqual(len(second_batch), 0, "No debe crear notificaciones duplicadas el mismo día")
         
         # VERIFICAR: Solo debe existir UNA notificación total en BD
@@ -190,6 +191,7 @@ class NotificationModelTest(TestCase):
         ).count()
         
         self.assertEqual(total_notifications, 1, "Solo debe existir una notificación por tarea por día")
+
 
 
 

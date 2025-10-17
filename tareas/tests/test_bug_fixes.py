@@ -33,7 +33,7 @@ class TaskPrioritizationBugFixTest(TestCase):
         
     def test_prioritization_engine_excludes_completed_tasks(self):
         """
-        PASO 1: TaskPrioritizationEngine NO debe incluir tareas completadas
+        TaskPrioritizationEngine NO debe incluir tareas completadas
         
         Este test DEBE FALLAR inicialmente (refleja bug actual)
         Después del fix, debe pasar
@@ -60,13 +60,8 @@ class TaskPrioritizationBugFixTest(TestCase):
         user_tasks = Tarea.objects.filter(usuario=self.user)
         prioritized_results = TaskPrioritizationEngine.prioritize_tasks(user_tasks)
         
-        # DEBUGGING: Ver qué tareas se analizan
-        print(f"DEBUG: Total user tasks: {user_tasks.count()}")
-        print(f"DEBUG: Prioritized results: {len(prioritized_results)}")
-        
         for result in prioritized_results:
             task = Tarea.objects.get(id=result.task_id)
-            print(f"  - Task: {task.titulo} (completada: {task.completada}) - Score: {result.score}")
         
         # VERIFICACIONES DEL BUG FIX
         
@@ -90,7 +85,7 @@ class TaskPrioritizationBugFixTest(TestCase):
         
     def test_current_tests_still_work_after_bug_fix(self):
         """
-        PASO 2: Verificar que tests existentes siguen funcionando
+        Verificar que tests existentes siguen funcionando
         
         Regression test - existing functionality debe mantenerse
         """

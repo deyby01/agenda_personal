@@ -92,29 +92,42 @@ class NotificationService:
         """
         Crea notificación específica para tarea crítica
         
-        Lógica anti-duplicados robusta para producción y tests
+        FIX: Mejorar duplicate detection para test environment
         """
-        # LÓGICA MEJORADA: Verificar duplicados con query más específica
         today = timezone.now().date()
         
-        # Buscar notificación existente hoy para esta tarea específica
-        existing = Notification.objects.filter(
+        # === MEJORAR DUPLICATE DETECTION ===
+        # Buscar todas las notificaciones para esta tarea (más amplio)
+        all_notifications_for_task = Notification.objects.filter(
+            usuario=usuario,
+            tarea_relacionada=tarea,
+            tipo='task',
+            subtipo='critical'
+        )
+        
+        # Filtrar las de hoy específicamente  
+        existing_today = all_notifications_for_task.filter(
+            fecha_creacion__date=today
+        ).first()
+        
+        if existing_today:
+            return None  # No crear duplicado
+        
+        # SEGUNDA VERIFICACIÓN: Por si acaso, buscar en las últimas 24 horas
+        from django.utils import timezone as django_timezone
+        last_24h = django_timezone.now() - datetime.timedelta(hours=24)
+        
+        recent_notifications = Notification.objects.filter(
             usuario=usuario,
             tarea_relacionada=tarea,
             tipo='task',
             subtipo='critical',
-            fecha_creacion__date=today
-        ).first()  # ← Usar .first() en lugar de .exists() para más información
+            fecha_creacion__gte=last_24h
+        ).count()
         
-        if existing:
+        if recent_notifications > 0:
             return None
-        
-        # DEBUGGING: Verificar estado antes de crear
-        all_notifications_for_task = Notification.objects.filter(
-            tarea_relacionada=tarea
-        )
-        
-        # Crear nueva notificación
+            
         reasons_text = ', '.join(task_score.reasons) if task_score.reasons else 'Análisis de prioridad'
         
         notification = Notification.objects.create(
@@ -135,6 +148,7 @@ class NotificationService:
             }
         )
         return notification
+
 
 
 
