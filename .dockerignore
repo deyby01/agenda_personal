@@ -1,0 +1,66 @@
+# .dockerignore - Security & Performance
+# Similar to .gitignore but for Docker builds
+
+# Environment & Secrets
+.env
+.env.*
+*.env
+file.env
+.venv/
+.virtualenv/
+env/
+
+# Git & Version Control
+.git/
+.gitignore
+*.git*
+
+# IDE & Development
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django Development  
+db.sqlite3
+db.sqlite3-journal
+*.log
+logs/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.cache/
+
+# Documentation
+README.md
+docs/
+*.md
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Large/Unnecessary Files
+*.zip
+*.tar.gz
+node_modules/
+staticfiles/
+mediafiles/
