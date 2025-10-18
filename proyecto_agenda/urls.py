@@ -21,6 +21,9 @@ from rest_framework.authtoken import views
 from django.views.generic.base import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 # Smart homepage routing
 def homepage_redirect(request):
     """
@@ -53,3 +56,8 @@ urlpatterns = [
     # ========= AUTHENTICATION ========
     path('accounts/', include('allauth.urls')),
 ]
+
+# *** ADD STATIC FILES SERVING FOR CLOUD ***
+if not settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

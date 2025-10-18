@@ -1,0 +1,36 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Instalar dependencias
+RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Instalar paquetes Python
+COPY requirements-cloud.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar aplicación
+COPY . .
+
+# Crear directorios
+RUN mkdir -p staticfiles
+
+# Recopilar archivos estáticos
+RUN python manage.py collectstatic --noinput --settings=proyecto_agenda.settings_cloud
+
+# Script de inicio con migraciones automáticas
+RUN echo '#!/bin/bash\n\
+echo "Iniciando aplicación con configuración automática..."\n\
+python manage.py migrate --settings=proyecto_agenda.settings_cloud\n\
+echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username=\"admin\").exists() or User.objects.create_superuser(\"admin\", \"admin@agenda.com\", \"admin123\")" | python manage.py shell --settings=proyecto_agenda.settings_cloud\n\
+echo "from django.contrib.sites.models import Site; site, created = Site.objects.get_or_create(id=1); site.domain = \"agenda-personal-1015223170221.us-central1.run.app\"; site.name = \"Agenda Personal\"; site.save()" | python manage.py shell --settings=proyecto_agenda.settings_cloud\n\
+echo "Configuración completa - iniciando servidor..."\n\
+exec gunicorn --bind 0.0.0.0:$PORT --workers 1 proyecto_agenda.wsgi:application' > /app/startup.sh
+
+RUN chmod +x /app/startup.sh
+
+EXPOSE 8000
+CMD ["/app/startup.sh"]
