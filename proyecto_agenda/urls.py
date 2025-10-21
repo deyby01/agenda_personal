@@ -40,6 +40,9 @@ urlpatterns = [
     # ======== INTELLIGENT HOMEPAGE ROUTING ========
     path('', homepage_redirect, name='homepage'),
 
+    # ========= CORE ENDPOINTS ===========
+    path('', include('apps.core.urls')), # 🆕 Health check y shared endpoints
+
     # =========== APP URLS ========
     path('agenda/', include('tareas.urls')),
 

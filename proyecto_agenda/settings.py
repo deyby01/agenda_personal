@@ -72,6 +72,13 @@ INSTALLED_APPS = [
     
     # Project apps
     'tareas',
+
+    # 🆕 Enterprise Apps - Domain Architecture
+    'apps.core.apps.CoreConfig',
+    'apps.tasks.apps.TasksConfig',
+    'apps.projects.apps.ProjectsConfig',
+    'apps.notifications.apps.NotificationsConfig',
+    'apps.api.apps.ApiConfig',
 ]
 
 # JWT Configuration

@@ -2,8 +2,6 @@
 # docker-compose.yml - Enterprise Microservices
 # ============================================
 
-version: '3.8'
-
 services:
   # PostgreSQL Database Service
   db:
