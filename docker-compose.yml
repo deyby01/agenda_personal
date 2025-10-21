@@ -1,0 +1,94 @@
+# ============================================
+# docker-compose.yml - Enterprise Microservices
+# ============================================
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: agenda_db_enterprise
+    environment:
+      POSTGRES_DB: agenda_enterprise_db
+      POSTGRES_USER: agenda_user
+      POSTGRES_PASSWORD: agenda_secure_2025
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=es_CO.UTF-8 --lc-ctype=es_CO.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agenda_user -d agenda_enterprise_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agenda_network
+
+  # Redis Cache & Session Service
+  redis:
+    image: redis:7-alpine
+    container_name: agenda_redis_enterprise
+    command: redis-server --appendonly yes --requirepass redis_secure_2025
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_secure_2025", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agenda_network
+
+  # Django Web Application Service
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agenda_web_enterprise
+    ports:
+      - "${PORT:-8000}:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    networks:
+      - agenda_network
+
+# Volumes para persistencia de datos
+volumes:
+  postgres_data:
+    driver: local
+    name: agenda_postgres_data
+  redis_data:
+    driver: local
+    name: agenda_redis_data
+  static_volume:
+    driver: local
+    name: agenda_static_files
+  media_volume:
+    driver: local
+    name: agenda_media_files
+
+# Network para comunicación entre servicios
+networks:
+  agenda_network:
+    driver: bridge
+    name: agenda_enterprise_network

@@ -1,0 +1,12 @@
+# ============================================
+# requirements/production.txt - PRODUCCIÓN
+# ============================================
+
+# Base dependencies
+-r base.txt
+
+# MySQL Driver (PythonAnywhere)
+mysqlclient==2.2.0
+
+# Production optimizations
+sentry-sdk==1.38.0
