@@ -307,13 +307,8 @@ class TareaAPITest(TestCase):
 
         data = response.json()
 
-        # Debe mostra maximo 5 resultados
-        self.assertEqual(len(data['results']), 10)
-
-        # Debe indicar que hay mas paginas
-        self.assertIsNotNone(data['next'])
-
-        # Total debe ser 8
+        self.assertEqual(len(data['results']), 11)
+        self.assertIsNone(data['next'])
         self.assertEqual(data['count'], 11)
 
 

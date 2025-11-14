@@ -183,7 +183,6 @@ class ProyectoModelTest(TestCase):
 class ProjectTaskRelationshipTest(TestCase):
     """
     TDD Tests for Project-Task Relationship
-    These test WILL FAIL initially (RED phase)
     """
     def setUp(self):
         self.user = User.objects.create_user(
