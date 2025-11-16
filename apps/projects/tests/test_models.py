@@ -79,16 +79,13 @@ class ProyectoModelTest(TestCase):
         self.proyecto.save()
         self.assertFalse(self.proyecto.is_active)
 
-    # TESTS COMENTADO TEMPORALMENTE
-    # Requieren: apps.tasks.models.Tarea (Sesión 2)
-    # TODO: Descomentar después de implementar Task model
     
-    # def test_project_without_tasks(self):
-    #     """Test: Proyecto sin tareas tiene 0% completado"""
-    #     self.assertEqual(self.proyecto.get_completion_percentage(), 0.0)
-    #     self.assertEqual(self.proyecto.total_tareas, 0)
-    #     self.assertEqual(self.proyecto.tareas_completadas, 0)
-    #     self.assertEqual(self.proyecto.tareas_pendientes, 0)
+    def test_project_without_tasks(self):
+        """Test: Proyecto sin tareas tiene 0% completado"""
+        self.assertEqual(self.proyecto.get_completion_percentage(), 0.0)
+        self.assertEqual(self.proyecto.total_tareas, 0)
+        self.assertEqual(self.proyecto.tareas_completadas, 0)
+        self.assertEqual(self.proyecto.tareas_pendientes, 0)
     
     def test_project_state_choices(self):
         """Test: Estados válidos del proyecto"""
@@ -116,3 +113,41 @@ class ProyectoModelTest(TestCase):
         self.assertIsNone(proyecto_minimal.fecha_inicio)
         self.assertIsNone(proyecto_minimal.fecha_fin_estimada)
         self.assertIsNone(proyecto_minimal.tiempo_estimado_general)
+    
+    def test_project_with_tasks_completion(self):
+        """Test: Porcentaje de completación con tareas reales"""
+        from apps.tasks.models import Tarea
+        
+        # Crear 4 tareas para el proyecto
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea 1',
+            proyecto=self.proyecto,
+            completada=True
+        )
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea 2',
+            proyecto=self.proyecto,
+            completada=True
+        )
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea 3',
+            proyecto=self.proyecto,
+            completada=False
+        )
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea 4',
+            proyecto=self.proyecto,
+            completada=False
+        )
+        
+        # Verificar counts
+        self.assertEqual(self.proyecto.total_tareas, 4)
+        self.assertEqual(self.proyecto.tareas_completadas, 2)
+        self.assertEqual(self.proyecto.tareas_pendientes, 2)
+        
+        # Verificar porcentaje: 2/4 = 50%
+        self.assertEqual(self.proyecto.get_completion_percentage(), 50.0)

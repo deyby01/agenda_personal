@@ -45,21 +45,18 @@ class ProyectoRepositoryTest(TestCase):
         self.assertEqual(proyectos.count(), 1)
         self.assertEqual(proyectos.first(), self.proyecto_activo)
 
-    # TEST COMENTADO TEMPORALMENTE
-    # Requiere: apps.tasks.models.Tarea (Sesión 2)
-    # TODO: Descomentar después de implementar Task model
     
-    # def test_get_project_with_tasks_stats(self):
-    #     """Test: Obtener proyecto con estadísticas"""
-    #     stats = ProyectoRepository.get_project_with_tasks_stats(
-    #         self.proyecto_activo.id,
-    #         self.user
-    #     )
+    def test_get_project_with_tasks_stats(self):
+         """Test: Obtener proyecto con estadísticas"""
+         stats = ProyectoRepository.get_project_with_tasks_stats(
+             self.proyecto_activo.id,
+             self.user
+         )
         
-    #     self.assertIsNotNone(stats)
-    #     self.assertEqual(stats['proyecto'], self.proyecto_activo)
-    #     self.assertEqual(stats['total_tareas'], 0)
-    #     self.assertEqual(stats['completion_percentage'], 0.0)
+         self.assertIsNotNone(stats)
+         self.assertEqual(stats['proyecto'], self.proyecto_activo)
+         self.assertEqual(stats['total_tareas'], 0)
+         self.assertEqual(stats['completion_percentage'], 0.0)
     
     def test_get_project_with_tasks_stats_not_found(self):
         """Test: Proyecto no encontrado devuelve None"""
@@ -103,3 +100,33 @@ class ProyectoRepositoryTest(TestCase):
         )
         
         self.assertIn(proyecto_en_periodo, proyectos)
+
+
+    def test_get_project_with_tasks_stats_with_real_tasks(self):
+        """Test: Estadísticas de proyecto con tareas reales"""
+        from apps.tasks.models import Tarea
+        
+        # Crear tareas para el proyecto
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea Completada',
+            proyecto=self.proyecto_activo,
+            completada=True
+        )
+        Tarea.objects.create(
+            usuario=self.user,
+            titulo='Tarea Pendiente',
+            proyecto=self.proyecto_activo,
+            completada=False
+        )
+        
+        stats = ProyectoRepository.get_project_with_tasks_stats(
+            self.proyecto_activo.id,
+            self.user
+        )
+        
+        self.assertIsNotNone(stats)
+        self.assertEqual(stats['total_tareas'], 2)
+        self.assertEqual(stats['tareas_completadas'], 1)
+        self.assertEqual(stats['tareas_pendientes'], 1)
+        self.assertEqual(stats['completion_percentage'], 50.0)
