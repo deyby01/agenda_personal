@@ -20,7 +20,7 @@ class NotificationRepository:
     """
 
     @staticmethod
-    def get_all_for_user(user:User) -> QuerySet[notificacion]:
+    def get_all_for_user(user:User) -> QuerySet[Notification]:
         """
         Obtiene todas las notificaciones de un usuario.
 
@@ -28,7 +28,7 @@ class NotificationRepository:
             user (User): Usuario propietario
 
         Returns:
-            QuerySet[notificacion]: Notificaciones ordenadas por fecha
+            QuerySet[Notification]: Notificaciones ordenadas por fecha
         """
         return Notification.objects.filter(
             usuario=user

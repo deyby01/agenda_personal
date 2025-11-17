@@ -131,7 +131,12 @@ class Notification(UserOwnedModel):
         return self.subtipo in ['critical', 'warning'] and not self.accionada
 
     def mark_as_read(self):
-        """ Marks the notification as actioned. """
+        """ Marks the notification as read """
+        self.leida = True
+        self.save(update_fields=['leida'])
+
+    def mark_as_actioned(self):
+        """ Marks the notification as actioned """
         self.accionada = True
         self.leida = True
         self.save(update_fields=['accionada', 'leida'])
