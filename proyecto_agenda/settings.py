@@ -187,8 +187,8 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 ACCOUNT_FORMS = {
-    'login': 'tareas.forms.CustomLoginForm',
-    'signup': 'tareas.forms.CustomUserCreationForm',
+    'login': 'apps.core.forms.CustomLoginForm',
+    'signup': 'apps.core.forms.CustomUserCreationForm',
 }
 
 ACCOUNT_SESSION_REMEMBER = True
