@@ -3,8 +3,12 @@ from django.urls import reverse_lazy
 from django.views import generic, View
 
 from tareas.business_logic import PriorityLevel, TaskPrioritizationEngine, ProjectProgressCalculator
-from .models import Notification, Tarea, Proyecto
-from .forms import TareaForm, CustomUserCreationForm, ProyectoForm
+from apps.notifications.models import Notification
+from apps.tasks.models import Tarea
+from apps.projects.models import Proyecto
+from apps.core.forms import CustomUserCreationForm
+from apps.tasks.forms import TareaForm
+from apps.projects.forms import ProyectoForm
 import datetime
 from django.utils import timezone
 from django.urls import reverse
@@ -16,8 +20,9 @@ from rest_framework import viewsets
 from .serializers import TareaSerializer, ProyectoSerializer
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
-from .services import WeekCalculatorService, WeekNavigationService
-from .repositories import TareaRepository, ProyectoRepository
+from apps.tasks.services import WeekCalculatorService, WeekNavigationService
+from apps.tasks.repositories import TareaRepository
+from apps.projects.repositories import ProyectoRepository
 from .notification_service import NotificationService
 from datetime import timedelta
 

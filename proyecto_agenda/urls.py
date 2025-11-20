@@ -40,6 +40,9 @@ urlpatterns = [
     # ======== INTELLIGENT HOMEPAGE ROUTING ========
     path('', homepage_redirect, name='homepage'),
 
+    # ========= AUTHENTICATION ========
+    path('accounts/', include('allauth.urls')),
+
     # ========= CORE ENDPOINTS ===========
     path('', include('apps.core.urls')), # 🆕 Health check y shared endpoints
 
@@ -53,6 +56,5 @@ urlpatterns = [
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-    # ========= AUTHENTICATION ========
-    path('accounts/', include('allauth.urls')),
+    
 ]

@@ -12,6 +12,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, HTML, Div
+from crispy_forms.bootstrap import AppendedText
 from allauth.account.forms import LoginForm
 
 
@@ -20,9 +21,11 @@ class CustomUserCreationForm(UserCreationForm):
     Form personalizado para registro de usuarios.
     
     Extiende UserCreationForm con:
-    - Email obligatorio
+    - Email obligatorio y único
+    - Nombre y apellido
     - Validación de email único
     - Styling con crispy forms
+    - Password toggle buttons
     
     Usage:
         form = CustomUserCreationForm(request.POST)
@@ -32,15 +35,39 @@ class CustomUserCreationForm(UserCreationForm):
     
     email = forms.EmailField(
         required=True,
+        label='Correo Electrónico',
+        help_text='Requerido. Se necesita una dirección de correo válida.',
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
             'placeholder': 'correo@ejemplo.com'
         })
     )
     
+    first_name = forms.CharField(
+        max_length=100,
+        required=True,
+        label='Nombre',
+        help_text='Requerido. Tu nombre.',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tu nombre'
+        })
+    )
+    
+    last_name = forms.CharField(
+        max_length=100,
+        required=False,
+        label='Apellido',
+        help_text='Opcional. Tu apellido.',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tu apellido (opcional)'
+        })
+    )
+    
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -49,9 +76,12 @@ class CustomUserCreationForm(UserCreationForm):
         }
     
     def __init__(self, *args, **kwargs):
-        """Personalizar widgets de password fields."""
+        """
+        Constructor personalizado con Crispy Forms layout.
+        """
         super().__init__(*args, **kwargs)
         
+        # Personalizar widgets de password fields
         self.fields['password1'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Contraseña'
@@ -60,6 +90,18 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Confirmar contraseña'
         })
+        
+        # Configurar Crispy Forms Helper
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        
+        # Layout con password toggle buttons
+        self.helper.layout = Layout(
+            Field('username', css_class='mb-3'),
+            Field('first_name', css_class='mb-3'),
+            Field('last_name', css_class='mb-3'),
+            Field('email', css_class='mb-3')
+        )
     
     def clean_email(self):
         """
@@ -80,18 +122,25 @@ class CustomUserCreationForm(UserCreationForm):
     
     def save(self, commit=True):
         """
-        Guardar usuario con email.
+        Guardar usuario con todos los campos.
         
         Args:
             commit: Si True, guarda en BD inmediatamente
             
         Returns:
-            User: Usuario creado
+            User: Usuario creado con first_name, last_name y email
         """
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['first_name']
+        
+        # Last name es opcional
+        if self.cleaned_data.get('last_name'):
+            user.last_name = self.cleaned_data['last_name']
+        
         if commit:
             user.save()
+        
         return user
 
 

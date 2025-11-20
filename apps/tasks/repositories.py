@@ -1,13 +1,13 @@
 """
 Task Repository - Data access layer.
 
-Migrated from tareas/repositories.TareaRepository
-Single Responsibility: Task data access.
+Migrado desde tareas/repositories.TareaRepository
+Single Responsibility: Acceso a datos de tareas.
 """
 
 from typing import Dict, List, Optional
 from django.contrib.auth.models import User
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet, Q
 import datetime
 
 from apps.tasks.models import Tarea
@@ -16,125 +16,171 @@ from apps.core.utils import WeekRange
 
 class TareaRepository:
     """
-    Repository for Task data access.
+    Repository para acceso a datos de Tarea.
     
-    Single responsibility: ONLY queries and data access.
+    Responsabilidad única: SOLO queries y acceso a datos.
+    - No contiene lógica de negocio
+    - No maneja presentación
+    - No conoce sobre HTTP
+    
+    NOTA: Mantiene AMBAS APIs (antigua y nueva) para compatibilidad.
     """
-
+    
     @staticmethod
     def get_tasks_for_user(user: User) -> QuerySet[Tarea]:
         """
-        Gets all tasks for a user.
-
+        Obtiene todas las tareas de un usuario.
+        
         Args:
-            user (User): User who owns the tasks.
-
+            user: Usuario propietario
+            
         Returns:
-            QuerySet[Tarea]: User's tasks with project pre-fetched.
+            QuerySet[Tarea]: Tareas del usuario con proyecto pre-cargado
         """
-        return Tarea.objects.filter(usuario=user).select_related('proyecto', 'usuario')
-
-
-    @staticmethod
-    def get_tasks_for_user_in_week(user: User, week_range: WeekRange) -> QuerySet[Tarea]:
-        """
-        Gets tasks for a user within a week range.
-
-        Args:
-            user (User): Task owner
-            week_range (WeekRange): Date range for the week
-
-        Returns:
-            QuerySet[Tarea]: Tasks within the specified date range.
-        """
-        return Tarea.objects.filter(usuario=user, fecha_asignada__range=[week_range.start_date, week_range.end_date]).select_related('proyecto')
-
-
+        return Tarea.objects.filter(
+            usuario=user
+        ).select_related('proyecto', 'usuario')
     
     @staticmethod
-    def get_tasks_grouped_by_date(user: User, week_range: WeekRange) -> Dict[datetime.date, List[Tarea]]:
+    def get_tasks_for_user_in_week(
+        user: User,
+        week_range: WeekRange
+    ) -> QuerySet[Tarea]:
         """
-        Groups tasks by assigned date for a week.
-
+        Obtiene tareas de un usuario en un rango de semana.
+        
         Args:
-            user (User): Task owner
-            week_range (WeekRange): Date range
-
+            user: Usuario propietario
+            week_range: Rango de fechas de la semana
+            
         Returns:
-            Dict: {date: [Tasks]} for each day of the week
+            QuerySet[Tarea]: Tareas en el rango especificado
         """
-
+        return Tarea.objects.filter(
+            usuario=user,
+            fecha_asignada__range=[week_range.start_date, week_range.end_date]
+        ).select_related('proyecto')
+    
+    @staticmethod
+    def get_tasks_grouped_by_date(
+        user: User,
+        week_range: WeekRange
+    ) -> Dict[datetime.date, List[Tarea]]:
+        """
+        Agrupa tareas por fecha asignada para una semana.
+        
+        Args:
+            user: Usuario propietario
+            week_range: Rango de fechas
+            
+        Returns:
+            Dict: {fecha: [tareas]} para cada día de la semana
+        """
         tareas = TareaRepository.get_tasks_for_user_in_week(user, week_range)
-
-        # Initialize dict with all dates in the week
+        
+        # Inicializar dict con todas las fechas de la semana
         grouped = {day: [] for day in week_range.days}
-
-        # Group tasks by date
+        
+        # Agrupar tareas por fecha
         for tarea in tareas:
             if tarea.fecha_asignada in grouped:
                 grouped[tarea.fecha_asignada].append(tarea)
-
+        
         return grouped
-
-
+    
+    # ========== API ANTIGUA (week-based) - COMPATIBILIDAD ==========
+    
     @staticmethod
-    def get_completed_tasks_count(user: User) -> int:
+    def get_completed_tasks_count(
+        user: User,
+        week_range: Optional[WeekRange] = None
+    ) -> int:
         """
-        Counts completed tasks for a user.
-
+        Cuenta tareas completadas de un usuario.
+        
+        DUAL API:
+        - Si se proporciona week_range: cuenta completadas EN LA SEMANA
+        - Si NO se proporciona week_range: cuenta completadas TOTAL del usuario
+        
         Args:
-            user (User): Task owner
-
+            user: Usuario propietario
+            week_range: (Opcional) Rango de fechas de la semana
+            
         Returns:
-            int: Number of completed tasks
+            int: Número de tareas completadas
         """
-        return Tarea.objects.filter(usuario=user, completada=True).count()
-
-
+        if week_range:
+            # API ANTIGUA: Contar completadas en la semana específica
+            return TareaRepository.get_tasks_for_user_in_week(
+                user, week_range
+            ).filter(completada=True).count()
+        else:
+            # API NUEVA: Contar completadas totales del usuario
+            return Tarea.objects.filter(
+                usuario=user,
+                completada=True
+            ).count()
+    
     @staticmethod
-    def get_total_tasks_count(user: User) -> int:
+    def get_total_tasks_count(
+        user: User,
+        week_range: Optional[WeekRange] = None
+    ) -> int:
         """
-        Counts total tasks for a user.
-
+        Cuenta total de tareas de un usuario.
+        
+        DUAL API:
+        - Si se proporciona week_range: cuenta tareas EN LA SEMANA
+        - Si NO se proporciona week_range: cuenta tareas TOTALES del usuario
+        
         Args:
-            user (User): Task owner
-
+            user: Usuario propietario
+            week_range: (Opcional) Rango de fechas de la semana
+            
         Returns:
-            int: Total number of tasks
+            int: Número total de tareas
         """
-        return Tarea.objects.filter(usuario=user).count()
-
-
+        if week_range:
+            # API ANTIGUA: Contar tareas en la semana específica
+            return TareaRepository.get_tasks_for_user_in_week(
+                user, week_range
+            ).count()
+        else:
+            # API NUEVA: Contar tareas totales del usuario
+            return Tarea.objects.filter(usuario=user).count()
+    
+    # ========== API NUEVA (sin week_range) - CÓDIGO FUTURO ==========
     
     @staticmethod
     def get_pending_tasks_for_user(user: User) -> QuerySet[Tarea]:
         """
-        Gets pending tasks for a user.
-
+        Obtiene tareas pendientes de un usuario.
+        
         Args:
-            user (User): Task owner
-
+            user: Usuario propietario
+            
         Returns:
-            QuerySet[Tarea]: Incomplete tasks
+            QuerySet[Tarea]: Tareas no completadas
         """
-        return Tarea.objects.filter(usuario=user, completada=False).select_related('proyecto')
-
-
+        return Tarea.objects.filter(
+            usuario=user,
+            completada=False
+        ).select_related('proyecto')
     
     @staticmethod
     def get_overdue_tasks_for_user(user: User) -> QuerySet[Tarea]:
         """
-        Gets overdue tasks (fecha_asignada < today and not completed)
-
+        Obtiene tareas atrasadas (fecha_asignada < hoy y no completadas).
+        
         Args:
-            user (User): Task owner
-
+            user: Usuario propietario
+            
         Returns:
-            QuerySet[Tarea]: Overdue tasks
+            QuerySet[Tarea]: Tareas atrasadas
         """
         from django.utils import timezone
-        today = timezone.now().date()
-
+        today = timezone.localdate()
+        
         return Tarea.objects.filter(
             usuario=user,
             completada=False,

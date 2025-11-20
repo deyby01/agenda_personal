@@ -1,8 +1,10 @@
 """
 Task Services - Business Logic Layer.
 
-Migrated from tareas/services.py
-Contains: WeekCalculatorService, WeekNavigationService
+Migrado desde tareas/services.py
+Contiene: WeekCalculatorService, WeekNavigationService
+
+NOTA: Mantiene AMBAS APIs (antigua y nueva) para compatibilidad.
 """
 
 import datetime
@@ -12,78 +14,68 @@ from django.urls import reverse
 
 from apps.core.utils import WeekRange
 
+
 class WeekCalculatorService:
     """
-    Service for week-related calculations.
+    Servicio para cálculos relacionados con semanas.
     
-    Single Responsibility: Date and week range calculations.
+    Single Responsibility: Cálculos de fechas y rangos de semana.
+    
+    IMPORTANTE: Mantiene dos APIs diferentes para compatibilidad:
+    - API antigua (date-based): parse_date_params(year, month, day)
+    - API nueva (week-based): parse_week_params(year_param, week_param)
     """
-
+    
+    # ========== API NUEVA (week-based) ==========
+    
     @staticmethod
-    def get_week_range(year: Optional[int] = None, week: Optional[int] = None) -> WeekRange:
+    def get_week_range_from_week_number(
+        year: Optional[int] = None,
+        week: Optional[int] = None
+    ) -> WeekRange:
         """
-        Gets the week range (Monday to Sunday).
-
+        Obtiene rango de semana usando número de semana ISO.
+        
+        API NUEVA: Usa year/week number (ISO 8601)
+        
         Args:
-            year: Year (default: current year)
-            week: Week number (default: current week)
-
+            year: Año (default: año actual)
+            week: Número de semana ISO (default: semana actual)
+            
         Returns:
-            WeekRange: Object with start_date and end_date
+            WeekRange: Objeto con start_date y end_date
         """
-
         if year is None or week is None:
             today = timezone.localdate()
             year = today.year
             week = today.isocalendar()[1]
-
-        # Calculate Monday of the week
+        
+        # Calcular lunes de la semana
         jan_4 = datetime.date(year, 1, 4)
         week_1_monday = jan_4 - datetime.timedelta(days=jan_4.weekday())
         monday = week_1_monday + datetime.timedelta(weeks=week - 1)
-
-        # Calculate Sunday
+        
+        # Calcular domingo
         sunday = monday + datetime.timedelta(days=6)
-
+        
         return WeekRange(start_date=monday, end_date=sunday)
-
-
+    
     @staticmethod
-    def get_navigation_weeks(current_week: WeekRange) -> Dict[str, WeekRange]:
+    def parse_week_params(
+        year_param: Optional[str],
+        week_param: Optional[str]
+    ) -> Tuple[Optional[int], Optional[int]]:
         """
-        Gets previous and next weeks
-
+        Parsea parámetros de año y semana de URL.
+        
+        API NUEVA: Para URLs como /semana/2025/47/
+        
         Args:
-            current_week (WeekRange): current week
-
+            year_param: Año como string
+            week_param: Semana como string
+            
         Returns:
-            Dict with 'prev' and 'next' WeekRange
-        """
-        # Previous week
-        prev_monday = current_week.start_date - datetime.timedelta(days=7)
-        prev_sunday = prev_monday + datetime.timedelta(days=6)
-
-        # Next week
-        next_monday = current_week.start_date + datetime.timedelta(days=7)
-        next_sunday = next_monday + datetime.timedelta(days=6)
-
-        return {
-            'prev': WeekRange(start_date=prev_monday, end_date=prev_sunday),
-            'next': WeekRange(start_date=next_monday, end_date=next_sunday)
-        }
-
-
-    @staticmethod
-    def parse_date_params(year_param: Optional[str], week_param: Optional[str]) -> Tuple[Optional[int], Optional[int]]:
-        """
-        Parses year and week parameters from URL.
-
-        Args:
-            year_param (Optional[str]): Year as string
-            week_param (Optional[str]): Week as string
-
-        Returns:
-            Tuple (year, week) or (None, None) if invalid
+            Tuple (year, week) o (None, None) si inválidos
         """
         try:
             year = int(year_param) if year_param else None
@@ -91,65 +83,163 @@ class WeekCalculatorService:
             return year, week
         except (ValueError, TypeError):
             return None, None
+    
+    # ========== API ANTIGUA (date-based) - COMPATIBILIDAD ==========
+    
+    @staticmethod
+    def get_week_range(base_date: Optional[datetime.date] = None) -> WeekRange:
+        """
+        Calcula el rango de semana para una fecha dada.
+        
+        API ANTIGUA: Usa datetime.date como base
+        MANTIENE COMPATIBILIDAD con código existente.
+        
+        Args:
+            base_date: Fecha base (si None, usa fecha actual)
+            
+        Returns:
+            WeekRange con inicio (lunes) y fin (domingo) de la semana
+        """
+        if base_date is None:
+            base_date = timezone.localdate()
+        
+        # Calcular lunes de la semana (weekday 0 = lunes)
+        start_week = base_date - datetime.timedelta(days=base_date.weekday())
+        # Calcular domingo de la semana
+        end_week = start_week + datetime.timedelta(days=6)
+        
+        return WeekRange(start_date=start_week, end_date=end_week)
+    
+    @staticmethod
+    def parse_date_params(
+        year: Optional[int],
+        month: Optional[int],
+        day: Optional[int]
+    ) -> datetime.date:
+        """
+        Parsea parámetros de URL a fecha válida.
+        
+        API ANTIGUA: Para URLs como /mi-semana/2025/11/20/
+        MANTIENE COMPATIBILIDAD con tareas/views.py existente.
+        
+        Args:
+            year, month, day: Parámetros opcionales de fecha
+            
+        Returns:
+            Fecha válida (usa hoy si parámetros son None)
+            
+        Raises:
+            ValueError: Si la fecha es inválida
+        """
+        if all(param is not None for param in [year, month, day]):
+            try:
+                return datetime.date(year, month, day)
+            except ValueError:
+                # Fecha inválida, usar fecha actual
+                return timezone.localdate()
+        
+        return timezone.localdate()
+    
+    # ========== MÉTODOS COMPARTIDOS ==========
+    
+    @staticmethod
+    def get_navigation_weeks(current_week: WeekRange) -> Dict[str, WeekRange]:
+        """
+        Obtiene la semana anterior y siguiente para navegación.
+        
+        COMPATIBLE con ambas APIs.
+        
+        Args:
+            current_week: Semana actual
+            
+        Returns:
+            Dict con keys 'previous' (o 'prev') y 'next' conteniendo WeekRange
+        """
+        previous_start = current_week.start_date - datetime.timedelta(days=7)
+        next_start = current_week.start_date + datetime.timedelta(days=7)
+        
+        return {
+            'previous': WeekCalculatorService.get_week_range(previous_start),
+            'prev': WeekCalculatorService.get_week_range(previous_start),  # Alias
+            'next': WeekCalculatorService.get_week_range(next_start)
+        }
 
 
 class WeekNavigationService:
     """
-    Service for generating week navigation URLs.
+    Servicio para generar URLs de navegación entre semanas.
     
-    Single Responsibility: Navigation URL generation.
+    Single Responsibility: Generación de URLs de navegación.
+    
+    MANTIENE COMPATIBILIDAD con ambas APIs de URL.
     """
-
+    
     @staticmethod
-    def get_navigation_urls(week_range: WeekRange, url_name: str = 'mi_semana_url') -> Dict[str, str]:
+    def get_navigation_urls(
+        current_week: WeekRange,
+        navigation_weeks: Optional[Dict[str, WeekRange]] = None,
+        url_name: str = 'mi_semana_especifica_url'
+    ) -> Dict[str, str]:
         """
-        Generates navigation URLs (prev/next week).
-
+        Genera URLs de navegación (prev/next week).
+        
+        COMPATIBLE con ambas APIs:
+        - API antigua: /mi-semana/<year>/<month>/<day>/
+        - API nueva: /semana/<year>/<week>/
+        
         Args:
-            week_range (WeekRange): current week
-            url_name (str, optional): Django URL name
-
+            current_week: Semana actual
+            navigation_weeks: Dict con semanas prev/next (opcional)
+            url_name: Nombre de la URL de Django
+            
         Returns:
-            Dict with 'prev_url' and 'next_url'
+            Dict con 'previous' y 'next' (URLs)
         """
-
-        nav_weeks = WeekCalculatorService.get_navigation_weeks(week_range)
-
-        prev_week = nav_weeks['prev']
-        next_week = nav_weeks['next']
-
-        # Get ISO year and week number
-        prev_year, prev_week_num = prev_week.start_date.isocalendar()[:2]
-        next_year, next_week_num = next_week.start_date.isocalendar()[:2]
-
+        # Calcular navigation_weeks si no se proporciona
+        if navigation_weeks is None:
+            navigation_weeks = WeekCalculatorService.get_navigation_weeks(current_week)
+        
+        prev_week = navigation_weeks.get('previous') or navigation_weeks.get('prev')
+        next_week = navigation_weeks.get('next')
+        
+        # Generar URLs usando la API antigua (fecha completa)
+        prev_date = prev_week.start_date if prev_week else current_week.start_date
+        next_date = next_week.start_date if next_week else current_week.start_date
+        
         return {
-            'prev_url': reverse(url_name, kwargs={
-                'year': prev_year,
-                'week': prev_week_num
+            'previous': reverse(url_name, kwargs={
+                'anio': prev_date.year,
+                'mes': prev_date.month,
+                'dia': prev_date.day
             }),
-            'next_url': reverse(url_name, kwargs={
-                'year': next_year,
-                'week': next_week_num
+            'next': reverse(url_name, kwargs={
+                'anio': next_date.year,
+                'mes': next_date.month,
+                'dia': next_date.day
             })
         }
-
-
+    
     @staticmethod
-    def get_create_task_urls(week_range: WeekRange, url_name: str = 'crear_tarea_url') -> Dict[datetime.date, str]:
+    def get_create_task_urls(
+        week_range: WeekRange,
+        url_name: str = 'crear_tarea_url'
+    ) -> Dict[str, str]:
         """
-        Generates URLs to create tasks for each day of the week.
-
+        Genera URLs para crear tareas por cada día de la semana.
+        
         Args:
-            week_range (WeekRange): Current week
-            url_name (str, optional): Creation URL name
-
+            week_range: Semana actual
+            url_name: Nombre de la URL de creación
+            
         Returns:
-            Dict: {date: creation_url}
+            Dict: {day_name: url_creacion}
         """
-
         create_urls = {}
-
-        for day in week_range.days:
-            create_urls[day] = reverse(url_name) + f"?fecha={day.isoformat()}"
-
+        
+        days_names = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        
+        for i, day in enumerate(week_range.days):
+            day_name = days_names[i]
+            create_urls[day_name] = reverse(url_name) + f"?fecha={day.isoformat()}"
+        
         return create_urls
