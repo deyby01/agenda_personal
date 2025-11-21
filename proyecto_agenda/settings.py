@@ -33,7 +33,7 @@ if not DEBUG:
     if allowed_hosts_env:
         ALLOWED_HOSTS = allowed_hosts_env.split(',')
     else:
-        ALLOWED_HOSTS = []
+        ALLOWED_HOSTS = ["deyby01.pythonanywhere.com"]
 else:
     ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
