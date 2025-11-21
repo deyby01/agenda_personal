@@ -1,5 +1,6 @@
 # GitHub Actions CI/CD Pipeline para Django
 # Archivo: .github/workflows/django-tests.yml
+# Actualizado para nueva arquitectura clean
 
 name: 🚀 Django Tests & Deployment Pipeline
 
@@ -8,7 +9,7 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   test:
@@ -66,8 +67,11 @@ jobs:
 
     - name: 🧪 Run comprehensive test suite
       run: |
-        echo "🔥 Ejecutando TODOS los tests de Deyby..."
-        coverage run --source='.' manage.py test tareas.tests --verbosity=2
+        echo "🔥 Ejecutando TODOS los tests de las nuevas apps..."
+        coverage run --source='.' manage.py test apps.tasks.tests --verbosity=2
+        coverage run --source='.' manage.py test apps.projects.tests --verbosity=2
+        coverage run --source='.' manage.py test apps.notifications.tests --verbosity=2
+        coverage run --source='.' manage.py test apps.core.tests --verbosity=2
         echo "✅ Tests completados!"
 
     - name: 📊 Generate coverage report
@@ -99,7 +103,7 @@ jobs:
       run: |
         echo "🚨 Algunos tests fallaron"
         echo "🔍 Revisa los logs arriba"
-        echo "❌ No se puede mergear a main"
+        echo "❌ No se puede mergear"
         exit 1
 
   security:
@@ -120,7 +124,7 @@ jobs:
       run: |
         pip install bandit safety
         echo "🛡️ Ejecutando análisis de seguridad..."
-        bandit -r . -x tests/ || true
+        bandit -r apps/ -x tests/ || true
         safety check || true
         echo "✅ Análisis de seguridad completado"
 
@@ -128,7 +132,7 @@ jobs:
       run: |
         pip install flake8
         echo "📝 Verificando calidad de código..."
-        flake8 tareas/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        flake8 apps/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
         echo "✅ Verificación de calidad completada"
 
   deploy-ready:
