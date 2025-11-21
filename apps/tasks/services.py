@@ -10,7 +10,7 @@ NOTA: Mantiene AMBAS APIs (antigua y nueva) para compatibilidad.
 import datetime
 from typing import Dict, List, Optional, Tuple
 from django.utils import timezone
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
 
 from apps.core.utils import WeekRange
 
@@ -202,22 +202,38 @@ class WeekNavigationService:
         prev_week = navigation_weeks.get('previous') or navigation_weeks.get('prev')
         next_week = navigation_weeks.get('next')
         
-        # Generar URLs usando la API antigua (fecha completa)
+        # Generar URLs usando la API nueva (year/week) o la antigua (anio/mes/dia)
         prev_date = prev_week.start_date if prev_week else current_week.start_date
         next_date = next_week.start_date if next_week else current_week.start_date
         
         return {
-            'previous': reverse(url_name, kwargs={
-                'anio': prev_date.year,
-                'mes': prev_date.month,
-                'dia': prev_date.day
-            }),
-            'next': reverse(url_name, kwargs={
-                'anio': next_date.year,
-                'mes': next_date.month,
-                'dia': next_date.day
-            })
+            'previous': WeekNavigationService._build_week_url(url_name, prev_date),
+            'next': WeekNavigationService._build_week_url(url_name, next_date),
         }
+
+    @staticmethod
+    def _build_week_url(url_name: str, date_obj: datetime.date) -> str:
+        """
+        Intenta generar URL usando la API nueva (year/week) y
+        si falla, recurre a la API antigua (anio/mes/dia).
+        """
+        iso_year, iso_week, _ = date_obj.isocalendar()
+        
+        # Intentar API nueva (year/week)
+        try:
+            return reverse(url_name, kwargs={
+                'year': iso_year,
+                'week': iso_week,
+            })
+        except NoReverseMatch:
+            pass
+        
+        # Fallback API antigua (anio/mes/dia)
+        return reverse(url_name, kwargs={
+            'anio': date_obj.year,
+            'mes': date_obj.month,
+            'dia': date_obj.day,
+        })
     
     @staticmethod
     def get_create_task_urls(

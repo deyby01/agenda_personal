@@ -149,6 +149,22 @@ class TareaRepository:
             # API NUEVA: Contar tareas totales del usuario
             return Tarea.objects.filter(usuario=user).count()
     
+    @staticmethod
+    def get_tasks_without_date(user: User) -> QuerySet[Tarea]:
+        """
+        Obtiene tareas sin fecha asignada para un usuario.
+        
+        Args:
+            user: Usuario propietario
+        
+        Returns:
+            QuerySet[Tarea]: Tareas con fecha_asignada nula
+        """
+        return Tarea.objects.filter(
+            usuario=user,
+            fecha_asignada__isnull=True
+        ).select_related('proyecto')
+    
     # ========== API NUEVA (sin week_range) - CÓDIGO FUTURO ==========
     
     @staticmethod

@@ -10,7 +10,7 @@ Migrado desde tareas/views.py con mejoras:
 
 from django.shortcuts import redirect, get_list_or_404
 from django.urls import reverse_lazy, reverse
-from django.views import (
+from django.views.generic import (
     CreateView, DetailView, ListView,
     UpdateView, DeleteView, TemplateView
 )
@@ -31,12 +31,12 @@ class ListViewProjects(LoginRequiredMixin, ListView):
     - Ordenado por fecha_fin_estimada
     - Paginación
     
-    Template: proyectos/list.html
+    Template: projects/list.html
     Context: lista_de_proyectos_template (QuerySet de Proyecto)
     """
 
     model = Proyecto
-    template_name = 'tareas/lista_proyectos.html'
+    template_name = 'projects/list.html'
     context_object_name = 'lista_de_proyectos_template'
     paginate_by = 20
 
@@ -62,11 +62,11 @@ class CreateViewProject(LoginRequiredMixin, CreateView):
     - Success message
     - Context personalizado para template genérico
     
-    Template: tareas/formulario_generico.html
+    Template: projects/form.html
     Success URL: lista_de_proyectos_url
     """
     model = Proyecto
-    template_name = 'tareas/formulario_generico.html'
+    template_name = 'projects/form.html'
     form_class = ProyectoForm
     success_url = reverse_lazy('lista_de_proyectos_url')
 
@@ -114,11 +114,11 @@ class DetailViewProject(LoginRequiredMixin, DetailView):
     - Información completa del proyecto
     - Links de edición y eliminación
     
-    Template: tareas/detalle_proyecto.html
+    Template: projects/detail.html
     Context: proyecto (Proyecto instance)
     """
     model = Proyecto
-    template_name = 'tareas/detalle_proyecto.html'
+    template_name = 'projects/detail.html'
     context_object_name = 'proyecto'
 
     def get_queryset(self):
@@ -140,12 +140,12 @@ class UpdateViewProject(LoginRequiredMixin, UpdateView):
     - Success message
     - Context personalizado para template genérico
     
-    Template: tareas/formulario_generico.html
+    Template: projects/form.html
     Success URL: lista_de_proyectos_url
     """
     model = Proyecto
     form_class = ProyectoForm
-    template_name = 'tareas/formulario_generico.html'
+    template_name = 'projects/form.html'
     success_url = reverse_lazy('lista_de_proyectos_url')
 
     def get_queryset(self):
@@ -155,14 +155,10 @@ class UpdateViewProject(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         """
         Procesa form válido con success message.
-        
-        Args:
-            form: ProyectoForm válido
-            
-        Returns:
-            HttpResponse: Redirect a success_url
         """
+        response = super().form_valid(form)
         messages.success(self.request, f'¡Proyecto "{form.instance.nombre}" actualizado exitosamente!')
+        return response
 
     def get_context_data(self, **kwargs):
         """
@@ -189,11 +185,11 @@ class DeleteViewProject(LoginRequiredMixin, DeleteView):
     - Confirmation template
     - Success message
     
-    Template: tareas/confirmar_eliminacion_generica.html
+    Template: projects/confirm_delete.html
     Success URL: lista_de_proyectos_url
     """
     model = Proyecto
-    template_name = 'tareas/confirmar_eliminacion_generica.html'
+    template_name = 'projects/confirm_delete.html'
     success_url = reverse_lazy('lista_de_proyectos_url')
     context_object_name = 'objeto'
 

@@ -29,11 +29,11 @@ class NotificationCenterView(LoginRequiredMixin, ListView):
     - Paginación para performance
     - Estadísticas en contexto
     
-    Template: notificaciones/centro_notificaciones.html
+    Template: notifications/notification_center.html
     Context: notificaciones (QuerySet de Notification)
     """
     model = Notification
-    template_name = 'notificaciones/centro_notificaciones.html'
+    template_name = 'notifications/notification_center.html'
     context_object_name = 'notificaciones'
     paginate_by = 20
 

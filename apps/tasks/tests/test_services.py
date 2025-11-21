@@ -28,9 +28,12 @@ class WeekCalculatorServiceTest(TestCase):
         self.assertEqual(week_range.end_date.weekday(), 6)  # 6 = domingo
     
     def test_get_week_range_specific_week(self):
-        """Test: Obtener rango de semana específica"""
+        """Test: Obtener rango de semana específica (API nueva)"""
         # Semana 1 de 2025
-        week_range = WeekCalculatorService.get_week_range(year=2025, week=1)
+        week_range = WeekCalculatorService.get_week_range_from_week_number(
+            year=2025,
+            week=1
+        )
         
         self.assertIsInstance(week_range, WeekRange)
         self.assertEqual(len(week_range.days), 7)
@@ -62,23 +65,23 @@ class WeekCalculatorServiceTest(TestCase):
         self.assertEqual(next_week.start_date, date(2025, 11, 17))
         self.assertEqual(next_week.end_date, date(2025, 11, 23))
     
-    def test_parse_date_params_valid(self):
-        """Test: Parsear parámetros válidos"""
-        year, week = WeekCalculatorService.parse_date_params('2025', '45')
+    def test_parse_week_params_valid(self):
+        """Test: Parsear parámetros válidos (API nueva)"""
+        year, week = WeekCalculatorService.parse_week_params('2025', '45')
         
         self.assertEqual(year, 2025)
         self.assertEqual(week, 45)
     
-    def test_parse_date_params_invalid(self):
+    def test_parse_week_params_invalid(self):
         """Test: Parsear parámetros inválidos"""
-        year, week = WeekCalculatorService.parse_date_params('invalid', 'bad')
+        year, week = WeekCalculatorService.parse_week_params('invalid', 'bad')
         
         self.assertIsNone(year)
         self.assertIsNone(week)
     
-    def test_parse_date_params_none(self):
+    def test_parse_week_params_none(self):
         """Test: Parsear parámetros None"""
-        year, week = WeekCalculatorService.parse_date_params(None, None)
+        year, week = WeekCalculatorService.parse_week_params(None, None)
         
         self.assertIsNone(year)
         self.assertIsNone(week)

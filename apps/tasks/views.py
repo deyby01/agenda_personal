@@ -22,6 +22,7 @@ from django.utils import timezone
 import datetime
 from datetime import timedelta
 
+from apps.core.forms import CustomUserCreationForm
 from apps.tasks.models import Tarea
 from apps.tasks.forms import TareaForm, TareaEstadoForm
 from apps.tasks.repositories import TareaRepository
@@ -43,7 +44,7 @@ class ListViewTasks(LoginRequiredMixin, ListView):
     Context: tareas (QuerySet de Tarea)
     """
     model = Tarea
-    template_name = 'tareas/lista_tareas.html'
+    template_name = 'tasks/list.html'
     context_object_name = 'tareas'
     paginate_by = 20
     
@@ -74,8 +75,34 @@ class ListViewTasks(LoginRequiredMixin, ListView):
         
         return queryset.order_by('-fecha_asignada', '-fecha_creacion')
 
+    def get_context_data(self, **kwargs):
+        """
+        Asegura compatibilidad con template legado que espera
+        la variable lista_de_tareas_template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['lista_de_tareas_template'] = context.get('tareas')
+        return context
 
-class CreateViewTask(LoginRequiredMixin, CreateView):
+
+class TaskFormContextMixin:
+    """
+    Mixin para asegurar que el template genérico de formularios
+    reciba siempre los valores esperados (accion, tipo_objeto, formulario).
+    """
+    action_label = 'Crear'
+    object_type_label = 'Tarea'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.setdefault('accion', self.action_label)
+        context.setdefault('tipo_objeto', self.object_type_label)
+        # Compatibilidad con template heredado que espera 'formulario'
+        context['formulario'] = context.get('form')
+        return context
+
+
+class CreateViewTask(TaskFormContextMixin, LoginRequiredMixin, CreateView):
     """
     Vista para crear nuevas tareas.
     
@@ -85,12 +112,12 @@ class CreateViewTask(LoginRequiredMixin, CreateView):
     - Pre-rellena fecha si viene de mi_semana
     - Success message
     
-    Template: tareas/formulario_generico.html
+    Template: tasks/form.html
     Success URL: lista_de_tareas_url
     """
     model = Tarea
     form_class = TareaForm
-    template_name = 'tareas/formulario_generico.html'
+    template_name = 'tasks/form.html'
     success_url = reverse_lazy('lista_de_tareas_url')
     
     def get_form_kwargs(self):
@@ -114,7 +141,7 @@ class CreateViewTask(LoginRequiredMixin, CreateView):
         initial = super().get_initial()
         
         # Si viene fecha en query params (desde mi_semana)
-        fecha = self.request.GET.get('fecha')
+        fecha = self.request.GET.get('fecha') or self.request.GET.get('fecha_asignada')
         if fecha:
             try:
                 initial['fecha_asignada'] = datetime.datetime.strptime(
@@ -159,11 +186,11 @@ class DetailViewTask(LoginRequiredMixin, DetailView):
     - Información completa de la tarea
     - Links de edición y eliminación
     
-    Template: tareas/detalle_tarea.html
+    Template: tasks/detail.html
     Context: tarea (Tarea instance)
     """
     model = Tarea
-    template_name = 'tareas/detalle_tarea.html'
+    template_name = 'tasks/detail.html'
     context_object_name = 'tarea'
     
     def get_queryset(self):
@@ -176,7 +203,7 @@ class DetailViewTask(LoginRequiredMixin, DetailView):
         return TareaRepository.get_tasks_for_user(self.request.user)
 
 
-class UpdateViewTask(LoginRequiredMixin, UpdateView):
+class UpdateViewTask(TaskFormContextMixin, LoginRequiredMixin, UpdateView):
     """
     Vista para editar tareas existentes.
     
@@ -186,11 +213,13 @@ class UpdateViewTask(LoginRequiredMixin, UpdateView):
     - Success message
     - Redirect a detalle
     
-    Template: tareas/formulario_generico.html
+    Template: tasks/form.html
     """
     model = Tarea
     form_class = TareaForm
-    template_name = 'tareas/formulario_generico.html'
+    template_name = 'tasks/form.html'
+
+    action_label = 'Editar'
     
     def get_queryset(self):
         """Filtra solo tareas del usuario."""
@@ -226,17 +255,28 @@ class DeleteViewTask(LoginRequiredMixin, DeleteView):
     - Success message
     - Redirect a lista
     
-    Template: tareas/confirmar_eliminacion_generica.html
+    Template: tasks/confirm_delete.html
     Success URL: lista_de_tareas_url
     """
     model = Tarea
-    template_name = 'tareas/confirmar_eliminacion_generica.html'
+    template_name = 'tasks/confirm_delete.html'
     success_url = reverse_lazy('lista_de_tareas_url')
     context_object_name = 'tarea'
     
     def get_queryset(self):
         """Filtra solo tareas del usuario."""
         return TareaRepository.get_tasks_for_user(self.request.user)
+
+    def get_context_data(self, **kwargs):
+        """
+        Asegura compatibilidad con plantilla legacy que espera
+        tipo_objeto, objeto y url_lista_retorno.
+        """
+        context = super().get_context_data(**kwargs)
+        context.setdefault('tipo_objeto', 'Tarea')
+        context.setdefault('objeto', context.get('tarea'))
+        context.setdefault('url_lista_retorno', 'lista_de_tareas_url')
+        return context
     
     def delete(self, request, *args, **kwargs):
         """
@@ -305,6 +345,10 @@ class ToggleTaskStatusView(LoginRequiredMixin, View):
             request.META.get('HTTP_REFERER', 'lista_de_tareas_url')
         )
 
+class VistaRegistro(CreateView):
+    form_class = CustomUserCreationForm 
+    success_url = reverse_lazy('login')
+    template_name = 'registration/registro.html'
 
 class MyWeekView(LoginRequiredMixin, TemplateView):
     """
@@ -318,7 +362,7 @@ class MyWeekView(LoginRequiredMixin, TemplateView):
     - Proyectos activos
     - Week range calculation con Service Layer
     
-    Template: tareas/mi_semana.html
+    Template: tasks/my_week.html
     
     Context:
         tareas_por_dia: Dict[date, List[Tarea]]
@@ -326,7 +370,7 @@ class MyWeekView(LoginRequiredMixin, TemplateView):
         proyectos_activos: QuerySet[Proyecto]
         nav_urls: Dict[str, str] (prev_url, next_url)
     """
-    template_name = 'tareas/mi_semana.html'
+    template_name = 'tasks/my_week.html'
     
     def get_context_data(self, **kwargs):
         """
@@ -342,12 +386,24 @@ class MyWeekView(LoginRequiredMixin, TemplateView):
         week_param = self.kwargs.get('week')
         
         # Parsear parámetros
-        year, week = WeekCalculatorService.parse_date_params(
-            year_param, week_param
+        year_parsed, week_parsed = WeekCalculatorService.parse_week_params(
+            str(year_param) if year_param else None,
+            str(week_param) if week_param else None
         )
         
         # Calcular rango de semana
-        week_range = WeekCalculatorService.get_week_range(year, week)
+        week_range = WeekCalculatorService.get_week_range_from_week_number(year_parsed, week_parsed)
+
+        navigation_weeks = WeekCalculatorService.get_navigation_weeks(week_range)
+
+        # Generar URLs de navegación usando Service
+        nav_urls = WeekNavigationService.get_navigation_urls(
+            week_range,
+            navigation_weeks,
+            url_name='mi_semana_url'
+        )
+
+        create_task_urls = WeekNavigationService.get_create_task_urls(week_range)
         
         # Obtener tareas agrupadas por día usando Repository
         tareas_por_dia = TareaRepository.get_tasks_grouped_by_date(
@@ -359,24 +415,83 @@ class MyWeekView(LoginRequiredMixin, TemplateView):
         proyectos_activos = ProyectoRepository.get_active_projects_for_user(
             self.request.user
         )
-        
-        # Generar URLs de navegación usando Service
-        nav_urls = WeekNavigationService.get_navigation_urls(
-            week_range,
-            url_name='mi_semana_url'
+
+        completed_count = TareaRepository.get_completed_tasks_count(
+            self.request.user,
+            week_range
         )
-        
+
+        total_count = TareaRepository.get_total_tasks_count(
+            self.request.user,
+            week_range
+        )
+
+        tareas_sin_fecha = TareaRepository.get_tasks_without_date(self.request.user)
+
+        dias_con_tareas = self._transform_tasks_to_template_format(
+            tareas_por_dia,
+            create_task_urls
+        )
+
         # Actualizar contexto
         context.update({
-            'tareas_por_dia': tareas_por_dia,
+            'tareas_por_dia': dias_con_tareas,  # legacy compatibility
+            'dias_con_tareas': dias_con_tareas,
             'week_range': week_range,
             'proyectos_activos': proyectos_activos,
             'nav_urls': nav_urls,
             'today': timezone.localdate(),
+            'completed_count': completed_count,
+            'total_count': total_count,
+            'completion_percentage': self._calculate_completion_percentage(completed_count, total_count),
+            'rango_fechas_str': week_range.format_display(),
+            'es_semana_actual': week_range.is_current_week,
+            'semana_anterior_url': nav_urls.get('previous'),
+            'semana_siguiente_url': nav_urls.get('next'),
+            'tareas_sin_fecha': tareas_sin_fecha,
         })
         
         return context
 
+    def _transform_tasks_to_template_format(self, tasks_by_date, create_task_urls=None):
+        """
+        Transforma datos del repository al formato del template.
+        
+        Args:
+            tasks_by_date: Dict[date, List[Tarea]]
+            
+        Returns:
+            list: Lista de díccionarios con formato para template
+        """
+        today = timezone.localdate()
+        dias_con_tareas = []
+        
+        # Iterar through week days en orden
+        for date in sorted(tasks_by_date.keys()):
+            day_name = date.strftime('%A').lower()
+            dias_con_tareas.append({
+                'fecha': date,
+                'tareas': tasks_by_date[date],
+                'es_hoy': date == today,
+                'url_crear_tarea_dia': (create_task_urls or {}).get(day_name, '')
+            })
+        
+        return dias_con_tareas
+    
+    def _calculate_completion_percentage(self, completed: int, total: int) -> float:
+        """
+        Calcula porcentaje de completación.
+        
+        Args:
+            completed: Tareas completadas
+            total: Total de tareas
+            
+        Returns:
+            float: Porcentaje (0-100)
+        """
+        if total == 0:
+            return 0.0
+        return round((completed / total) * 100, 1)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -412,10 +527,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             self.request.user
         )
         
-        # 🚀 USAR TaskPrioritizationEngine
-        # NOTA: Este viene de tareas/business_logic.py
-        # Necesitas mantener la importación en tareas/views.py
-        from tareas.business_logic import (
+        from apps.tasks.business_logic import (
             TaskPrioritizationEngine,
             ProjectProgressCalculator,
             PriorityLevel

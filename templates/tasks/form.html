@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %} {# ¡CARGAMOS LOS TAGS DE CRISPY FORMS! #}
+
+{% block title %}{{ accion }} {{ tipo_objeto|default:"Elemento" }} - Agenda Personal{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header {% if accion == 'Editar' %}bg-warning text-dark{% else %}bg-primary text-white{% endif %}">
+                <h2 class="card-title mb-0">{{ accion }} {{ tipo_objeto|default:"Nuevo Elemento" }}</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {# REEMPLAZAMOS EL BUCLE MANUAL CON LA ETIQUETA CRISPY #}
+                    {{ formulario|crispy }}
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                         {# El enlace de cancelar debería ser dinámico o quitarse si es muy complejo ahora #}
+                         <a href="{% if tipo_objeto == 'Proyecto' %}{% url 'lista_de_proyectos_url' %}{% else %}{% url 'lista_de_tareas_url' %}{% endif %}" class="btn btn-outline-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn {% if accion == 'Editar' %}btn-warning text-dark{% else %}btn-success{% endif %}">Guardar {{ accion }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

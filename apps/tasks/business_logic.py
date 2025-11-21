@@ -358,19 +358,17 @@ class ProjectProgressCalculator:
             proyecto, completed_tasks
         )
         
-        # Estimación de finalización
-        estimated_completion = (
-            ProjectProgressCalculator._estimate_completion_date(
-                pending_tasks.count(),
-                velocity,
-                proyecto.fecha_fin_estimada
-            )
+        # Estimación de finalización (para reportes/UI)
+        estimated_completion = ProjectProgressCalculator._estimate_completion_date(
+            pending_tasks.count(),
+            velocity,
+            proyecto.fecha_fin_estimada
         )
         
         # Estado de salud del proyecto
         health_status = ProjectProgressCalculator._assess_project_health(
             completion_percentage,
-            estimated_completion,
+            pending_tasks.count(),
             proyecto.fecha_fin_estimada
         )
         
@@ -442,30 +440,32 @@ class ProjectProgressCalculator:
     @staticmethod
     def _assess_project_health(
         completion_percentage: float,
-        estimated_completion: Optional[datetime.date],
+        pending_tasks_count: int,
         planned_end: Optional[datetime.date]
     ) -> str:
         """
-        Business rule: Evalúa estado de salud del proyecto.
-        
-        Args:
-            completion_percentage: Porcentaje de completación
-            estimated_completion: Fecha estimada
-            planned_end: Fecha planeada
-            
-        Returns:
-            str: Estado de salud (excellent, good, fair, poor, critical)
+        Evalúa la salud basado en fecha de fin:
+        - Crítico: vencido o ≤7 días restantes.
+        - En riesgo: 8-21 días restantes.
+        - Saludable: >21 días o sin fecha.
+        Si no hay tareas pendientes (o casi completado), se considera saludable.
         """
-        if completion_percentage >= 90:
-            return "excellent"
-        elif completion_percentage >= 70:
-            return "good"
-        elif completion_percentage >= 50:
-            return "fair"
-        elif completion_percentage >= 25:
-            return "poor"
-        else:
+        if pending_tasks_count == 0 or completion_percentage >= 99.0:
+            return "healthy"
+        
+        if not planned_end:
+            return "healthy"
+        
+        today = timezone.localdate()
+        days_remaining = (planned_end - today).days
+        
+        if days_remaining < 0:
             return "critical"
+        if days_remaining <= 7:
+            return "critical"
+        if days_remaining <= 21:
+            return "at_risk"
+        return "healthy"
     
     @staticmethod
     def _identify_critical_tasks(pending_tasks) -> List[Dict[str, Any]]:
