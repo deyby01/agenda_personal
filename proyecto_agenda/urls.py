@@ -28,7 +28,7 @@ def homepage_redirect(request):
     """
     if request.user.is_authenticated:
         # Logged users -> Dashboard 
-        return redirect('/agenda/dashboard/')
+        return redirect('/dashboard/')
     else:
         # Anonymous users -> login page
         return redirect('/accounts/login/')
