@@ -1,6 +1,6 @@
 # GitHub Actions CI/CD Pipeline para Django
 # Archivo: .github/workflows/django-tests.yml
-# Actualizado para nueva arquitectura clean
+# Actualizado para nueva arquitectura clean + requirements/docker.txt
 
 name: 🚀 Django Tests & Deployment Pipeline
 
@@ -44,14 +44,14 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements/docker.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
 
     - name: 🔧 Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements/docker.txt
         pip install coverage
 
     - name: 🔑 Setup environment variables
