@@ -2,7 +2,11 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy 
 from django.views import generic, View
 
-from tareas.business_logic import PriorityLevel, TaskPrioritizationEngine, ProjectProgressCalculator
+from apps.tasks.business_logic import (
+    TaskPrioritizationEngine,
+    ProjectProgressCalculator,
+    PriorityLevel
+)
 from apps.notifications.models import Notification
 from apps.tasks.models import Tarea
 from apps.projects.models import Proyecto
@@ -23,7 +27,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from apps.tasks.services import WeekCalculatorService, WeekNavigationService
 from apps.tasks.repositories import TareaRepository
 from apps.projects.repositories import ProyectoRepository
-from .notification_service import NotificationService
+from apps.notifications.services import NotificationService
 from datetime import timedelta
 
 
