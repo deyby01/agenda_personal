@@ -20,13 +20,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.utils import timezone
 import datetime
+from datetime import timedelta
 
 from apps.tasks.models import Tarea
 from apps.tasks.forms import TareaForm, TareaEstadoForm
 from apps.tasks.repositories import TareaRepository
 from apps.tasks.services import WeekCalculatorService, WeekNavigationService
 from apps.projects.repositories import ProyectoRepository
-
+from apps.notifications.services import NotificationService
 
 class ListViewTasks(LoginRequiredMixin, ListView):
     """
@@ -372,6 +373,201 @@ class MyWeekView(LoginRequiredMixin, TemplateView):
             'proyectos_activos': proyectos_activos,
             'nav_urls': nav_urls,
             'today': timezone.localdate(),
+        })
+        
+        return context
+
+
+
+class DashboardView(LoginRequiredMixin, TemplateView):
+    """
+    Dashboard Inteligente - Implementación de visión de Deyby.
+    
+    Features:
+    - Priorización de tareas usando TaskPrioritizationEngine
+    - Zonas de prioridad: Critical, Attention, Future
+    - Puntuación y categorización en tiempo real
+    - Organización de proyectos por salud y estado
+    - Gamificación y motivación del usuario
+    - Estadísticas de completación
+    
+    Security: Requiere autenticación via LoginRequiredMixin
+    """
+    template_name = 'dashboard.html'
+    
+    def get_context_data(self, **kwargs):
+        """
+        Prepara datos inteligentes del dashboard.
+        
+        Returns:
+            dict: Context con tareas priorizadas y proyectos organizados
+        """
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener tareas del usuario
+        user_tasks = TareaRepository.get_tasks_for_user(self.request.user)
+        
+        # Obtener proyectos del usuario
+        user_projects = ProyectoRepository.get_all_projects_for_user(
+            self.request.user
+        )
+        
+        # 🚀 USAR TaskPrioritizationEngine
+        # NOTA: Este viene de tareas/business_logic.py
+        # Necesitas mantener la importación en tareas/views.py
+        from tareas.business_logic import (
+            TaskPrioritizationEngine,
+            ProjectProgressCalculator,
+            PriorityLevel
+        )
+        
+        prioritized_task_scores = TaskPrioritizationEngine.prioritize_tasks(
+            user_tasks
+        )
+        
+        # Crear diccionario eficiente de tareas
+        tasks_dict = {task.id: task for task in user_tasks}
+        
+        # Organizar por zonas de prioridad
+        critical_tasks = []
+        attention_tasks = []
+        future_tasks = []
+        
+        for task_score in prioritized_task_scores:
+            # Obtener objeto de tarea usando task_id
+            task = tasks_dict.get(task_score.task_id)
+            if not task:
+                continue
+            
+            # Crear datos combinados para template
+            task_data = {
+                'task': task,
+                'priority_level': task_score.priority_level,
+                'urgency_level': task_score.urgency_level,
+                'score': task_score.score,
+                'reasons': task_score.reasons
+            }
+            
+            # Categorizar en zonas de prioridad
+            if task_score.priority_level == PriorityLevel.CRITICAL:
+                critical_tasks.append(task_data)
+            elif task_score.priority_level in [
+                PriorityLevel.HIGH,
+                PriorityLevel.MEDIUM
+            ]:
+                attention_tasks.append(task_data)
+            else:  # LOW priority
+                future_tasks.append(task_data)
+        
+        # ========== ORGANIZACIÓN DUAL - Salud + Estado ==========
+        
+        projects_by_health = {
+            'healthy': [],
+            'at_risk': [],
+            'critical': [],
+            'completed': []
+        }
+        
+        projects_by_status = {
+            'planificado': [],
+            'en_curso': [],
+            'completado': [],
+            'en_espera': [],
+            'cancelado': []
+        }
+        
+        total_projects = 0
+        
+        for proyecto in user_projects:
+            # Calcular progreso AVANZADO para cada proyecto
+            progress_data = ProjectProgressCalculator.calculate_advanced_progress(
+                proyecto
+            )
+            
+            # Calcular días restantes manualmente
+            if proyecto.fecha_fin_estimada:
+                today = timezone.localdate()
+                days_remaining = (proyecto.fecha_fin_estimada - today).days
+            else:
+                days_remaining = None
+            
+            # Crear datos comprehensivos del proyecto
+            project_data = {
+                'project': proyecto,
+                'progress_data': progress_data,
+                'percentage': progress_data['completion_percentage'],
+                'velocity': progress_data['velocity'],
+                'days_remaining': days_remaining,
+                'health_status': progress_data['health_status'],
+                'estimated_completion': progress_data['estimated_completion'],
+                'total_tasks': progress_data['total_tasks'],
+                'completed_tasks': progress_data['completed_tasks'],
+                'pending_tasks': progress_data['pending_tasks'],
+                'critical_tasks': progress_data['critical_tasks']
+            }
+            
+            # ORGANIZACIÓN 1: Por estado de salud
+            if proyecto.estado == 'completado':
+                projects_by_health['completed'].append(project_data)
+            elif progress_data['health_status'] == 'critical':
+                projects_by_health['critical'].append(project_data)
+            elif progress_data['health_status'] == 'at_risk':
+                projects_by_health['at_risk'].append(project_data)
+            else:  # Healthy
+                projects_by_health['healthy'].append(project_data)
+            
+            # Organizar por estado del proyecto
+            if proyecto.estado in projects_by_status:
+                projects_by_status[proyecto.estado].append(project_data)
+            
+            total_projects += 1
+        
+        # Generar notificaciones al acceder al dashboard
+        NotificationService.generate_daily_notifications(self.request.user)
+        
+        today = timezone.localdate()
+        
+        # Completadas hoy (para motivación inmediata)
+        completed_today = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+            fecha_asignada=today,
+        ).order_by('-id')[:5]  # Máximo 5 más recientes
+        
+        # Estadísticas motivacionales
+        completed_this_week = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+            fecha_asignada__gte=today - timedelta(days=7)
+        ).count()
+        
+        total_completed_ever = Tarea.objects.filter(
+            usuario=self.request.user,
+            completada=True,
+        ).count()
+        
+        # Añadir al contexto
+        context.update({
+            'critical_tasks': critical_tasks,
+            'attention_tasks': attention_tasks,
+            'future_tasks': future_tasks,
+            'total_tasks': len(prioritized_task_scores),
+            
+            'projects_by_health': projects_by_health,
+            'projects_by_status': projects_by_status,
+            'total_projects': total_projects,
+            
+            # Estadísticas rápidas con nombres correctos
+            'planificado_count': len(projects_by_status['planificado']),
+            'en_curso_count': len(projects_by_status['en_curso']),
+            'completado_count': len(projects_by_status['completado']),
+            'en_espera_count': len(projects_by_status['en_espera']),
+            'cancelado_count': len(projects_by_status['cancelado']),
+            
+            # Gamificación - Motivación del usuario
+            'completed_tasks_today': completed_today,
+            'completed_this_week': completed_this_week,
+            'total_completed_ever': total_completed_ever,
         })
         
         return context
