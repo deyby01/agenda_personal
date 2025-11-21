@@ -1,0 +1,16 @@
+# ============================================
+# requirements/docker.txt - DESARROLLO DOCKER
+# ============================================
+
+# Base dependencies
+-r base.txt
+
+# PostgreSQL Driver (precompilado)
+psycopg2-binary==2.9.9
+
+# Redis Client
+redis==5.0.1
+django-redis==5.4.0
+
+# Development & Debugging
+django-debug-toolbar==4.2.0

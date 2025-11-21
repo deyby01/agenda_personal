@@ -40,16 +40,23 @@ urlpatterns = [
     # ======== INTELLIGENT HOMEPAGE ROUTING ========
     path('', homepage_redirect, name='homepage'),
 
-    # =========== APP URLS ========
-    path('agenda/', include('tareas.urls')),
-
-    # ========== API URLS ========
-    path('api/', include('tareas.api_urls')), 
-    path('api-token-auth/', views.obtain_auth_token, name='api-token-auth'),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-
     # ========= AUTHENTICATION ========
     path('accounts/', include('allauth.urls')),
+
+    # ========= CORE ENDPOINTS ===========
+    path('', include('apps.core.urls')), # 🆕 Health check y shared endpoints
+
+    # =========== APP URLS ========
+    path('agenda/', include('apps.tasks.urls')),
+    path('agenda/', include('apps.projects.urls')),
+    path('agenda/', include('apps.notifications.urls')),
+
+    # ========== API URLS ========
+    # path('api/', include('apps.api.urls')), 
+    # path('api-token-auth/', views.obtain_auth_token, name='api-token-auth'),
+    # path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    
 ]

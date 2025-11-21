@@ -13,15 +13,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Cargar variables de entorno desde .env (si existe)
-load_dotenv(os.path.join(BASE_DIR, '.env')) # Añadir esta línea
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -29,29 +27,26 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
-
+# ALLOWED_HOSTS configuration
 if not DEBUG:
-    allowed_hosts_env = os.environ.get('ALLOWED_HOSTS')
+    allowed_hosts_env = os.environ.get('DJANGO_ALLOWED_HOSTS')
     if allowed_hosts_env:
         ALLOWED_HOSTS = allowed_hosts_env.split(',')
     else:
-        ALLOWED_HOSTS = [] # Django se quejará si está vacío y DEBUG=False
+        ALLOWED_HOSTS = []
 else:
-    # Para desarrollo con DEBUG=True, podemos dejarlo vacío o añadir hosts de desarrollo
-    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+    ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
-LOGIN_URL = 'account_login'  # El nombre de la URL de inicio de sesión (Django usa 'login' por defecto con django.contrib.auth.urls)
-LOGIN_REDIRECT_URL = 'mi_semana_actual_url' # A dónde ir después de un inicio de sesión exitoso
-LOGOUT_REDIRECT_URL = 'account_login' # A dónde ir después de cerrar sesión (podría ser 'logged_out' o la página principal)
+# Authentication URLs
+LOGIN_URL = 'account_login'
+LOGIN_REDIRECT_URL = 'mi_semana_actual_url'
+LOGOUT_REDIRECT_URL = 'account_login'
 
-# Configuraciones de allauth
-ACCOUNT_EMAIL_VERIFICATION = 'none' # Para no requerir verificar email al inicio
-ACCOUNT_LOGOUT_ON_GET = True # Permite cerrar sesión con una petición GET
+# Allauth configuration
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_LOGOUT_ON_GET = True
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,44 +54,123 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tareas',
-    'crispy_forms',
-    'crispy_bootstrap5',
     'django.contrib.sites',
     
+    # Third party apps
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',  # 🆕 JWT Authentication
+    'django_filters',
+    'drf_spectacular',
+    'corsheaders',  # 🆕 CORS Headers
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    
-    # Proveedor google
     'allauth.socialaccount.providers.google',
-
-    # api
-    'rest_framework',
-    # Token
-    'rest_framework.authtoken',
-    'django_filters',
-    'drf_spectacular',
+    'crispy_forms',
+    'crispy_bootstrap5',
+    
+    # 🆕 Enterprise Apps - Domain Architecture
+    'apps.core.apps.CoreConfig',
+    'apps.tasks.apps.TasksConfig',
+    'apps.projects.apps.ProjectsConfig',
+    'apps.notifications.apps.NotificationsConfig',
+    #'apps.api.apps.ApiConfig',
 ]
 
+# JWT Configuration
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'JTI_CLAIM': 'jti',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+}
+
+# DRF Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+        'login': '5/min',
+    },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+# API Documentation
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'API Agenda semanal',
-    'DESCRIPTION': 'API para la gestión de tareas y proyectos semanales.',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,# Opcional para ocultar el schema.yml de la UI
+    'TITLE': 'Agenda Personal Enterprise API',
+    'DESCRIPTION': 'Enterprise API for task and project management with JWT authentication',
+    'VERSION': '2.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': '/api/v1',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': False,
+    },
+    'SECURITY': [
+        {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
+        }
+    ],
 }
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 SITE_ID = 1
 
@@ -105,23 +179,19 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Dile a allauth que el método de autenticación es el email.
+# Account configuration
 ACCOUNT_LOGIN_METHODS = {'email'}
-
-# Exige que el email sea obligatorio para registrarse.
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
-# Haz que el nombre de usuario ya no sea obligatorio.
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']  
-
 ACCOUNT_FORMS = {
-    'login': 'tareas.forms.CustomLoginForm',
-    'signup': 'tareas.forms.CustomUserCreationForm',
+    'login': 'apps.core.forms.CustomLoginForm',
+    'signup': 'apps.core.forms.CustomUserCreationForm',
 }
 
-ACCOUNT_SESSION_REMEMBER = True 
+ACCOUNT_SESSION_REMEMBER = True
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # 🆕 CORS debe ir primero
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -144,7 +214,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'tareas.context_processors.notifications_context',
+                'apps.core.context_processors.notifications_context',
             ],
         },
     },
@@ -152,10 +222,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'proyecto_agenda.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 if os.environ.get('DB_ENGINE'):
+    # Configuración para Docker/Producción
     DATABASES = {
         'default': {
             'ENGINE': os.environ.get('DB_ENGINE'),
@@ -164,9 +233,12 @@ if os.environ.get('DB_ENGINE'):
             'PASSWORD': os.environ.get('DB_PASSWORD'),
             'HOST': os.environ.get('DB_HOST'),
             'PORT': os.environ.get('DB_PORT'),
+            'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', 0)),
+            'OPTIONS': {} if not os.environ.get('DB_OPTIONS') else eval(os.environ.get('DB_OPTIONS', '{}')),
         }
     }
 else:
+    # Desarrollo local: SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -174,10 +246,7 @@ else:
         }
     }
 
-
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -193,22 +262,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'America/Santiago'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -216,10 +276,9 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / "staticfiles_production"
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email Configuration
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     EMAIL_HOST = os.environ.get('EMAIL_HOST')
@@ -229,6 +288,42 @@ if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
-# Configuraciones de Django Crispy Forms
+# Django Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# ============================================
+# REDIS CACHE CONFIGURATION
+# ============================================
+
+if os.getenv('REDIS_URL'):
+    # Configuración Redis con password
+    redis_url = os.getenv('REDIS_URL')
+    
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': redis_url,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+                'IGNORE_EXCEPTIONS': True,
+            },
+            'KEY_PREFIX': 'agenda',
+            'TIMEOUT': int(os.getenv('CACHE_TTL', 300)),
+        }
+    }
+    
+    # Configurar sesiones en Redis
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+    SESSION_COOKIE_AGE = 86400  # 24 horas
+    SESSION_COOKIE_SECURE = not DEBUG
+    SESSION_COOKIE_HTTPONLY = True
+else:
+    # Fallback cache en memoria
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
