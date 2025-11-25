@@ -7,25 +7,25 @@
 <div class="text-center my-4">
     <h1 class="mb-1 titulo-mi-semana">Mi Semana</h1>
     <h4 class="text-muted fw-normal mb-3 subtitulo-mi-semana">{{ rango_fechas_str }} {% if es_semana_actual %}<span class="badge bg-primary align-middle">Semana Actual</span>{% endif %}</h4>
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+    <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-sm-between align-items-center gap-2">
         {# Botón Semana Anterior (condicional) #}
-        <div class="mb-2 mb-sm-0"> {# Margen inferior en móvil, ninguno en sm y superior #}
+        <div class="w-100 w-sm-auto"> {# Ancho completo en móvil, auto en sm y superior #}
             {% if semana_anterior_url %}
-                <a href="{{ semana_anterior_url }}" class="btn btn-outline-secondary btn-nav-semana">&laquo; Semana Anterior</a>
+                <a href="{{ semana_anterior_url }}" class="btn btn-outline-secondary btn-nav-semana w-100 w-sm-auto">&laquo; Semana Anterior</a>
             {% else %}
                 {# Espacio invisible para mantener el equilibrio si el botón no está, o simplemente no mostrar nada #}
-                <a href="#" class="btn btn-outline-secondary invisible disabled btn-nav-semana" aria-disabled="true">&laquo; Semana Anterior</a>
+                <a href="#" class="btn btn-outline-secondary invisible disabled btn-nav-semana w-100 w-sm-auto" aria-disabled="true">&laquo; Semana Anterior</a>
             {% endif %}
         </div>
         {# Botón Semana Siguiente #}
-        <div>
-            <a href="{{ semana_siguiente_url }}" class="btn btn-outline-secondary btn-nav-semana">Semana Siguiente &raquo;</a>
+        <div class="w-100 w-sm-auto">
+            <a href="{{ semana_siguiente_url }}" class="btn btn-outline-secondary btn-nav-semana w-100 w-sm-auto">Semana Siguiente &raquo;</a>
         </div>
     </div>
 </div>
 
-<div class="row row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-7 g-3">
-    {# Para 7 columnas en pantallas XL, 4 en LG, 3 en MD, 2 en SM, 1 por defecto #}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-7 g-3">
+    {# Para 7 columnas en pantallas XL, 4 en LG, 3 en MD, 2 en SM, 1 en móviles #}
     {% for dia_info in dias_con_tareas %}
         <div class="col">
             <div class="card semana-dia h-100 {% if dia_info.es_hoy %}border-primary border-2 shadow{% else %}shadow-sm{% endif %}">

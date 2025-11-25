@@ -1,77 +1,536 @@
+/* ============================================
+   ESTILOS GLOBALES Y BASE
+   ============================================ */
+
 body {
     padding-top: 56px; /* Ajuste para la barra de navegación fija */
-    background-color: #c4c4c4;
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 50%, #e9ecef 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #212529;
 }
+
+/* Mejora de contenedor principal */
+main.container, main.container-fluid {
+    background: transparent;
+    padding-bottom: 2rem;
+}
+
+/* Mejora de cards generales */
+.card {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06);
+    border-color: #c0c0c0;
+}
+
+.card-header {
+    border-bottom: 1px solid #e0e0e0;
+    font-weight: 600;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Mejora de botones - Estilo Minimalista con Acentos de Color */
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+    color: #ffffff;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    border: none;
+    color: #ffffff;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #1e7e34 0%, #28a745 100%);
+    color: #ffffff;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border: none;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #ffc107 100%);
+    color: #212529;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
+    color: #ffffff;
+}
+
+.btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border-color: #007bff;
+    color: #ffffff;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    border-color: #6c757d;
+    color: #ffffff;
+}
+
+.btn-outline-success {
+    border: 2px solid #28a745;
+    color: #28a745;
+    background: transparent;
+}
+
+.btn-outline-success:hover {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    border-color: #28a745;
+    color: #ffffff;
+}
+
+.btn-outline-warning {
+    border: 2px solid #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.btn-outline-warning:hover {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-outline-danger {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border-color: #dc3545;
+    color: #ffffff;
+}
+
+.btn-outline-info {
+    border: 2px solid #00d4ff;
+    color: #00d4ff;
+    background: transparent;
+}
+
+.btn-outline-info:hover {
+    background: linear-gradient(135deg, #00d4ff 0%, #00b8d4 100%);
+    border-color: #00d4ff;
+    color: #ffffff;
+}
+
+/* Mejora de badges - Estilo Minimalista con Acentos de Color */
+.badge {
+    padding: 0.5em 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+}
+
+.bg-primary {
+    background-color: #007bff !important; /* Azul claro */
+    color: #ffffff !important;
+}
+
+.bg-success {
+    background-color: #28a745 !important; /* Verde */
+    color: #ffffff !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important; /* Amarillo */
+    color: #212529 !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important; /* Rojo */
+    color: #ffffff !important;
+}
+
+.bg-info {
+    background-color: #00d4ff !important; /* Azul neón */
+    color: #ffffff !important;
+}
+
+.bg-secondary {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+}
+
+/* Mejora de títulos - Estilo Ejecutivo */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: #212529;
+    letter-spacing: -0.3px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #1a1a1a;
+}
+
+/* Mejora de listas - Estilo Minimalista */
+.list-group-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px !important;
+    margin-bottom: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.list-group-item:hover {
+    transform: translateX(3px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    border-color: #c0c0c0;
+}
+
+.list-group-item-success {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-left: 3px solid #5a6c7d;
+}
+
+.list-group-item-light {
+    background: #ffffff;
+    border-left: 3px solid #95a5a6;
+}
+
+/* Mejora de alerts - Estilo Minimalista con Acentos de Color */
+.alert {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    border-left: 4px solid;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+    border-left-color: #28a745;
+    color: #155724;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+    border-left-color: #dc3545;
+    color: #721c24;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fffbf0 0%, #ffffff 100%);
+    border-left-color: #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    border-left-color: #00d4ff;
+    color: #0c5460;
+}
+/* ============================================
+   ESTILOS PARA TAREAS
+   ============================================ */
+
 .task-actions a {
     margin-left: 5px;
-} /* Pequeño ajuste para los botones de acción de tareas */
-    /* Estilo adicional para los botones de acción en la vista semanal si es necesario */
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.task-actions a:hover {
+    transform: scale(1.05);
+}
+
+/* Cards de tareas mejoradas - Estilo Minimalista con Acentos */
+.list-group-item.list-group-item-success {
+    background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+    border-left: 3px solid #28a745;
+}
+
+.list-group-item.list-group-item-light {
+    background: #ffffff;
+    border-left: 3px solid #ffc107;
+}
+
+/* Estilo adicional para los botones de acción en la vista semanal */
 .action-buttons-semana a small { 
     font-size: 0.7rem; 
+}
+
+.action-buttons-semana .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
 }
 
 /* --- INICIO DE ESTILOS RESPONSIVOS PARA VISTA SEMANAL --- */
 /* Aplicaremos estos estilos a pantallas más pequeñas que 768px (breakpoint 'md' de Bootstrap) */
 /* Esto cubrirá cuando tengas 2 columnas (xs, sm) o incluso si tuvieras 1 columna en xs. */
-@media (max-width: 767.98px) {
+
+/* Para móviles muy pequeños (menos de 576px) */
+@media (max-width: 575.98px) {
     /* --- Cabecera de la tarjeta del día --- */
-    .card-header h5.small { /* Contenedor del texto del día: "Lunes", "19", "May" */
-        font-size: 0.8rem; /* Reduce el tamaño general si es necesario */
-        line-height: 1.2; /* Ajusta el interlineado */
+    .card-header h5.small {
+        font-size: 0.75rem;
+        line-height: 1.1;
     }
-    .card-header h5.small .fs-5.fw-bold { /* Número del día, ej: "19" */
-        font-size: 1.1rem !important; /* Reduce el tamaño del número del día */
+    .card-header h5.small .fs-5.fw-bold {
+        font-size: 1rem !important;
     }
-    .card-header h5.small .small { /* Nombre del mes, ej: "May" */
-        font-size: 0.7rem; /* Reduce el tamaño del mes */
+    .card-header h5.small .small {
+        font-size: 0.65rem;
     }
 
     /* --- Cuerpo de la tarjeta del día --- */
-    .card-body.p-2 { /* Si tus card-body tienen padding p-2 */
-        padding: 0.5rem !important; /* Ajusta el padding interno del cuerpo de la tarjeta */
+    .card-body.p-2 {
+        padding: 0.4rem !important;
+        min-height: 120px !important;
     }
 
     /* --- Tareas dentro de la tarjeta del día --- */
-    .card-body ul.list-unstyled li .fw-bold.small { /* Título de la tarea */
-        font-size: 0.85rem; /* Reduce el tamaño del título de la tarea */
-        white-space: normal;   /* Permite que el título se divida en múltiples líneas */
-        word-break: break-word;/* Rompe palabras largas para evitar desbordamiento horizontal */
-        line-height: 1.3;      /* Ajusta interlineado del título de tarea */
+    .card-body ul.list-unstyled li {
+        margin-bottom: 0.5rem !important;
+        padding: 0.4rem !important;
     }
-    .card-body ul.list-unstyled li .text-muted.d-block { /* Tiempo estimado de la tarea */
-        font-size: 0.75rem;
+    .card-body ul.list-unstyled li .fw-bold.small {
+        font-size: 0.8rem;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.2;
+    }
+    .card-body ul.list-unstyled li .text-muted.d-block {
+        font-size: 0.7rem;
         line-height: 1;
-        margin-top: 0.1rem !important; /* Reduce espacio sobre el tiempo estimado */
-        margin-bottom: 0.2rem !important; /* Reduce espacio debajo del tiempo estimado */
+        margin-top: 0.1rem !important;
+        margin-bottom: 0.15rem !important;
     }
     .card-body ul.list-unstyled li .action-buttons-semana {
-        margin-top: 0.2rem !important; /* Reduce espacio sobre los botones E/X */
+        margin-top: 0.15rem !important;
     }
-     .card-body ul.list-unstyled li .me-2.pt-1 { /* Contenedor del checkbox */
-        padding-top: 0.1rem !important; /* Ajusta alineación vertical del checkbox con el título */
+    .card-body ul.list-unstyled li .action-buttons-semana .btn {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.7rem;
     }
-
+    .card-body ul.list-unstyled li .me-2.pt-1 {
+        padding-top: 0.05rem !important;
+    }
 
     /* --- Footer de la tarjeta del día --- */
-    .card-footer.p-1 .btn-sm small { /* Botón "+ Añadir" */
+    .card-footer.p-1 {
+        padding: 0.4rem !important;
+    }
+    .card-footer.p-1 .btn-sm small {
+        font-size: 0.7rem;
+    }
+    .card-footer.p-1 .btn-sm {
+        padding: 0.2rem 0.4rem;
         font-size: 0.75rem;
     }
-    .card-footer.p-1 .btn-sm { /* Botón "+ Añadir" en sí */
+
+    /* --- Sección de Proyectos Activos --- */
+    .list-group-item h5.mb-1 {
+        font-size: 0.85rem;
+    }
+    .list-group-item .small.text-muted,
+    .list-group-item .mt-1 .ms-2.text-muted {
+        font-size: 0.7rem;
+    }
+    .list-group-item .mt-2.text-end .btn-sm {
+        padding: 0.1rem 0.3rem;
+        font-size: 0.7rem;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    .list-group-item .mt-2.text-end {
+        text-align: center !important;
+    }
+}
+
+/* Para tablets y móviles grandes (576px - 767.98px) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    /* --- Cabecera de la tarjeta del día --- */
+    .card-header h5.small {
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    .card-header h5.small .fs-5.fw-bold {
+        font-size: 1.1rem !important;
+    }
+    .card-header h5.small .small {
+        font-size: 0.7rem;
+    }
+
+    /* --- Cuerpo de la tarjeta del día --- */
+    .card-body.p-2 {
+        padding: 0.5rem !important;
+    }
+
+    /* --- Tareas dentro de la tarjeta del día --- */
+    .card-body ul.list-unstyled li .fw-bold.small {
+        font-size: 0.85rem;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+    .card-body ul.list-unstyled li .text-muted.d-block {
+        font-size: 0.75rem;
+        line-height: 1;
+        margin-top: 0.1rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+    .card-body ul.list-unstyled li .action-buttons-semana {
+        margin-top: 0.2rem !important;
+    }
+    .card-body ul.list-unstyled li .me-2.pt-1 {
+        padding-top: 0.1rem !important;
+    }
+
+    /* --- Footer de la tarjeta del día --- */
+    .card-footer.p-1 .btn-sm small {
+        font-size: 0.75rem;
+    }
+    .card-footer.p-1 .btn-sm {
         padding-top: 0.2rem;
         padding-bottom: 0.2rem;
     }
 
-    /* --- Sección de Proyectos Activos (si también necesita ajuste) --- */
-    .list-group-item h5.mb-1 { /* Título del proyecto */
+    /* --- Sección de Proyectos Activos --- */
+    .list-group-item h5.mb-1 {
         font-size: 0.9rem;
     }
-    .list-group-item .small.text-muted, 
-    .list-group-item .mt-1 .ms-2.text-muted { /* Descripción/Estado/Tiempo Estimado del proyecto */
+    .list-group-item .small.text-muted,
+    .list-group-item .mt-1 .ms-2.text-muted {
         font-size: 0.75rem;
     }
-    .list-group-item .mt-2.text-end .btn-sm { /* Botón Editar Proyecto */
-         padding: .15rem .4rem;
-         font-size: .75rem;
+    .list-group-item .mt-2.text-end .btn-sm {
+        padding: 0.15rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Para pantallas pequeñas en general (menos de 768px) */
+@media (max-width: 767.98px) {
+    /* --- Cabecera de la tarjeta del día --- */
+    .card-header h5.small {
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    .card-header h5.small .fs-5.fw-bold {
+        font-size: 1.1rem !important;
+    }
+    .card-header h5.small .small {
+        font-size: 0.7rem;
+    }
+
+    /* --- Cuerpo de la tarjeta del día --- */
+    .card-body.p-2 {
+        padding: 0.5rem !important;
+    }
+
+    /* --- Tareas dentro de la tarjeta del día --- */
+    .card-body ul.list-unstyled li .fw-bold.small {
+        font-size: 0.85rem;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+    .card-body ul.list-unstyled li .text-muted.d-block {
+        font-size: 0.75rem;
+        line-height: 1;
+        margin-top: 0.1rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+    .card-body ul.list-unstyled li .action-buttons-semana {
+        margin-top: 0.2rem !important;
+    }
+    .card-body ul.list-unstyled li .me-2.pt-1 {
+        padding-top: 0.1rem !important;
+    }
+
+    /* --- Footer de la tarjeta del día --- */
+    .card-footer.p-1 .btn-sm small {
+        font-size: 0.75rem;
+    }
+    .card-footer.p-1 .btn-sm {
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+    }
+
+    /* --- Sección de Proyectos Activos --- */
+    .list-group-item h5.mb-1 {
+        font-size: 0.9rem;
+    }
+    .list-group-item .small.text-muted,
+    .list-group-item .mt-1 .ms-2.text-muted {
+        font-size: 0.75rem;
+    }
+    .list-group-item .mt-2.text-end .btn-sm {
+        padding: 0.15rem 0.4rem;
+        font-size: 0.75rem;
     }
 }
 /* --- FIN DE ESTILOS RESPONSIVOS PARA VISTA SEMANAL --- */
@@ -86,7 +545,7 @@ body {
     background: #fff;
 }
 .login-header {
-    background: linear-gradient(90deg, #202020 50%, #494949 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
     color: #fff;
     padding: 1.5rem 1rem;
 }
@@ -95,13 +554,15 @@ body {
     margin-bottom: 0.5rem;
 }
 .login-btn {
-    background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     border: none;
     font-weight: 600;
     letter-spacing: 1px;
+    color: #ffffff;
 }
 .login-btn:hover {
-    background: linear-gradient(90deg, #2e7d32 60%, #388e3c 100%);
+    background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+    color: #ffffff;
 }
 .login-links a {
     color: #1976d2;
@@ -128,7 +589,7 @@ form small a[href*="password/reset"] {
     background: #fff;
 }
 .registro-header {
-    background: linear-gradient(90deg, #213522 50%, #658566 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
     color: #fff;
     padding: 1.5rem 1rem;
 }
@@ -137,13 +598,15 @@ form small a[href*="password/reset"] {
     margin-bottom: 0.5rem;
 }
 .registro-btn {
-    background: linear-gradient(90deg, #1976d2 60%, #00bcd4 100%);
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
     border: none;
     font-weight: 600;
     letter-spacing: 1px;
+    color: #ffffff;
 }
 .registro-btn:hover {
-    background: linear-gradient(90deg, #1565c0 60%, #1976d2 100%);
+    background: linear-gradient(135deg, #1e7e34 0%, #28a745 100%);
+    color: #ffffff;
 }
 .registro-links a {
     color: #1976d2;
@@ -157,62 +620,111 @@ form small a[href*="password/reset"] {
 
 /*--ESTILOS BASE--*/
 
-/* Navbar gradiente y sombra */
+/* ============================================
+   NAVBAR MEJORADA
+   ============================================ */
+
+/* Navbar gradiente y sombra - Estilo Ejecutivo Minimalista */
 .bg-gradient-custom {
-    background: linear-gradient(90deg, #000000 20%, #303030 100%) !important;
-    box-shadow: 0 2px 12px rgba(25, 118, 210, 0.10);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 50%, #1a1a1a 100%) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
 }
 
 /* Navbar brand más grande y con sombra */
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-size: 1.6rem;
+    font-weight: 800;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
     letter-spacing: 1px;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
 }
 
-/* Botones de sesión y registro llamativos */
-.btn-login {
-    background: linear-gradient(90deg, #1c324b 50%, #667a8f 100%);
-    color: #fff !important;
-    border-radius: 20px;
+.navbar-brand:hover {
+    transform: scale(1.05);
+    text-shadow: 0 4px 12px rgba(255,255,255,0.3);
+}
+
+/* Nav links mejorados */
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin: 0 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+
+.navbar-nav .nav-link.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff !important;
     font-weight: 600;
-    transition: background 0.2s;
+}
+
+/* Botones de sesión y registro - Estilo con Acentos de Color */
+.btn-login {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: #fff !important;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
     border: none;
     margin-right: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
 }
 .btn-login:hover, .btn-login:focus {
-    background: linear-gradient(90deg, #787c7c 60%, #bebebe 100%);
+    background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
     color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
 
 .btn-register {
-    background: linear-gradient(90deg, #255711 50%, #79cc79 100%);
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
     color: #fff !important;
-    border-radius: 20px;
+    border-radius: 8px;
     font-weight: 600;
-    transition: background 0.2s;
+    transition: all 0.3s ease;
     border: none;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
 }
 .btn-register:hover, .btn-register:focus {
-    background: linear-gradient(90deg, #709e66 60%, #294126 100%);
+    background: linear-gradient(135deg, #1e7e34 0%, #28a745 100%);
     color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
 }
 
-/* Footer moderno */
+/* ============================================
+   FOOTER MEJORADO
+   ============================================ */
+
+/* Footer moderno - Estilo Ejecutivo Minimalista */
 .bg-footer {
-    background: linear-gradient(90deg, #000000 20%, #303030 100%) !important;
-    color: #fff;
-    border-top: 2px solid #5d6063;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 50%, #1a1a1a 100%) !important;
+    color: #ffffff;
+    border-top: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+    padding: 2rem 0;
 }
+
 .bg-footer .text-muted {
-    color: #e3f2fd !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
+
 .bg-footer .mt-1 {
-    color: #b3e5fc !important;
+    color: rgba(255, 255, 255, 0.7) !important;
 }
+
 .bg-footer .small {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
     letter-spacing: 0.5px;
 }
@@ -221,53 +733,54 @@ form small a[href*="password/reset"] {
 
 /*--- ESTILO MI SEMANA----*/
 
-/* Fondo plata con degradado sutil */
+/* Fondo plata con degradado sutil - Estilo Minimalista */
 .body-mi-semana, .main-mi-semana {
-    background: linear-gradient(135deg, #eceff1 0%, #f5f7fa 100%);
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 50%, #e9ecef 100%);
     min-height: 100vh;
 }
 
-/* Tarjetas de días con efecto glass y sombra */
+/* Tarjetas de días - Estilo Minimalista Ejecutivo */
 .card.semana-dia {
-    background: rgba(255,255,255,0.85);
-    border-radius: 18px;
-    box-shadow: 0 4px 24px rgba(176,190,197,0.18), 0 1.5px 6px rgba(120,144,156,0.10);
-    border: 1.5px solid #cfd8dc;
-    transition: transform 0.12s, box-shadow 0.12s;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .card.semana-dia:hover {
-    transform: translateY(-4px) scale(1.03);
-    box-shadow: 0 8px 32px rgba(120,144,156,0.18), 0 2px 8px rgba(120,144,156,0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+    border-color: #c0c0c0;
 }
 
-/* Cabecera del día */
+/* Cabecera del día - Estilo Minimalista con Acentos */
 .card-header.bg-primary, .card-header.bg-light {
-    border-top-left-radius: 18px;
-    border-top-right-radius: 18px;
-    border-bottom: 1px solid #b0bec5;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom: 1px solid #e0e0e0;
 }
 .card-header.bg-primary {
-    background: linear-gradient(90deg, #90caf9 60%, #eceff1 100%) !important;
-    color: #263238 !important;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    color: #ffffff !important;
 }
 .card-header.bg-light {
-    background: #f5f7fa !important;
-    color: #607d8b !important;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+    color: #212529 !important;
 }
 
-/* Botón + Añadir */
+/* Botón + Añadir - Estilo Minimalista con Acentos */
 .btn-outline-success {
-    border-radius: 16px;
+    border-radius: 8px;
     font-weight: 600;
-    background: #e8f5e9;
-    border: 1.5px solid #66bb6a;
-    color: #388e3c;
-    transition: background 0.15s, color 0.15s;
+    background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+    border: 1.5px solid #28a745;
+    color: #28a745;
+    transition: all 0.3s ease;
 }
 .btn-outline-success:hover, .btn-outline-success:focus {
-    background: linear-gradient(90deg, #66bb6a 60%, #b2dfdb 100%);
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
     color: #fff;
-    border-color: #388e3c;
+    border-color: #28a745;
 }
 
 /* Botones de acción de tarea */
@@ -280,12 +793,12 @@ form small a[href*="password/reset"] {
     font-size: 0.9em;
 }
 
-/* Tarjetas de proyecto activo */
+/* Tarjetas de proyecto activo - Estilo Minimalista */
 .list-group-item {
-    background: rgba(255,255,255,0.92);
-    border-radius: 14px !important;
-    border: 1.5px solid #cfd8dc;
-    box-shadow: 0 2px 8px rgba(176,190,197,0.10);
+    background: #ffffff;
+    border-radius: 8px !important;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     margin-bottom: 0.7rem;
 }
 
@@ -318,69 +831,72 @@ h1, h2, h4 {
 /*--- ESTILO MI SEMANA TITULOS Y BOTONES -----------------------------------------*/
 
 .titulo-mi-semana {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 800;
-    color: #ff1616;
-    text-shadow: 0 4px 18px rgb(0, 255, 242), 0 1.5px 6px rgba(0,0,0,0.08);
-    letter-spacing: 1px;
+    color: #1a1a1a;
+    letter-spacing: -1px;
     margin-bottom: 0.2em;
+    text-shadow: none;
 }
 
 .subtitulo-mi-semana {
-    font-size: 1.3rem;
-    color: #006091 !important;
-    text-shadow: 0 2px 8px rgba(120,144,156,0.10);
+    font-size: 1.4rem;
+    color: #495057 !important;
     font-weight: 600;
+    text-shadow: none;
 }
 
 .btn-nav-semana {
     font-size: 1.1rem;
     font-weight: 600;
-    border-radius: 18px;
-    box-shadow: 0 2px 8px rgba(120,144,156,0.10);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     padding: 0.5em 1.2em;
-    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-    background: rgba(255,255,255,0.85);
+    transition: all 0.3s ease;
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    color: #495057;
 }
 .btn-nav-semana:hover, .btn-nav-semana:focus {
-    background: linear-gradient(90deg, #90caf9 60%, #eceff1 100%);
-    color: #1976d2;
-    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
-    border-color: #1976d2;
+    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: #495057;
 }
 
 .titulo-proyectos-semana {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 700;
-    color: #ff2121;
-    text-shadow: 0 2px 12px rgba(49, 235, 204, 0.1), 0 1.5px 6px rgba(0,0,0,0.08);
-    letter-spacing: 0.5px;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
     margin-bottom: 1em;
+    text-shadow: none;
 }
 
 
 
 /*--- ESTILO LOGIN SOCIAL GOOGLE ----*/
 .btn-google-login {
-    background: linear-gradient(90deg, #ea4335 60%, #ff7961 100%);
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: #fff !important;
     border: none;
-    border-radius: 22px;
+    border-radius: 8px;
     font-weight: 600;
     font-size: 1.08rem;
-    box-shadow: 0 2px 8px rgba(234,67,53,0.10);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
     padding: 0.7em 1.2em;
-    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    transition: all 0.3s ease;
     width: 100%;
     max-width: 320px;
     display: inline-block;
     text-align: center;
 }
 .btn-google-login:hover, .btn-google-login:focus {
-    background: linear-gradient(90deg, #ea4335 0%, #c62828 100%);
+    background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
     color: #fff !important;
     border: none;
-    box-shadow: 0 4px 16px rgba(234,67,53,0.18);
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px);
 }
 .btn-google-login .fab.fa-google {
     font-size: 1.3em;
@@ -388,26 +904,494 @@ h1, h2, h4 {
 
 /*--- ESTILO CONFIRMAR LOGIN GOOGLE ROJO CENTRADO ----*/
 .btn-google-login-red {
-    background: linear-gradient(90deg, #ea4335 60%, #ff7961 100%);
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: #fff !important;
     border: none;
-    border-radius: 22px;
+    border-radius: 8px;
     font-weight: 600;
     font-size: 1.08rem;
-    box-shadow: 0 2px 8px rgba(234,67,53,0.10);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
     padding: 0.7em 1.2em;
-    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    transition: all 0.3s ease;
     min-width: 260px;
     max-width: 340px;
     display: inline-block;
     text-align: center;
 }
 .btn-google-login-red:hover, .btn-google-login-red:focus {
-    background: linear-gradient(90deg, #ea4335 0%, #c62828 100%);
+    background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
     color: #fff !important;
     border: none;
-    box-shadow: 0 4px 16px rgba(234,67,53,0.18);
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px);
 }
 .btn-google-login-red .fab.fa-google {
     font-size: 1.3em;
+}
+
+/* ============================================
+   ESTILOS PARA PROYECTOS
+   ============================================ */
+
+/* Cards de proyectos mejoradas */
+.card.border-primary {
+    border-left: 4px solid #667eea !important;
+}
+
+.card.border-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.card.border-danger {
+    border-left: 4px solid #dc3545 !important;
+}
+
+.card.border-info {
+    border-left: 4px solid #17a2b8 !important;
+}
+
+.card.border-secondary {
+    border-left: 4px solid #6c757d !important;
+}
+
+/* Headers de cards de proyectos - Estilo Minimalista con Acentos */
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    color: #ffffff !important;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+    color: #ffffff !important;
+}
+
+.card-header.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    color: #ffffff !important;
+}
+
+.card-header.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+    color: #212529 !important;
+}
+
+.card-header.bg-info {
+    background: linear-gradient(135deg, #00d4ff 0%, #00b8d4 100%) !important;
+    color: #ffffff !important;
+}
+
+.card-header.bg-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+    color: #ffffff !important;
+}
+
+.card-header.bg-light {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+    color: #212529 !important;
+}
+
+/* Progress bars mejoradas */
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background-color: #e9ecef;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    transition: width 0.6s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.progress-bar.bg-primary {
+    background-color: #007bff !important;
+}
+
+.progress-bar.bg-success {
+    background-color: #28a745 !important;
+}
+
+.progress-bar.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.progress-bar.bg-warning {
+    background-color: #ffc107 !important;
+}
+
+.progress-bar.bg-info {
+    background-color: #00d4ff !important;
+}
+
+/* ============================================
+   ESTILOS PARA DASHBOARD
+   ============================================ */
+
+/* Stats cards del dashboard - Estilo Minimalista con Acentos */
+.card.bg-success,
+.card.bg-warning,
+.card.bg-danger,
+.card.bg-info {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+    color: #ffffff !important;
+}
+
+.card.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+    color: #212529 !important;
+}
+
+.card.bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    color: #ffffff !important;
+}
+
+.card.bg-info {
+    background: linear-gradient(135deg, #00d4ff 0%, #00b8d4 100%) !important;
+    color: #ffffff !important;
+}
+
+.card.bg-success:hover,
+.card.bg-warning:hover,
+.card.bg-danger:hover,
+.card.bg-info:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Zonas del dashboard - Estilo Minimalista con Acentos */
+.card.border-danger {
+    border-left: 4px solid #dc3545 !important;
+}
+
+.card.border-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+
+.card.border-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.card.border-primary {
+    border-left: 4px solid #007bff !important;
+}
+
+.card.border-info {
+    border-left: 4px solid #00d4ff !important;
+}
+
+.card.border-secondary {
+    border-left: 4px solid #6c757d !important;
+}
+
+/* ============================================
+   ESTILOS PARA FORMULARIOS
+   ============================================ */
+
+/* Formularios mejorados - Estilo Minimalista con Acentos */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border: 1px solid #d0d0d0;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+    transform: translateY(-1px);
+    background: #ffffff;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.3px;
+}
+
+/* ============================================
+   ANIMACIONES Y EFECTOS
+   ============================================ */
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card,
+.list-group-item,
+.alert {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Hover effects mejorados */
+.btn-sm:hover {
+    transform: scale(1.05);
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ============================================
+   MEJORAS RESPONSIVE
+   ============================================ */
+
+/* Extra Small devices (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+    body {
+        padding-top: 50px;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .card {
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .btn-lg {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .titulo-mi-semana {
+        font-size: 1.8rem;
+    }
+    
+    .subtitulo-mi-semana {
+        font-size: 1.1rem;
+    }
+    
+    .titulo-proyectos-semana {
+        font-size: 1.6rem;
+    }
+    
+    .btn-nav-semana {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-login, .btn-register {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+        margin-right: 0.25rem;
+    }
+    
+    .login-header .fa-user-circle,
+    .registro-header .fa-user-plus {
+        font-size: 2rem;
+    }
+    
+    .login-header h2,
+    .registro-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    main.container, main.container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .card-footer {
+        padding: 0.75rem;
+    }
+    
+    .card-footer .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-footer .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.4rem;
+    }
+    
+    .titulo-mi-semana {
+        font-size: 2.2rem;
+    }
+    
+    .subtitulo-mi-semana {
+        font-size: 1.2rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    h1 {
+        font-size: 2.25rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+    
+    .titulo-mi-semana {
+        font-size: 2.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    /* Estilos específicos para pantallas grandes si es necesario */
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    /* Estilos específicos para pantallas extra grandes si es necesario */
+}
+
+/* Media query general para móviles (menos de 768px) */
+@media (max-width: 767.98px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .card {
+        border-radius: 12px;
+    }
+    
+    .btn {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Mejoras para formularios en móviles */
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Previene zoom en iOS */
+    }
+    
+    /* Cards de estadísticas en dashboard */
+    .card.bg-success,
+    .card.bg-warning,
+    .card.bg-danger,
+    .card.bg-info {
+        margin-bottom: 1rem;
+    }
+    
+    /* Ajustes para botones de acción en listas */
+    .task-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .task-actions .btn {
+        width: 100%;
+    }
+    
+    /* Footer de cards con botones apilados */
+    .card-footer.text-end {
+        text-align: center !important;
+    }
+    
+    .card-footer .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .card-footer .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Ajustes para el navbar en móviles */
+    .navbar-collapse {
+        margin-top: 1rem;
+    }
+    
+    .navbar-nav.ms-auto {
+        margin-top: 0.5rem;
+    }
+    
+    /* Ajustes para login/registro en móviles */
+    .login-card,
+    .registro-card {
+        margin: 1rem 0;
+    }
+    
+    /* Ajustes para proyectos en lista */
+    .row-cols-md-2 .col {
+        margin-bottom: 1rem;
+    }
 }

@@ -156,7 +156,7 @@
                     <h2>📊 Resumen de Proyectos ({{ total_projects }})</h2>
                     <div class="row">
                         <!-- Quick Stats Cards -->
-                        <div class="col-md-3 mb-3">
+                        <div class="col-6 col-md-3 mb-3">
                             <div class="card bg-success text-white">
                                 <div class="card-body text-center">
                                     <h4>{{ healthy_count }}</h4>
@@ -164,7 +164,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-6 col-md-3 mb-3">
                             <div class="card bg-warning">
                                 <div class="card-body text-center">
                                     <h4>{{ at_risk_count }}</h4>
@@ -172,7 +172,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-6 col-md-3 mb-3">
                             <div class="card bg-danger text-white">
                                 <div class="card-body text-center">
                                     <h4>{{ critical_count }}</h4>
@@ -180,7 +180,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 mb-3">
+                        <div class="col-6 col-md-3 mb-3">
                             <div class="card bg-info text-white">
                                 <div class="card-body text-center">
                                     <h4>{{ completed_count }}</h4>
@@ -205,7 +205,7 @@
                             {% for item in projects_by_health.critical %}
                                 <div class="alert alert-danger">
                                     <div class="row">
-                                        <div class="col-md-8">
+                                        <div class="col-12 col-md-8">
                                             <h6><strong>{{ item.project.nombre }}</strong></h6>
                                             <p>{{ item.project.descripcion|default:"Sin descripción" }}</p>
                                             <small class="text-muted">
@@ -213,7 +213,7 @@
                                                 {% if item.project.fecha_fin_estimada %} | Fin estimado: {{ item.project.fecha_fin_estimada|date:"d M Y" }}{% endif %}
                                             </small>
                                         </div>
-                                        <div class="col-md-4 text-end">
+                                        <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
                                             <div class="progress mb-2">
                                                 <div class="progress-bar bg-danger" style="width: {{ item.percentage }}%"></div>
                                             </div>
@@ -251,7 +251,7 @@
                             {% for item in projects_by_health.healthy %}
                                 <div class="alert alert-success">
                                     <div class="row">
-                                        <div class="col-md-8">
+                                        <div class="col-12 col-md-8">
                                             <h6><strong>{{ item.project.nombre }}</strong></h6>
                                             <p>{{ item.project.descripcion|default:"Sin descripción" }}</p>
                                             <small class="text-muted">
@@ -259,7 +259,7 @@
                                                 {% if item.project.fecha_fin_estimada %} | Fin estimado: {{ item.project.fecha_fin_estimada|date:"d M Y" }}{% endif %}
                                             </small>
                                         </div>
-                                        <div class="col-md-4 text-end">
+                                        <div class="col-12 col-md-4 text-md-end mt-2 mt-md-0">
                                             <div class="progress mb-2">
                                                 <div class="progress-bar bg-success" style="width: {{ item.percentage }}%"></div>
                                             </div>
@@ -398,7 +398,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <!-- Task Actions -->
-                                <div class="col-md-6 mb-3">
+                                <div class="col-12 col-md-6 mb-3">
                                     <h6>📋 Gestión de Tareas</h6>
                                     <div class="d-grid gap-2">
                                         <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary">
@@ -414,7 +414,7 @@
                                 </div>
                                 
                                 <!-- Project Actions -->
-                                <div class="col-md-6 mb-3">
+                                <div class="col-12 col-md-6 mb-3">
                                     <h6>📊 Gestión de Proyectos</h6>
                                     <div class="d-grid gap-2">
                                         <a href="{% url 'crear_proyecto_url' %}" class="btn btn-success">

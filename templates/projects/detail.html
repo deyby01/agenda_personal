@@ -36,7 +36,7 @@
             <hr>
             <h5 class="card-subtitle my-3 text-muted">Planificación:</h5>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <p><strong>Creado en Sistema:</strong> {{ proyecto.fecha_creacion_proyecto|date:"d M Y, H:i" }}</p>
                     {% if proyecto.fecha_inicio %}
                         <p><strong>Fecha de Inicio:</strong> {{ proyecto.fecha_inicio|date:"l, d M Y" }}</p>
@@ -44,7 +44,7 @@
                         <p><strong>Fecha de Inicio:</strong> <em class="text-muted">No especificada</em></p>
                     {% endif %}
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     {% if proyecto.fecha_fin_estimada %}
                         <p><strong>Fecha Fin Estimada:</strong> {{ proyecto.fecha_fin_estimada|date:"l, d M Y" }}</p>
                     {% else %}
@@ -68,10 +68,12 @@
                 </ul>
             {% endif %}
         </div>
-        <div class="card-footer bg-light text-end">
-            <a href="{% url 'lista_de_proyectos_url' %}" class="btn btn-outline-secondary me-2">Volver a Proyectos</a>
-            <a href="{% url 'editar_proyecto_url' proyecto.id %}" class="btn btn-warning me-2">✏️ Editar Proyecto</a>
-            <a href="{% url 'eliminar_proyecto_url' proyecto.id %}" class="btn btn-danger">🗑️ Eliminar Proyecto</a>
+        <div class="card-footer bg-light text-center text-md-end">
+            <div class="d-grid d-md-inline gap-2">
+                <a href="{% url 'lista_de_proyectos_url' %}" class="btn btn-outline-secondary">Volver a Proyectos</a>
+                <a href="{% url 'editar_proyecto_url' proyecto.id %}" class="btn btn-warning">✏️ Editar Proyecto</a>
+                <a href="{% url 'eliminar_proyecto_url' proyecto.id %}" class="btn btn-danger">🗑️ Eliminar Proyecto</a>
+            </div>
         </div>
     </div>
 </div>

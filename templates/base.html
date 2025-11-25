@@ -75,7 +75,7 @@
                     {% if user.is_authenticated %}
 
                     <!-- CAMPANA DE NOTIFICACIONES - TU DISEÑO PROFESIONAL -->
-                    <li class="nav-item dropdown me-3">
+                    <li class="nav-item dropdown me-2 me-md-3">
                         <a class="nav-link position-relative text-decoration-none" 
                         href="{% url 'centro_notificaciones' %}"
                         title="Centro de Notificaciones">
@@ -98,7 +98,7 @@
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
                         >
-                            Hola, {{ user.username }}
+                            <span class="d-none d-sm-inline">Hola, </span>{{ user.username }}
                         </a>
                         <ul
                             class="dropdown-menu dropdown-menu-end"
@@ -120,14 +120,14 @@
                     {% else %}
                     <li class="nav-item">
                         <a
-                            class="nav-link btn btn-login me-2 px-3 py-1 {% if request.resolver_match.url_name == 'account_login' %}active{% endif %}"
+                            class="nav-link btn btn-login me-2 px-2 px-md-3 py-1 {% if request.resolver_match.url_name == 'account_login' %}active{% endif %}"
                             href="{% url 'account_login' %}"
-                            >Iniciar Sesión</a>
+                            ><span class="d-none d-sm-inline">Iniciar </span>Sesión</a>
                     </li>
                     <li class="nav-item">
                         {# Asumimos que la URL de registro se llamará 'registro_url' #}
                         <a
-                            class="nav-link btn btn-register px-3 py-1 {% if request.resolver_match.url_name == 'registro_url' %}active{% endif %}"
+                            class="nav-link btn btn-register px-2 px-md-3 py-1 {% if request.resolver_match.url_name == 'registro_url' %}active{% endif %}"
                             href="{% url 'registro_url' %}"
                             >Registrarse</a>
                     </li>
@@ -137,7 +137,7 @@
         </div>
     </nav>
 
-    <main class="container mt-4 my-4">
+    <main class="container-fluid mt-4 my-4 px-3 px-md-4">
         {# --- INICIO DE LA SECCIÓN DE MENSAJES --- #}
         {% if messages %}
             {% for message in messages %}
