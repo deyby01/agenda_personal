@@ -37,6 +37,15 @@ El objetivo era construir una aplicación funcional, segura y desplegada en un e
 * **Interfaz Responsiva:**
     * Construida con Bootstrap 5, asegurando una buena experiencia de usuario en dispositivos de escritorio, tablets y móviles.
 
+## API RESTful
+
+- Endpoints versionados bajo `api/v1/` (tasks, projects, notifications).
+- Autenticación JWT vía `/api/token/` y `/api/token/refresh/`.
+- Documentación generada con **drf-spectacular**:
+  - OpenAPI JSON: `/api/schema/`
+  - Swagger UI interactivo: `/api/docs/swagger/`
+  - ReDoc: `/api/docs/redoc/`
+
 ## Mejoras Técnicas Clave
 
 * **Refactorización a Vistas Basadas en Clases (CBV):** Todo el proyecto fue migrado de Vistas Basadas en Funciones (FBV) a CBV, utilizando las vistas genéricas de Django (`ListView`, `CreateView`, `UpdateView`, `DeleteView`, `TemplateView`) para un código más reutilizable, mantenible y escalable.

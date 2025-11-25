@@ -16,10 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.shortcuts import redirect
-from django.urls import path, include
-from rest_framework.authtoken import views
-from django.views.generic.base import RedirectView
+from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 # Smart homepage routing
 def homepage_redirect(request):
@@ -28,7 +27,7 @@ def homepage_redirect(request):
     """
     if request.user.is_authenticated:
         # Logged users -> Dashboard 
-        return redirect('/agenda/dashboard/')
+        return redirect('/dashboard/')
     else:
         # Anonymous users -> login page
         return redirect('/accounts/login/')
@@ -52,11 +51,18 @@ urlpatterns = [
     path('agenda/', include('apps.notifications.urls')),
 
     # ========== API URLS ========
-    # path('api/', include('apps.api.urls')), 
-    # path('api-token-auth/', views.obtain_auth_token, name='api-token-auth'),
-    # path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    # path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    # path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-
-    
+    path('api/', include('apps.api.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='api-token-obtain'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='api-schema'),
+    path(
+        'api/docs/swagger/',
+        SpectacularSwaggerView.as_view(url_name='api-schema'),
+        name='api-swagger',
+    ),
+    path(
+        'api/docs/redoc/',
+        SpectacularRedocView.as_view(url_name='api-schema'),
+        name='api-redoc',
+    ),
 ]

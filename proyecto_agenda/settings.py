@@ -75,7 +75,7 @@ INSTALLED_APPS = [
     'apps.tasks.apps.TasksConfig',
     'apps.projects.apps.ProjectsConfig',
     'apps.notifications.apps.NotificationsConfig',
-    #'apps.api.apps.ApiConfig',
+    'apps.api.apps.ApiConfig',
 ]
 
 # JWT Configuration
@@ -123,6 +123,7 @@ REST_FRAMEWORK = {
         'login': '5/min',
     },
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'apps.api.exceptions.custom_exception_handler',
 }
 
 # API Documentation
@@ -130,7 +131,7 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Agenda Personal Enterprise API',
     'DESCRIPTION': 'Enterprise API for task and project management with JWT authentication',
     'VERSION': '2.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_INCLUDE_SCHEMA': True,
     'SCHEMA_PATH_PREFIX': '/api/v1',
     'COMPONENT_SPLIT_REQUEST': True,
     'COMPONENT_NO_READ_ONLY_REQUIRED': True,
