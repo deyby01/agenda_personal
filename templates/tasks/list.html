@@ -1,60 +1,183 @@
-{% extends "base.html" %} {# Le decimos a Django que esta plantilla hereda de 'base.html' #}
+{% extends "base.html" %}
 
-{% block title %}Lista de Mis Tareas - Mi Agenda{% endblock title %} {# Sobrescribimos el bloque title #}
+{% block title %}Lista de Mis Tareas - Mi Agenda{% endblock title %}
 
-{% block content %} {# Aquí empieza el contenido específico de esta página #}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Lista de Mis Tareas</h1>
-    <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary">➕ Añadir Nueva Tarea</a>
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <div class="mb-3 mb-md-0">
+        <h1 class="mb-2">
+            <i class="fas fa-tasks text-primary"></i> Mis Tareas
+        </h1>
+        <p class="text-muted mb-0">Gestiona todas tus tareas en un solo lugar</p>
+    </div>
+    <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus-circle"></i> Nueva Tarea
+    </a>
+</div>
+
+<!-- Barra de Filtros -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" action="{% url 'lista_de_tareas_url' %}" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="q" class="form-label">
+                    <i class="fas fa-search text-primary"></i> Buscar por nombre
+                </label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="q" 
+                    name="q" 
+                    value="{{ current_search }}"
+                    placeholder="Buscar tareas por título o descripción..."
+                >
+            </div>
+            <div class="col-md-4">
+                <label for="estado" class="form-label">
+                    <i class="fas fa-filter text-primary"></i> Filtrar por estado
+                </label>
+                <select class="form-select" id="estado" name="estado">
+                    <option value="">Todas las tareas</option>
+                    <option value="pendientes" {% if current_estado == 'pendientes' %}selected{% endif %}>
+                        Pendientes
+                    </option>
+                    <option value="completadas" {% if current_estado == 'completadas' %}selected{% endif %}>
+                        Completadas
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                    {% if has_filters %}
+                        <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Limpiar
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 {% if lista_de_tareas_template %}
-    <div class="list-group">
+    <div class="row g-3">
         {% for tarea_individual in lista_de_tareas_template %}
-            <div class="list-group-item list-group-item-action flex-column align-items-start {% if tarea_individual.completada %}list-group-item-success{% else %}list-group-item-light{% endif %} mb-2 shadow-sm rounded">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">
-                        <a href="{% url 'detalle_tarea_url' tarea_individual.id %}" class="text-decoration-none">
-                            {{ tarea_individual.titulo }}
-                        </a>
-                    </h5>
-                    <small class="text-muted">
-                        {% if tarea_individual.fecha_asignada %}
-                            {{ tarea_individual.fecha_asignada|date:"D, d M Y" }}
-                        {% else %}
-                            Sin fecha asignada
-                        {% endif %}
-                    </small>
-                </div>
-
-                {% if tarea_individual.descripcion %}
-                    <p class="mb-1">{{ tarea_individual.descripcion }}</p>
-                {% endif %}
-
-                <small class="text-muted">
-                    Creada: {{ tarea_individual.fecha_creacion|date:"d/m/Y H:i" }}
-                    {% if tarea_individual.tiempo_estimado %}
-                        | Tiempo Estimado: {{ tarea_individual.tiempo_estimado }}
-                    {% endif %}
-                </small>
-                <div class="mt-2">
-                    <strong>Estado:</strong>
-                    {% if tarea_individual.completada %}
-                        <span class="badge bg-success">Completada ✔</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">Pendiente ⏳</span>
-                    {% endif %}
-                </div>
-                <div class="mt-3 task-actions"> {# Aplicamos la clase definida en base.html o podemos añadir más aquí #}
-                    <a href="{% url 'editar_tarea_url' tarea_individual.id %}" class="btn btn-sm btn-outline-warning">✏️ Editar</a>
-                    <a href="{% url 'eliminar_tarea_url' tarea_individual.id %}" class="btn btn-sm btn-outline-danger">🗑️ Eliminar</a>
+            <div class="col-12">
+                <div class="card {% if tarea_individual.completada %}border-success{% else %}border-warning{% endif %} h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-2">
+                                    <a href="{% url 'detalle_tarea_url' tarea_individual.id %}" 
+                                       class="text-decoration-none {% if tarea_individual.completada %}text-muted text-decoration-line-through{% else %}text-dark{% endif %}">
+                                        <i class="fas fa-circle-notch {% if tarea_individual.completada %}text-success{% else %}text-warning{% endif %}" 
+                                           style="font-size: 0.5rem; vertical-align: middle;"></i>
+                                        {{ tarea_individual.titulo }}
+                                    </a>
+                                </h5>
+                                {% if tarea_individual.descripcion %}
+                                    <p class="card-text text-muted mb-2">{{ tarea_individual.descripcion|truncatewords:20 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                {% if tarea_individual.completada %}
+                                    <span class="badge bg-success mb-2 d-block">
+                                        <i class="fas fa-check-circle"></i> Completada
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark mb-2 d-block">
+                                        <i class="fas fa-clock"></i> Pendiente
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-12 col-md-6">
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {% if tarea_individual.fecha_asignada %}
+                                        <strong>Fecha:</strong> {{ tarea_individual.fecha_asignada|date:"d M Y" }}
+                                    {% else %}
+                                        <strong>Sin fecha asignada</strong>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <small class="text-muted d-block">
+                                    <i class="fas fa-clock"></i>
+                                    {% if tarea_individual.tiempo_estimado %}
+                                        <strong>Tiempo:</strong> {{ tarea_individual.tiempo_estimado }}
+                                    {% else %}
+                                        <strong>Sin tiempo estimado</strong>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-plus"></i> Creada: {{ tarea_individual.fecha_creacion|date:"d/m/Y H:i" }}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex flex-column flex-md-row gap-2 task-actions">
+                            <a href="{% url 'editar_tarea_url' tarea_individual.id %}" 
+                               class="btn btn-sm btn-outline-primary flex-fill">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a href="{% url 'detalle_tarea_url' tarea_individual.id %}" 
+                               class="btn btn-sm btn-outline-info flex-fill">
+                                <i class="fas fa-eye"></i> Ver Detalle
+                            </a>
+                            <a href="{% url 'eliminar_tarea_url' tarea_individual.id %}" 
+                               class="btn btn-sm btn-outline-danger flex-fill flex-md-grow-0">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         {% endfor %}
     </div>
 {% else %}
-    <div class="alert alert-info" role="alert">
-        ¡No tienes tareas pendientes! <a href="{% url 'crear_tarea_url' %}" class="alert-link">Añade una ahora</a>.
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-clipboard-list fa-4x text-muted mb-3"></i>
+            {% if has_filters %}
+                <h3 class="text-muted">No se encontraron tareas</h3>
+                <p class="text-muted mb-4">
+                    No hay tareas que coincidan con los filtros aplicados.
+                    {% if current_search %}
+                        <br><strong>Búsqueda:</strong> "{{ current_search }}"
+                    {% endif %}
+                    {% if current_estado %}
+                        <br><strong>Estado:</strong> 
+                        {% if current_estado == 'completadas' %}
+                            Completadas
+                        {% elif current_estado == 'pendientes' %}
+                            Pendientes
+                        {% endif %}
+                    {% endif %}
+                </p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Limpiar Filtros
+                    </a>
+                    <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Crear Tarea
+                    </a>
+                </div>
+            {% else %}
+                <h3 class="text-muted">¡No tienes tareas!</h3>
+                <p class="text-muted mb-4">Comienza a organizar tu tiempo creando tu primera tarea.</p>
+                <a href="{% url 'crear_tarea_url' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle"></i> Crear Primera Tarea
+                </a>
+            {% endif %}
+        </div>
     </div>
 {% endif %}
-{% endblock content %} {# Aquí termina el bloque de contenido específico #}
+{% endblock content %}

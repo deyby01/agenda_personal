@@ -30,6 +30,8 @@ class ListViewProjects(LoginRequiredMixin, ListView):
     - Filtra solo proyectos del usuario autenticado
     - Ordenado por fecha_fin_estimada
     - Paginación
+    - Filtro por estado
+    - Búsqueda por nombre
     
     Template: projects/list.html
     Context: lista_de_proyectos_template (QuerySet de Proyecto)
@@ -42,14 +44,51 @@ class ListViewProjects(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """
-        Obtiene proyectos del usuario ordenados.
+        Obtiene proyectos del usuario con filtros opcionales.
 
         Returns:
             QuerySet[Proyecto]: Proyectos filtrados y ordenados.
         """
-        return ProyectoRepository.get_active_projects_for_user(
-            self.request.user
-        ).order_by('fecha_fin_estimada', 'nombre')
+        # Obtener proyectos base del usuario
+        queryset = ProyectoRepository.get_all_projects_for_user(
+            user=self.request.user
+        )
+        
+        # Filtrar por búsqueda de nombre si existe
+        search = self.request.GET.get('q', '').strip()
+        if search:
+            queryset = queryset.filter(
+                Q(nombre__icontains=search) | 
+                Q(descripcion__icontains=search)
+            )
+        
+        # Filtrar por estado si existe
+        estado = self.request.GET.get('estado', '')
+        if estado and estado in dict(Proyecto.ESTADO_CHOICES):
+            queryset = queryset.filter(estado=estado)
+        
+        return queryset.order_by('fecha_fin_estimada', 'nombre')
+
+    def get_context_data(self, **kwargs):
+        """
+        Agrega información de filtros al contexto.
+        
+        Returns:
+            dict: Context con filtros aplicados y opciones de estado
+        """
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener valores actuales de filtros
+        current_search = self.request.GET.get('q', '')
+        current_estado = self.request.GET.get('estado', '')
+        
+        # Agregar al contexto
+        context['current_search'] = current_search
+        context['current_estado'] = current_estado
+        context['estado_choices'] = Proyecto.ESTADO_CHOICES
+        context['has_filters'] = bool(current_search or current_estado)
+        
+        return context
 
     
 

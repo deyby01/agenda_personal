@@ -24,7 +24,7 @@
             <hr>
             <h5 class="card-subtitle my-3 text-muted">Detalles:</h5>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <p><strong>Creada:</strong> {{ tarea.fecha_creacion|date:"d M Y, H:i" }}</p>
                     {% if tarea.fecha_asignada %}
                         <p><strong>Fecha Asignada:</strong> {{ tarea.fecha_asignada|date:"l, d M Y" }}</p>
@@ -32,7 +32,7 @@
                         <p><strong>Fecha Asignada:</strong> <em class="text-muted">No especificada</em></p>
                     {% endif %}
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     {% if tarea.tiempo_estimado %}
                         <p><strong>Tiempo Estimado:</strong> {{ tarea.tiempo_estimado }}</p>
                     {% else %}
@@ -42,10 +42,12 @@
                 </div>
             </div>
         </div>
-        <div class="card-footer bg-light text-end">
-            <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-secondary me-2">Volver a la Lista</a>
-            <a href="{% url 'editar_tarea_url' tarea.id %}" class="btn btn-warning me-2">✏️ Editar Tarea</a>
-            <a href="{% url 'eliminar_tarea_url' tarea.id %}" class="btn btn-danger">🗑️ Eliminar Tarea</a>
+        <div class="card-footer bg-light text-center text-md-end">
+            <div class="d-grid d-md-inline gap-2">
+                <a href="{% url 'lista_de_tareas_url' %}" class="btn btn-outline-secondary">Volver a la Lista</a>
+                <a href="{% url 'editar_tarea_url' tarea.id %}" class="btn btn-warning">✏️ Editar Tarea</a>
+                <a href="{% url 'eliminar_tarea_url' tarea.id %}" class="btn btn-danger">🗑️ Eliminar Tarea</a>
+            </div>
         </div>
     </div>
 </div>

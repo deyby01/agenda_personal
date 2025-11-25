@@ -59,7 +59,7 @@ class ListViewTasks(LoginRequiredMixin, ListView):
         queryset = TareaRepository.get_tasks_for_user(self.request.user)
         
         # Filtrar por búsqueda si existe
-        search = self.request.GET.get('q')
+        search = self.request.GET.get('q', '').strip()
         if search:
             queryset = queryset.filter(
                 Q(titulo__icontains=search) | 
@@ -67,7 +67,7 @@ class ListViewTasks(LoginRequiredMixin, ListView):
             )
         
         # Filtrar por estado si existe
-        estado = self.request.GET.get('estado')
+        estado = self.request.GET.get('estado', '')
         if estado == 'completadas':
             queryset = queryset.filter(completada=True)
         elif estado == 'pendientes':
@@ -77,11 +77,26 @@ class ListViewTasks(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         """
-        Asegura compatibilidad con template legado que espera
-        la variable lista_de_tareas_template.
+        Agrega información de filtros al contexto y asegura compatibilidad
+        con template legado que espera lista_de_tareas_template.
+        
+        Returns:
+            dict: Context con filtros aplicados y lista de tareas
         """
         context = super().get_context_data(**kwargs)
+        
+        # Compatibilidad con template legado
         context['lista_de_tareas_template'] = context.get('tareas')
+        
+        # Obtener valores actuales de filtros
+        current_search = self.request.GET.get('q', '')
+        current_estado = self.request.GET.get('estado', '')
+        
+        # Agregar al contexto
+        context['current_search'] = current_search
+        context['current_estado'] = current_estado
+        context['has_filters'] = bool(current_search or current_estado)
+        
         return context
 
 
