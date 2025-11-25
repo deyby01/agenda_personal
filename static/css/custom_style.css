@@ -17,11 +17,6 @@ main.container, main.container-fluid {
     padding-bottom: 2rem;
 }
 
-/* Animaciones suaves globales */
-* {
-    transition: all 0.3s ease;
-}
-
 /* Mejora de cards generales */
 .card {
     border: 1px solid #e0e0e0;
