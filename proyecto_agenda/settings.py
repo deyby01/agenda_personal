@@ -288,6 +288,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Resend Configuration (si está configurado, se usa automáticamente)
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', 'onboarding@resend.dev')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
 # Determinar qué backend usar
 # Prioridad: Resend (si está configurado) > EMAIL_BACKEND del .env > Consola (desarrollo) > SMTP
@@ -312,12 +313,13 @@ if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
     EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False') == 'True'
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@agenda.local')
+    if not DEFAULT_FROM_EMAIL:
+        DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@agenda.local'
 
 # Si usamos Resend, usar el email de Resend como default
 if EMAIL_BACKEND == 'apps.core.backends.ResendEmailBackend':
     DEFAULT_FROM_EMAIL = RESEND_FROM_EMAIL
-elif not DEFAULT_FROM_EMAIL or DEFAULT_FROM_EMAIL == '':
+elif not DEFAULT_FROM_EMAIL:
     DEFAULT_FROM_EMAIL = 'noreply@agenda.local'
 
 # Django Crispy Forms
