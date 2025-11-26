@@ -43,8 +43,11 @@ LOGIN_REDIRECT_URL = 'mi_semana_actual_url'
 LOGOUT_REDIRECT_URL = 'account_login'
 
 # Allauth configuration
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # No requiere verificación de email para registro
 ACCOUNT_LOGOUT_ON_GET = True
+# Configuración para permitir restablecimiento de contraseña
+# Nota: ACCOUNT_AUTHENTICATION_METHOD está deprecado, usar ACCOUNT_LOGIN_METHODS
+# Nota: ACCOUNT_EMAIL_REQUIRED y ACCOUNT_USERNAME_REQUIRED están deprecados, usar ACCOUNT_SIGNUP_FIELDS
 
 # Application definition
 INSTALLED_APPS = [
@@ -264,7 +267,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
@@ -280,14 +283,42 @@ STATIC_ROOT = BASE_DIR / "staticfiles_production"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Email Configuration
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+# Prioridad: Resend > SMTP configurado > Consola (desarrollo)
+
+# Resend Configuration (si está configurado, se usa automáticamente)
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', 'onboarding@resend.dev')
+
+# Determinar qué backend usar
+# Prioridad: Resend (si está configurado) > EMAIL_BACKEND del .env > Consola (desarrollo) > SMTP
+
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
+
+# Si hay API key de Resend, usarlo automáticamente (tiene prioridad)
+if RESEND_API_KEY:
+    EMAIL_BACKEND = 'apps.core.backends.ResendEmailBackend'
+elif not EMAIL_BACKEND:
+    # Si estamos en DEBUG y no hay configuración, usar consola
+    if DEBUG:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    else:
+        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Configuración SMTP (solo si se usa SMTP, no Resend)
 if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
-    EMAIL_HOST = os.environ.get('EMAIL_HOST')
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'mailhog' if DEBUG else None)
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 1025 if DEBUG else 587))
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False' if DEBUG else 'True') == 'True'
+    EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False') == 'True'
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@agenda.local')
+
+# Si usamos Resend, usar el email de Resend como default
+if EMAIL_BACKEND == 'apps.core.backends.ResendEmailBackend':
+    DEFAULT_FROM_EMAIL = RESEND_FROM_EMAIL
+elif not DEFAULT_FROM_EMAIL or DEFAULT_FROM_EMAIL == '':
+    DEFAULT_FROM_EMAIL = 'noreply@agenda.local'
 
 # Django Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
