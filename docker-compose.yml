@@ -43,6 +43,19 @@ services:
     networks:
       - agenda_network
 
+  # MailHog - Email Testing Service (Solo para desarrollo)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: agenda_mailhog
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI para ver emails
+    networks:
+      - agenda_network
+    restart: unless-stopped
+    profiles:
+      - dev  # Solo se inicia con --profile dev
+
   # Django Web Application Service
   web:
     build:

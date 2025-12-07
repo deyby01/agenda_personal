@@ -729,6 +729,18 @@ form small a[href*="password/reset"] {
     letter-spacing: 0.5px;
 }
 
+.bg-footer a {
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.bg-footer a:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
 
 
 /*--- ESTILO MI SEMANA----*/
@@ -1318,6 +1330,91 @@ html {
 /* Extra large devices (large desktops, 1200px and up) */
 @media (min-width: 1200px) {
     /* Estilos específicos para pantallas extra grandes si es necesario */
+}
+
+/* ============================================
+   ESTILOS PARA IFRAME DE REDES SOCIALES
+   ============================================ */
+
+/* Contenedor del feed de redes sociales */
+.social-feed-container {
+    width: 100%;
+    min-height: 1200px;
+    height: 1400px;
+    overflow: hidden;
+    position: relative;
+    background: #ffffff;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Iframe del feed de redes sociales */
+.social-feed-iframe {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 1200px;
+    border: none;
+    display: block;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    flex: 1;
+}
+
+/* Asegurar que el contenido dentro del iframe tenga espacio suficiente */
+.social-feed-container iframe {
+    transform: scale(1);
+    transform-origin: top left;
+}
+
+/* Ajustes para pantallas grandes */
+@media (min-width: 1200px) {
+    .social-feed-container {
+        height: 1500px;
+        min-height: 1300px;
+    }
+    
+    .social-feed-iframe {
+        min-height: 1300px;
+    }
+}
+
+/* Ajustes para pantallas medianas */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .social-feed-container {
+        height: 1200px;
+        min-height: 1000px;
+    }
+    
+    .social-feed-iframe {
+        min-height: 1000px;
+    }
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 767.98px) {
+    .social-feed-container {
+        height: 900px;
+        min-height: 800px;
+    }
+    
+    .social-feed-iframe {
+        min-height: 800px;
+    }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 575.98px) {
+    .social-feed-container {
+        height: 700px;
+        min-height: 650px;
+    }
+    
+    .social-feed-iframe {
+        min-height: 650px;
+    }
 }
 
 /* Media query general para móviles (menos de 768px) */

@@ -1,0 +1,15 @@
+¡Hola!
+
+Estás recibiendo este correo porque tú, o alguien más, intentó acceder a una cuenta con el email {{ email }}. Sin embargo, no tenemos ningún registro de una cuenta con ese correo electrónico en nuestra base de datos.
+
+Este correo puede ser ignorado de forma segura si no iniciaste esta acción.
+
+Si fuiste tú, puedes registrarte para crear una cuenta usando el enlace a continuación:
+
+{{ signup_url }}
+
+¡Gracias por usar Agenda Personal!
+
+Agenda Personal
+{{ site_name }}
+

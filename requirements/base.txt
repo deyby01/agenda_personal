@@ -27,6 +27,7 @@ charset-normalizer==3.4.3
 
 # Utilities
 requests==2.32.5
+resend==2.4.0  # Email service integration
 attrs==25.3.0
 idna==3.10
 inflection==0.5.1
