@@ -35,7 +35,12 @@ desktop.ini
 
 # Archivos de IDE y editores
 .idea/
-.vscode/
+.cursor/
+# Permitir compartir configuración de VS Code pero ignorar archivos de usuario
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 *.sublime-project
 *.sublime-workspace
 *.komodoproject
@@ -55,6 +60,14 @@ logs/
 .coverage.*
 htmlcov/
 coverage_html_report/
+
+# Linting y formateo
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.tox/
+.dmypy.json
+dmypy.json
 
 # Archivos generados por Django
 media/ # Si no quieres subir los archivos subidos por los usuarios en desarrollo

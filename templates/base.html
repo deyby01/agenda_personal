@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{% static 'css/custom_style.css' %}">
     <!-- FontAwesome CDN for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
+    
 </head>
 <body class="d-flex flex-column min-vh-100 {% block extra_body_class %}{% endblock %}">
     <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-custom fixed-top shadow-sm">
@@ -193,5 +193,15 @@
         });
     });
     </script>
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-MtsS7mXuJr8wMgBP5pWGY8TuNxM8YqX5gFZeHZz38+DPCi7GMZXIhoB1aZCKQaYi" crossorigin="anonymous"></script>
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+          const csrfFromCookie = document.cookie.match(/csrftoken=([^;]+)/);
+          if (csrfFromCookie) {
+            event.detail.headers['X-CSRFToken'] = csrfFromCookie[1];
+          }
+        });
+    </script>
+    <div id="modal-root"></div>
 </body>
 </html>

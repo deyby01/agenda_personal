@@ -9,6 +9,8 @@ Migrado desde tareas/views.py con mejoras:
 """
 
 from django.shortcuts import redirect, get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import (
@@ -24,7 +26,7 @@ from datetime import timedelta
 
 from apps.core.forms import CustomUserCreationForm
 from apps.tasks.models import Tarea
-from apps.tasks.forms import TareaForm, TareaEstadoForm
+from apps.tasks.forms import TareaForm
 from apps.tasks.repositories import TareaRepository
 from apps.tasks.services import WeekCalculatorService, WeekNavigationService
 from apps.projects.repositories import ProyectoRepository
@@ -348,6 +350,14 @@ class ToggleTaskStatusView(LoginRequiredMixin, View):
         tarea.completada = not tarea.completada
         tarea.save()
         
+        if request.headers.get('HX-Request'):
+            html = render_to_string(
+                'tasks/partials/task_card.html',
+                {'tarea': tarea},
+                request=request
+            )
+            return HttpResponse(html)
+
         # Success message
         estado = "completada" if tarea.completada else "marcada como pendiente"
         messages.success(

@@ -23,11 +23,11 @@
                 <label for="q" class="form-label">
                     <i class="fas fa-search text-primary"></i> Buscar por nombre
                 </label>
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    id="q" 
-                    name="q" 
+                <input
+                    type="text"
+                    class="form-control"
+                    id="q"
+                    name="q"
                     value="{{ current_search }}"
                     placeholder="Buscar tareas por título o descripción..."
                 >
@@ -65,81 +65,7 @@
 {% if lista_de_tareas_template %}
     <div class="row g-3">
         {% for tarea_individual in lista_de_tareas_template %}
-            <div class="col-12">
-                <div class="card {% if tarea_individual.completada %}border-success{% else %}border-warning{% endif %} h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="flex-grow-1">
-                                <h5 class="card-title mb-2">
-                                    <a href="{% url 'detalle_tarea_url' tarea_individual.id %}" 
-                                       class="text-decoration-none {% if tarea_individual.completada %}text-muted text-decoration-line-through{% else %}text-dark{% endif %}">
-                                        <i class="fas fa-circle-notch {% if tarea_individual.completada %}text-success{% else %}text-warning{% endif %}" 
-                                           style="font-size: 0.5rem; vertical-align: middle;"></i>
-                                        {{ tarea_individual.titulo }}
-                                    </a>
-                                </h5>
-                                {% if tarea_individual.descripcion %}
-                                    <p class="card-text text-muted mb-2">{{ tarea_individual.descripcion|truncatewords:20 }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="text-end">
-                                {% if tarea_individual.completada %}
-                                    <span class="badge bg-success mb-2 d-block">
-                                        <i class="fas fa-check-circle"></i> Completada
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark mb-2 d-block">
-                                        <i class="fas fa-clock"></i> Pendiente
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="row g-2 mb-3">
-                            <div class="col-12 col-md-6">
-                                <small class="text-muted d-block">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    {% if tarea_individual.fecha_asignada %}
-                                        <strong>Fecha:</strong> {{ tarea_individual.fecha_asignada|date:"d M Y" }}
-                                    {% else %}
-                                        <strong>Sin fecha asignada</strong>
-                                    {% endif %}
-                                </small>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <small class="text-muted d-block">
-                                    <i class="fas fa-clock"></i>
-                                    {% if tarea_individual.tiempo_estimado %}
-                                        <strong>Tiempo:</strong> {{ tarea_individual.tiempo_estimado }}
-                                    {% else %}
-                                        <strong>Sin tiempo estimado</strong>
-                                    {% endif %}
-                                </small>
-                            </div>
-                            <div class="col-12">
-                                <small class="text-muted">
-                                    <i class="fas fa-calendar-plus"></i> Creada: {{ tarea_individual.fecha_creacion|date:"d/m/Y H:i" }}
-                                </small>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex flex-column flex-md-row gap-2 task-actions">
-                            <a href="{% url 'editar_tarea_url' tarea_individual.id %}" 
-                               class="btn btn-sm btn-outline-primary flex-fill">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <a href="{% url 'detalle_tarea_url' tarea_individual.id %}" 
-                               class="btn btn-sm btn-outline-info flex-fill">
-                                <i class="fas fa-eye"></i> Ver Detalle
-                            </a>
-                            <a href="{% url 'eliminar_tarea_url' tarea_individual.id %}" 
-                               class="btn btn-sm btn-outline-danger flex-fill flex-md-grow-0">
-                                <i class="fas fa-trash-alt"></i> Eliminar
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include "tasks/partials/task_card.html" with tarea=tarea_individual %}
         {% endfor %}
     </div>
 {% else %}
@@ -154,7 +80,7 @@
                         <br><strong>Búsqueda:</strong> "{{ current_search }}"
                     {% endif %}
                     {% if current_estado %}
-                        <br><strong>Estado:</strong> 
+                        <br><strong>Estado:</strong>
                         {% if current_estado == 'completadas' %}
                             Completadas
                         {% elif current_estado == 'pendientes' %}
