@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    
+
     # Third party apps
     'rest_framework',
     'rest_framework.authtoken',
@@ -72,7 +72,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'crispy_forms',
     'crispy_bootstrap5',
-    
+
     # 🆕 Enterprise Apps - Domain Architecture
     'apps.core.apps.CoreConfig',
     'apps.tasks.apps.TasksConfig',
@@ -226,6 +226,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'proyecto_agenda.wsgi.application'
 
+# Scope credentials
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", default="")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", default="")
+
+# Google OAuth Configuration
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "OAUTH_PKCE_ENABLED": True,
+        "APP": {
+            "client_id": GOOGLE_CLIENT_ID,
+            "secret": GOOGLE_CLIENT_SECRET,
+            "key": "",
+        },
+    }
+}
+
 # Database
 if os.environ.get('DB_ENGINE'):
     # Configuración para Docker/Producción
@@ -283,44 +306,33 @@ STATIC_ROOT = BASE_DIR / "staticfiles_production"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Email Configuration
-# Prioridad: Resend > SMTP configurado > Consola (desarrollo)
+# Prioridad: Resend > SMTP (si EMAIL_HOST está configurado) > Consola (fallback)
 
-# Resend Configuration (si está configurado, se usa automáticamente)
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 RESEND_FROM_EMAIL = os.environ.get('RESEND_FROM_EMAIL', 'onboarding@resend.dev')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
-# Determinar qué backend usar
-# Prioridad: Resend (si está configurado) > EMAIL_BACKEND del .env > Consola (desarrollo) > SMTP
-
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
-
-# Si hay API key de Resend, usarlo automáticamente (tiene prioridad)
+# Determinar backend automáticamente
 if RESEND_API_KEY:
+    # Prioridad 1: Resend
     EMAIL_BACKEND = 'apps.core.backends.ResendEmailBackend'
-elif not EMAIL_BACKEND:
-    # Si estamos en DEBUG y no hay configuración, usar consola
-    if DEBUG:
-        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    else:
-        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-# Configuración SMTP (solo si se usa SMTP, no Resend)
-if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
-    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'mailhog' if DEBUG else None)
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 1025 if DEBUG else 587))
-    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False' if DEBUG else 'True') == 'True'
+    DEFAULT_FROM_EMAIL = RESEND_FROM_EMAIL
+elif os.environ.get('EMAIL_HOST'):
+    # Prioridad 2: SMTP (Gmail u otro proveedor)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
     EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False') == 'True'
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
     if not DEFAULT_FROM_EMAIL:
         DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@agenda.local'
-
-# Si usamos Resend, usar el email de Resend como default
-if EMAIL_BACKEND == 'apps.core.backends.ResendEmailBackend':
-    DEFAULT_FROM_EMAIL = RESEND_FROM_EMAIL
-elif not DEFAULT_FROM_EMAIL:
-    DEFAULT_FROM_EMAIL = 'noreply@agenda.local'
+else:
+    # Fallback: Consola (solo si no hay configuración de email)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    if not DEFAULT_FROM_EMAIL:
+        DEFAULT_FROM_EMAIL = 'noreply@agenda.local'
 
 # Django Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -333,7 +345,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 if os.getenv('REDIS_URL'):
     # Configuración Redis con password
     redis_url = os.getenv('REDIS_URL')
-    
+
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
@@ -347,7 +359,7 @@ if os.getenv('REDIS_URL'):
             'TIMEOUT': int(os.getenv('CACHE_TTL', 300)),
         }
     }
-    
+
     # Configurar sesiones en Redis
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
     SESSION_CACHE_ALIAS = 'default'
