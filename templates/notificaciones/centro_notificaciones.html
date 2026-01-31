@@ -9,12 +9,12 @@
         <div>
             <h1><i class="fas fa-bell"></i> Centro de Notificaciones</h1>
             <p class="text-muted mb-0">
-                {{ total_notifications }} notificaciones totales | 
-                <span class="fw-bold text-danger">{{ unread_count }} sin leer</span> | 
+                {{ total_notifications }} notificaciones totales |
+                <span class="fw-bold text-danger">{{ unread_count }} sin leer</span> |
                 {{ read_count }} procesadas
             </p>
         </div>
-        
+
         <!-- Quick Stats -->
         <div class="d-flex gap-2">
             {% if critical_count > 0 %}
@@ -25,7 +25,7 @@
             {% endif %}
         </div>
     </div>
-    
+
     <!-- Filtros rápidos (opcional para futuro) -->
     <div class="mb-4">
         <div class="btn-group" role="group">
@@ -34,26 +34,26 @@
             <a href="?filter=critical" class="btn btn-outline-danger">Críticas</a>
         </div>
     </div>
-    
+
     <!-- Lista de notificaciones -->
     {% if notificaciones %}
         <div class="row">
             <div class="col-12">
                 {% for notification in notificaciones %}
-                    <div class="card mb-3 
+                    <div class="card mb-3
                         {% if not notification.leida %}
                             notification-unread border-primary shadow-sm
                         {% else %}
                             notification-read border-light opacity-75
                         {% endif %}">
-                        
+
                         <!-- Header de notificación -->
-                        <div class="card-header 
+                        <div class="card-header
                             {% if notification.subtipo == 'critical' %}bg-danger-subtle
-                            {% elif notification.subtipo == 'warning' %}bg-warning-subtle  
+                            {% elif notification.subtipo == 'warning' %}bg-warning-subtle
                             {% elif notification.subtipo == 'success' %}bg-success-subtle
                             {% else %}bg-light{% endif %}">
-                            
+
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <h6 class="mb-1">
@@ -67,7 +67,7 @@
                                         | <i class="fas fa-tag"></i> {{ notification.get_tipo_display }}
                                     </small>
                                 </div>
-                                
+
                                 <!-- Estado de lectura -->
                                 {% if notification.leida %}
                                     <i class="fas fa-check-circle text-success" title="Leída"></i>
@@ -76,36 +76,36 @@
                                 {% endif %}
                             </div>
                         </div>
-                        
+
                         <!-- Cuerpo clickeable -->
                         <div class="card-body">
                             <p class="card-text">{{ notification.mensaje }}</p>
-                            
+
                             <!-- Información de relaciones -->
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     {% if notification.tarea_relacionada %}
                                         <small class="text-muted">
-                                            <i class="fas fa-tasks"></i> Relacionado con tarea: 
+                                            <i class="fas fa-tasks"></i> Relacionado con tarea:
                                             <strong>{{ notification.tarea_relacionada.titulo }}</strong>
                                         </small>
                                     {% elif notification.proyecto_relacionado %}
                                         <small class="text-muted">
-                                            <i class="fas fa-project-diagram"></i> Relacionado con proyecto: 
+                                            <i class="fas fa-project-diagram"></i> Relacionado con proyecto:
                                             <strong>{{ notification.proyecto_relacionado.nombre }}</strong>
                                         </small>
                                     {% endif %}
                                 </div>
-                                
+
                                 <!-- Botón de acción -->
                                 <div>
                                     {% if not notification.leida %}
-                                        <a href="{% url 'notification_click' notification.id %}" 
+                                        <a href="{% url 'notification_click' notification.id %}"
                                            class="btn btn-primary btn-sm">
                                             <i class="fas fa-arrow-right"></i> Ver Detalles
                                         </a>
                                     {% else %}
-                                        <a href="{% url 'notification_click' notification.id %}" 
+                                        <a href="{% url 'notification_click' notification.id %}"
                                            class="btn btn-outline-secondary btn-sm">
                                             <i class="fas fa-redo"></i> Revisar Nuevamente
                                         </a>
@@ -115,7 +115,7 @@
                         </div>
                     </div>
                 {% endfor %}
-                
+
                 <!-- Paginación -->
                 {% if is_paginated %}
                     <nav>
@@ -125,11 +125,11 @@
                                     <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
                                 </li>
                             {% endif %}
-                            
+
                             <li class="page-item active">
                                 <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                             </li>
-                            
+
                             {% if page_obj.has_next %}
                                 <li class="page-item">
                                     <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>

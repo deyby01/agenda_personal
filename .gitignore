@@ -25,7 +25,6 @@ __pycache__/
 
 # Archivos de configuración local (si usas python-dotenv o similar)
 .env
-.env.*
 !.env.example  # A menudo se incluye un archivo de ejemplo
 
 # Archivos de sistema operativo
